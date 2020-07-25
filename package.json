@@ -1,0 +1,9 @@
+{
+  "name": "rippedwebserver",
+  "version": "1.0.0",
+  "description": "A web server for serving files.",
+  "main": "index.js",
+  "author": "KaiPrince <34746763+KaiPrince@users.noreply.github.com>",
+  "license": "MIT",
+  "private": true
+}

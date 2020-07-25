@@ -1,0 +1,10 @@
+{% extends 'base.html' %} {% block header %}
+<h1>{% block title %}Delete File{% endblock %}</h1>
+{% endblock %} {% block content %}
+<form method="POST">
+  <p>Delete {{ file['name'] }}?</p>
+  <button type="submit">Delete</button>
+  <a href="{{ url_for('files.detail', id=file['id']) }}">Cancel</a>
+</form>
+
+{% endblock %}
