@@ -116,13 +116,11 @@ def download(id):
     ).fetchone()
 
     if db_file is None or "file_path" not in db_file.keys():
-        # abort(404)
-        flash(str(db_file) + db_file.keys())
-        return "Failure!" + str(db_file)
+        abort(404)
 
     file = db_file["file_path"]
 
-    return "Success!" + file
+    return "Success!" + current_app.config["UPLOAD_FOLDER"] + file
 
     # return send_from_directory(current_app.config["UPLOAD_FOLDER"], file)
 
