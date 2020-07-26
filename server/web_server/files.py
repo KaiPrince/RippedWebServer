@@ -62,7 +62,7 @@ def create():
             flash(error)
         elif file:  # and allowed_file(file.filename):
 
-            filename = secure_filename(file_name)
+            filename = secure_filename(file.filename)
             file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
 
             db = get_db()
