@@ -1,11 +1,12 @@
 {
-	"python.formatting.provider": "black",
-	"python.linting.flake8Enabled": true,
-	"python.linting.enabled": true,
-	"python.testing.pytestEnabled": true,
-	"python.testing.unittestEnabled": true,
-	"python.testing.cwd": "./server",
-	"python.linting.flake8Args": [
-		"--config=server/setup.cfg"
-	]
+  "python.formatting.provider": "black",
+  "python.linting.flake8Enabled": true,
+  "python.linting.enabled": true,
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": true,
+  "python.testing.cwd": "${workspaceFolder}/server",
+  "python.linting.flake8Args": ["--config=server/setup.cfg"],
+  "python.venvPath": "${workspaceFolder}/server/env",
+  "python.terminal.activateEnvInCurrentTerminal": true,
+  "python.pythonPath": "server\\env\\Scripts\\python.exe"
 }
