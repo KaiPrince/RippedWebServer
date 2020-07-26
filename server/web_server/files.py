@@ -122,7 +122,7 @@ def download(id):
 
     file = db_file["file_path"]
 
-    return "Success!"
+    return "Success!" + file
 
     # return send_from_directory(current_app.config["UPLOAD_FOLDER"], file)
 
