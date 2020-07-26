@@ -106,12 +106,21 @@ def detail(id):
 def download(id):
     """ View for downloading a file. """
 
-    file_name = get_file(id)
+    db = get_db()
+    db_file = db.execute(
+        "SELECT f.id, file_name as name, uploaded, user_id, username, file_path"
+        " FROM user_file f JOIN user u ON f.user_id = u.id"
+        " WHERE f.id = ?"
+        " ORDER BY uploaded DESC",
+        str(id),
+    ).fetchone()
 
-    if not file_name:
+    if not db_file:
         abort(404)
 
-    return send_from_directory(current_app.config["UPLOAD_FOLDER"], file_name)
+    file = db_file["file_path"]
+
+    return send_from_directory(current_app.config["UPLOAD_FOLDER"], file)
 
 
 @bp.route("/delete/<int:id>", methods=["GET", "POST"])
