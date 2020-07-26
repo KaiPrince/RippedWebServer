@@ -115,7 +115,7 @@ def download(id):
         str(id),
     ).fetchone()
 
-    return str(db_file)
+    return str(db_file["file_path"])
 
     if not db_file:
         abort(404)
