@@ -124,7 +124,11 @@ def download(id):
     file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], file)
 
     # return "Success!" + current_app.config["UPLOAD_FOLDER"] + file
-    return send_file(file_path)
+    try:
+        return send_file(file_path)
+    except Exception as e:
+        return e
+
     # return send_from_directory(current_app.config["UPLOAD_FOLDER"], file)
 
 
