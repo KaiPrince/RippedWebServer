@@ -8,7 +8,6 @@ from flask import (
     url_for,
     current_app,
     send_from_directory,
-    send_file,
 )
 from .db import get_db
 from .auth import login_required
@@ -121,22 +120,9 @@ def download(id):
 
     file = db_file["file_path"]
 
-    file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], file)
+    file_dir = os.path.abspath(current_app.config["UPLOAD_FOLDER"])
 
-    # return "Success!" + current_app.config["UPLOAD_FOLDER"] + file
-
-    test = "LOL"
-    try:
-        # test = send_file(file_path)
-        test = send_from_directory(
-            os.path.abspath(current_app.config["UPLOAD_FOLDER"]), file
-        )
-    except Exception as e:
-        test = str(e)
-
-    return test
-
-    # return send_from_directory(current_app.config["UPLOAD_FOLDER"], file)
+    return send_from_directory(file_dir, file)
 
 
 @bp.route("/delete/<int:id>", methods=["GET", "POST"])
