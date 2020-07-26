@@ -122,7 +122,9 @@ def download(id):
 
     file = db_file["file_path"]
 
-    return send_from_directory(current_app.config["UPLOAD_FOLDER"], file)
+    return "Success!"
+
+    # return send_from_directory(current_app.config["UPLOAD_FOLDER"], file)
 
 
 @bp.route("/delete/<int:id>", methods=["GET", "POST"])
