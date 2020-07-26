@@ -118,7 +118,7 @@ def download(id):
     if db_file is None or "file_path" not in db_file.keys():
         # abort(404)
         flash(str(db_file) + db_file.keys())
-        return redirect(url_for("files.index"))
+        return "Failure!" + str(db_file)
 
     file = db_file["file_path"]
 
