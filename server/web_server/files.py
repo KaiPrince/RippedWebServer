@@ -129,3 +129,10 @@ def delete(id):
         return redirect(url_for("files.index"))
     return render_template("files/delete.html", file=db_file)
 
+
+def init_app(app):
+    """ Ensure uploads folder exists. """
+
+    if not os.path.exists(app.config["UPLOAD_FOLDER"]):
+        print("Creating Upload folder at", app.config["UPLOAD_FOLDER"])
+        os.mkdir(app.config["UPLOAD_FOLDER"])
