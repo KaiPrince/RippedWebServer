@@ -4,7 +4,7 @@ import click
 from flask import current_app, g
 from flask.cli import with_appcontext
 
-from server.web_server.auth import create_user
+from werkzeug.security import generate_password_hash
 
 
 def get_db():
@@ -44,3 +44,13 @@ def init_db_command():
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
+
+
+def create_user(username, password):
+    db = get_db()
+
+    db.execute(
+        "INSERT INTO user (username, password) VALUES (?, ?)",
+        (username, generate_password_hash(password)),
+    )
+    db.commit()

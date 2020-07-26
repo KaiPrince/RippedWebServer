@@ -3,5 +3,9 @@
 	"python.linting.flake8Enabled": true,
 	"python.linting.enabled": true,
 	"python.testing.pytestEnabled": true,
-	"python.testing.unittestEnabled": true
+	"python.testing.unittestEnabled": true,
+	"python.testing.cwd": "./server",
+	"python.linting.flake8Args": [
+		"--config=server/setup.cfg"
+	]
 }

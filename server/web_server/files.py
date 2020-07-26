@@ -8,8 +8,8 @@ from flask import (
     url_for,
     current_app,
 )
-from web_server.db import get_db
-from web_server.auth import login_required
+from .db import get_db
+from .auth import login_required
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 import os
