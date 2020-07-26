@@ -77,17 +77,33 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ div []
+        [ Html.form
+            [ method "POST"
+            , enctype "multipart/form-data"
+            ]
             [ label
-                []
+                [ for "file_name" ]
                 [ text "File Name" ]
             , input
-                [ type_ "text"
-                , placeholder "File Name"
+                [ id "file_name"
+                , name "file_name"
+                , type_ "text"
+                , placeholder "My text file.txt"
                 , onInput FileNameChanged
                 , value model.fileName
                 ]
                 []
+            , label [ for "file" ]
+                [ text "File" ]
+            , input
+                [ id "file"
+                , name "file"
+                , type_ "file"
+                , placeholder "File"
+                ]
+                []
+            , button [ type_ "submit" ]
+                [ text "Submit" ]
             ]
         ]
 
