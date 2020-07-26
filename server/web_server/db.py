@@ -4,6 +4,8 @@ import click
 from flask import current_app, g
 from flask.cli import with_appcontext
 
+from server.web_server.auth import create_user
+
 
 def get_db():
     if "db" not in g:
@@ -27,6 +29,8 @@ def init_db():
 
     with current_app.open_resource("schema.sql") as f:
         db.executescript(f.read().decode("utf8"))
+
+    create_user("admin", "frontenac")
 
 
 @click.command("init-db")

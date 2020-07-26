@@ -12,7 +12,7 @@ from flask import (
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from web_server.db import get_db
+from server.web_server.db import get_db
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -25,6 +25,9 @@ def register():
         db = get_db()
         error = None
 
+        # TEMP disable adding new users TODO: Remove.
+        error = "User registration is disabled."
+
         if not username:
             error = "Username is required."
         elif not password:
@@ -36,11 +39,7 @@ def register():
             error = "User {} is already registered.".format(username)
 
         if error is None:
-            db.execute(
-                "INSERT INTO user (username, password) VALUES (?, ?)",
-                (username, generate_password_hash(password)),
-            )
-            db.commit()
+            create_user(username, password)
             return redirect(url_for("auth.login"))
 
         flash(error)
@@ -101,3 +100,13 @@ def login_required(view):
         return view(**kwargs)
 
     return wrapped_view
+
+
+def create_user(username, password):
+    db = get_db()
+
+    db.execute(
+        "INSERT INTO user (username, password) VALUES (?, ?)",
+        (username, generate_password_hash(password)),
+    )
+    db.commit()
