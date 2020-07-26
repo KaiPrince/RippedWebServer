@@ -8,6 +8,7 @@ from flask import (
     url_for,
     current_app,
     send_from_directory,
+    send_file,
 )
 from .db import get_db
 from .auth import login_required
@@ -120,8 +121,10 @@ def download(id):
 
     file = db_file["file_path"]
 
-    return "Success!" + current_app.config["UPLOAD_FOLDER"] + file
+    file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], file)
 
+    # return "Success!" + current_app.config["UPLOAD_FOLDER"] + file
+    return send_file(file_path)
     # return send_from_directory(current_app.config["UPLOAD_FOLDER"], file)
 
 
