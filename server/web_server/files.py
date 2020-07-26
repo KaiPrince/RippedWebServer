@@ -122,7 +122,7 @@ def download(id):
 
     file_dir = os.path.abspath(current_app.config["UPLOAD_FOLDER"])
 
-    return send_from_directory(file_dir, file)
+    return send_from_directory(file_dir, file, as_attachment=True)
 
 
 @bp.route("/delete/<int:id>", methods=["GET", "POST"])
