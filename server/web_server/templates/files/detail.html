@@ -5,6 +5,7 @@
 {% endif %} {% endblock %} {% block content %}
 <p>{{ file['name'] }}</p>
 <p>{{ content }}</p>
+<a href="{{ url_for('files.download', id=file['id']) }}">Download</a>
 <a href="{{ url_for('files.delete', id=file['id']) }}">
   <button>Delete</button>
 </a>

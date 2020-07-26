@@ -7,6 +7,7 @@ from flask import (
     request,
     url_for,
     current_app,
+    send_from_directory,
 )
 from .db import get_db
 from .auth import login_required
@@ -100,6 +101,19 @@ def detail(id):
     return render_template("files/detail.html", file=file, content=content)
 
 
+@bp.route("/download/<int:id>")
+@login_required
+def download(id):
+    """ View for downloading a file. """
+
+    file_name = get_file(id)
+
+    if not file_name:
+        abort(404)
+
+    return send_from_directory(current_app.config["UPLOAD_FOLDER"], file_name)
+
+
 @bp.route("/delete/<int:id>", methods=["GET", "POST"])
 @login_required
 def delete(id):
@@ -136,3 +150,21 @@ def init_app(app):
     if not os.path.exists(app.config["UPLOAD_FOLDER"]):
         print("Creating Upload folder at", app.config["UPLOAD_FOLDER"])
         os.mkdir(app.config["UPLOAD_FOLDER"])
+
+
+def get_file(id):
+    """ Consumes an ID and produces a file name. """
+
+    db = get_db()
+    db_file = db.execute(
+        "SELECT f.id, file_name as name, uploaded, user_id, username, file_path"
+        " FROM user_file f JOIN user u ON f.user_id = u.id"
+        " WHERE f.id = ?"
+        " ORDER BY uploaded DESC",
+        str(id),
+    ).fetchone()
+
+    if not db_file:
+        return None
+
+    return db_file["file_path"]
