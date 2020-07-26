@@ -95,8 +95,10 @@ def detail(id):
     file = db_file
 
     file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], db_file["file_path"])
-    with open(file_path, "rt") as f:
-        content = "\n".join(f.readlines())
+
+    if file_path.endswith("txt"):
+        with open(file_path, "rt") as f:
+            content = "\n".join(f.readlines())
 
     return render_template("files/detail.html", file=file, content=content)
 
