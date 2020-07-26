@@ -128,7 +128,9 @@ def download(id):
     test = "LOL"
     try:
         # test = send_file(file_path)
-        test = send_from_directory(current_app.config["UPLOAD_FOLDER"], file)
+        test = send_from_directory(
+            os.path.abspath(current_app.config["UPLOAD_FOLDER"]), file
+        )
     except Exception as e:
         test = str(e)
 
