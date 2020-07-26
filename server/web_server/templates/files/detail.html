@@ -4,7 +4,9 @@
 <a class="action" href="{{ url_for('files.create') }}">Upload</a>
 {% endif %} {% endblock %} {% block content %}
 <p>{{ file['name'] }}</p>
+<p>{{ file['file_path'] }}</p>
 <p>{{ content }}</p>
+<a href="{{ url_for('files.download', id=file['id']) }}">Download</a>
 <a href="{{ url_for('files.delete', id=file['id']) }}">
   <button>Delete</button>
 </a>

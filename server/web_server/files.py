@@ -7,6 +7,7 @@ from flask import (
     request,
     url_for,
     current_app,
+    send_from_directory,
 )
 from .db import get_db
 from .auth import login_required
@@ -61,7 +62,7 @@ def create():
             flash(error)
         elif file:  # and allowed_file(file.filename):
 
-            filename = secure_filename(file_name)
+            filename = secure_filename(file.filename)
             file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
 
             db = get_db()
@@ -94,10 +95,37 @@ def detail(id):
     file = db_file
 
     file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], db_file["file_path"])
-    with open(file_path, "rt") as f:
-        content = "\n".join(f.readlines())
+
+    content = ""
+    if file_path.endswith("txt"):
+        with open(file_path, "rt") as f:
+            content = "\n".join(f.readlines())
 
     return render_template("files/detail.html", file=file, content=content)
+
+
+@bp.route("/download/<int:id>")
+@login_required
+def download(id):
+    """ View for downloading a file. """
+
+    db = get_db()
+    db_file = db.execute(
+        "SELECT f.id, file_name as name, uploaded, user_id, username, file_path"
+        " FROM user_file f JOIN user u ON f.user_id = u.id"
+        " WHERE f.id = ?"
+        " ORDER BY uploaded DESC",
+        str(id),
+    ).fetchone()
+
+    if db_file is None or "file_path" not in db_file.keys():
+        abort(404)
+
+    file = db_file["file_path"]
+
+    file_dir = os.path.abspath(current_app.config["UPLOAD_FOLDER"])
+
+    return send_from_directory(file_dir, file, as_attachment=True)
 
 
 @bp.route("/delete/<int:id>", methods=["GET", "POST"])
@@ -136,3 +164,21 @@ def init_app(app):
     if not os.path.exists(app.config["UPLOAD_FOLDER"]):
         print("Creating Upload folder at", app.config["UPLOAD_FOLDER"])
         os.mkdir(app.config["UPLOAD_FOLDER"])
+
+
+def get_file(id):
+    """ Consumes an ID and produces a file name. """
+
+    db = get_db()
+    db_file = db.execute(
+        "SELECT f.id, file_name as name, uploaded, user_id, username, file_path"
+        " FROM user_file f JOIN user u ON f.user_id = u.id"
+        " WHERE f.id = ?"
+        " ORDER BY uploaded DESC",
+        str(id),
+    ).fetchone()
+
+    if not db_file:
+        return None
+
+    return db_file["file_path"]

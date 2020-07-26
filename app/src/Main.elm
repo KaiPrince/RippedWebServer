@@ -83,12 +83,12 @@ view model =
             ]
             [ label
                 [ for "file_name" ]
-                [ text "File Name" ]
+                [ text "Title" ]
             , input
                 [ id "file_name"
                 , name "file_name"
                 , type_ "text"
-                , placeholder "My text file.txt"
+                , placeholder "Shopping list"
                 , onInput FileNameChanged
                 , value model.fileName
                 ]
