@@ -1,36 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title>{% block title %}{% endblock %} - RippedWebServer</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <!-- <link
+      href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css"
+      rel="stylesheet"
+    /> -->
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+      integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
+      crossorigin="anonymous"
     />
+    <!-- <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    /> -->
   </head>
   <body>
-    <nav>
-      <h1><a href="{{ url_for('files.index') }}">RippedWebServer</a></h1>
-      <ul>
-        {% if g.user %}
-        <li><span>{{ g.user['username'] }}</span></li>
-        <li><a href="{{ url_for('auth.logout') }}">Log Out</a> {% else %}</li>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <a href="{{ url_for('files.index') }}" class="navbar-brand">
+        RippedWebServer
+      </a>
 
-        <li><a href="{{ url_for('auth.register') }}">Register</a></li>
-        <li>
-          <a href="{{ url_for('auth.login') }}">Log In</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav ml-auto">
+          {% if g.user %}
+          <span class="nav-item navbar-text">
+            Logged in as {{ g.user['username'] }}
+          </span>
+          <a href="{{ url_for('auth.logout') }}" class="nav-item nav-link">
+            Log Out
+          </a>
+          {% else %}
+          <a href="{{ url_for('auth.register') }}" class="nav-item nav-link">
+            Register
+          </a>
+          <a href="{{ url_for('auth.login') }}" class="nav-item nav-link">
+            Log In
+          </a>
           {% endif %}
-        </li>
-      </ul>
+        </div>
+      </div>
     </nav>
+
     <section class="content">
-      <header>
-        {% block header %}{% endblock %}
-      </header>
-      {% for message in get_flashed_messages() %}
-      <div class="flash">{{ message }}</div>
-      {% endfor %} {% block content %}{% endblock %}
+      <div class="container">
+        <header>
+          {% block header %}{% endblock %}
+        </header>
+        {% for message in get_flashed_messages() %}
+        <div class="alert alert-primary" role="alert">{{ message }}</div>
+        {% endfor %} {% block content %}{% endblock %}
+      </div>
     </section>
 
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+      integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+      crossorigin="anonymous"
+    ></script>
     {% block js %} {% endblock %}
   </body>
 </html>

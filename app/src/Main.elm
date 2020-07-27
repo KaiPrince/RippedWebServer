@@ -1,4 +1,4 @@
-port module Main exposing (..)
+module Main exposing (..)
 
 import Browser
 import Html exposing (..)
@@ -17,7 +17,7 @@ main =
     Browser.element
         { init = init
         , view = view
-        , update = updateWithStorage
+        , update = update
         , subscriptions = \_ -> Sub.none
         }
 
@@ -29,6 +29,10 @@ main =
 type alias Model =
     { fileName : String
     , content : String
+    , filePath : String
+    , editable : Bool
+    , uploadedBy : String
+    , uploadedAt : String
     }
 
 
@@ -48,7 +52,7 @@ init flags =
             model
 
         Err _ ->
-            { fileName = "", content = "" }
+            { fileName = "", content = "", filePath = "", editable = False, uploadedBy = "", uploadedAt = "" }
     , Cmd.none
     )
 
@@ -81,57 +85,96 @@ view model =
             [ method "POST"
             , enctype "multipart/form-data"
             ]
-            [ label
-                [ for "file_name" ]
-                [ text "Title" ]
-            , input
-                [ id "file_name"
-                , name "file_name"
-                , type_ "text"
-                , placeholder "Shopping list"
-                , onInput FileNameChanged
-                , value model.fileName
+            [ div [ class "form-group row" ]
+                [ label
+                    [ for "file_name", class "col-sm-2 col-form-label" ]
+                    [ text "Title" ]
+                , div [ class "col-sm-10" ]
+                    [ input
+                        [ id "file_name"
+                        , name "file_name"
+                        , type_ "text"
+                        , class
+                            (if model.editable then
+                                "form-control"
+
+                             else
+                                "form-control-plaintext"
+                            )
+                        , readonly (not model.editable)
+                        , placeholder "Shopping list"
+                        , onInput FileNameChanged
+                        , value model.fileName
+                        ]
+                        []
+                    ]
                 ]
-                []
-            , label [ for "file" ]
-                [ text "File" ]
-            , input
-                [ id "file"
-                , name "file"
-                , type_ "file"
-                , placeholder "File"
-                ]
-                []
-            , button [ type_ "submit" ]
-                [ text "Submit" ]
+            , if model.filePath /= "" then
+                div [ class "form-group row" ]
+                    [ label [ for "file-path", class "col-sm-2 col-form-label" ] [ text "File Name" ]
+                    , div [ class "col-sm-10" ]
+                        [ input [ type_ "text", readonly True, class "form-control-plaintext", value model.filePath ] []
+                        ]
+                    ]
+
+              else
+                div [] []
+            , if model.uploadedBy /= "" then
+                div [ class "form-group row" ]
+                    [ label [ for "file-path", class "col-sm-2 col-form-label" ] [ text "Uploaded By" ]
+                    , div [ class "col-sm-10" ]
+                        [ input [ type_ "text", readonly True, class "form-control-plaintext", value model.uploadedBy ] []
+                        ]
+                    ]
+
+              else
+                div [] []
+            , if model.uploadedAt /= "" then
+                div [ class "form-group row" ]
+                    [ label [ for "file-path", class "col-sm-2 col-form-label" ] [ text "Uploaded At" ]
+                    , div [ class "col-sm-10" ]
+                        [ input [ type_ "text", readonly True, class "form-control-plaintext", value model.uploadedAt ] []
+                        ]
+                    ]
+
+              else
+                div [] []
+            , if model.content /= "" then
+                div [ class "form-group row" ]
+                    [ label [ for "content", class "col-sm-2 col-form-label" ] [ text "Content" ]
+                    , div [ class "col-sm-10" ]
+                        [ input [ type_ "text", readonly True, class "form-control-plaintext", value model.content ] []
+                        ]
+                    ]
+
+              else
+                div [] []
+            , if model.editable then
+                div [ class "form-group row" ]
+                    [ label [ for "file", class "col-sm-2 col-form-label" ]
+                        [ text "File" ]
+                    , div [ class "col-sm-10" ]
+                        [ input
+                            [ id "file"
+                            , name "file"
+                            , type_ "file"
+                            , class "form-control-file"
+                            , placeholder "File"
+                            ]
+                            []
+                        ]
+                    ]
+
+              else
+                div [] []
+            , if model.editable then
+                button [ type_ "submit", class "btn btn-primary" ]
+                    [ text "Submit" ]
+
+              else
+                div [] []
             ]
         ]
-
-
-
--- PORTS
-
-
-port setStorage : E.Value -> Cmd msg
-
-
-
--- We want to `setStorage` on every update, so this function adds
--- the setStorage command on each step of the update function.
---
--- Check out index.html to see how this is handled on the JS side.
---
-
-
-updateWithStorage : Msg -> Model -> ( Model, Cmd Msg )
-updateWithStorage msg oldModel =
-    let
-        ( newModel, cmds ) =
-            update msg oldModel
-    in
-    ( newModel
-    , Cmd.batch [ setStorage (encode newModel), cmds ]
-    )
 
 
 
@@ -143,11 +186,19 @@ encode model =
     E.object
         [ ( "fileName", E.string model.fileName )
         , ( "content", E.string model.content )
+        , ( "filePath", E.string model.filePath )
+        , ( "editable", E.bool model.editable )
+        , ( "uploadedBy", E.string model.uploadedBy )
+        , ( "uploadedAt", E.string model.uploadedAt )
         ]
 
 
 decoder : D.Decoder Model
 decoder =
-    D.map2 Model
+    D.map6 Model
         (D.field "fileName" D.string)
         (D.field "content" D.string)
+        (D.field "filePath" D.string)
+        (D.field "editable" D.bool)
+        (D.field "uploadedBy" D.string)
+        (D.field "uploadedAt" D.string)

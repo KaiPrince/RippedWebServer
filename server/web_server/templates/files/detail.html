@@ -1,13 +1,54 @@
 {% extends 'base.html' %} {% block header %}
-<h1>{% block title %}File Details{% endblock %}</h1>
-{% if g.user %}
-<a class="action" href="{{ url_for('files.create') }}">Upload</a>
-{% endif %} {% endblock %} {% block content %}
-<p>{{ file['name'] }}</p>
-<p>{{ file['file_path'] }}</p>
-<p>{{ content }}</p>
-<a href="{{ url_for('files.download', id=file['id']) }}">Download</a>
-<a href="{{ url_for('files.delete', id=file['id']) }}">
-  <button>Delete</button>
-</a>
+<div class="row">
+  <div class="col">
+    <h1>{% block title %}File Details{% endblock %}</h1>
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    <a href="{{ url_for('files.index') }}">Back</a>
+  </div>
+</div>
+{% endblock %} {% block content %}
+<div class="row mt-4">
+  <div class="col">
+    <div id="detail-container"></div>
+    <a
+      href="{{ url_for('files.download', id=file['id']) }}"
+      class="btn btn-primary"
+    >
+      Download
+    </a>
+    <a
+      href="{{ url_for('files.delete', id=file['id']) }}"
+      class="btn btn-danger"
+    >
+      Delete
+    </a>
+  </div>
+</div>
+{% endblock %} {% block js %}
+<script src="{{ url_for('static', filename='dist/index.js') }}"></script>
+<script type="text/javascript">
+  async function elmInit() {
+    // Extract the stored data from previous sessions.
+    var storedData = null; // await browser.storage.sync.get();
+    var flags = Object.assign({}, storedData || null, {
+      fileName: "{{ file['name'] }}",
+      editable: false,
+      content: "{{ content | replace('\n', '<br/>') | replace('\r', '') }}",
+      filePath: "{{ file['file_path'] }}",
+      uploadedBy: "{{ file['username'] }}",
+      uploadedAt: "{{ file['uploaded'] }}",
+    });
+
+    // Load the Elm app, passing in the stored data.
+    var app = Elm.Main.init({
+      node: document.getElementById("detail-container"),
+      flags: flags,
+    });
+  }
+
+  elmInit();
+</script>
 {% endblock %}
