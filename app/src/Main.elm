@@ -1,9 +1,11 @@
 module Main exposing (..)
 
 import Browser
+import File exposing (File)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Http
 import Json.Decode as D
 import Json.Encode as E
 
@@ -33,7 +35,15 @@ type alias Model =
     , editable : Bool
     , uploadedBy : String
     , uploadedAt : String
+    , uploadStatus : UploadStatus
     }
+
+
+type UploadStatus
+    = Waiting
+    | Uploading Float
+    | Done
+    | Fail
 
 
 
@@ -49,10 +59,10 @@ init : E.Value -> ( Model, Cmd Msg )
 init flags =
     ( case D.decodeValue decoder flags of
         Ok model ->
-            model
+            { fileName = model.fileName, content = model.content, filePath = model.filePath, editable = model.editable, uploadedBy = model.uploadedBy, uploadedAt = model.uploadedAt, uploadStatus = Waiting }
 
         Err _ ->
-            { fileName = "", content = "", filePath = "", editable = False, uploadedBy = "", uploadedAt = "" }
+            { fileName = "", content = "", filePath = "", editable = False, uploadedBy = "", uploadedAt = "", uploadStatus = Waiting }
     , Cmd.none
     )
 
@@ -63,6 +73,10 @@ init flags =
 
 type Msg
     = FileNameChanged String
+    | GotFiles (List File)
+    | GotProgress Http.Progress
+    | Uploaded (Result Http.Error ())
+    | Cancel
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -73,6 +87,38 @@ update msg model =
             , Cmd.none
             )
 
+        GotFiles files ->
+            ( { model | uploadStatus = Uploading 0 }
+            , Http.request
+                { method = "POST"
+                , url = "/"
+                , headers = []
+                , body = Http.multipartBody (List.map (Http.filePart "files[]") files)
+                , expect = Http.expectWhatever Uploaded
+                , timeout = Nothing
+                , tracker = Just "upload"
+                }
+            )
+
+        GotProgress progress ->
+            case progress of
+                Http.Sending p ->
+                    ( { model | uploadStatus = Uploading (Http.fractionSent p) }, Cmd.none )
+
+                Http.Receiving _ ->
+                    ( model, Cmd.none )
+
+        Uploaded result ->
+            case result of
+                Ok _ ->
+                    ( { model | uploadStatus = Done }, Cmd.none )
+
+                Err _ ->
+                    ( { model | uploadStatus = Fail }, Cmd.none )
+
+        Cancel ->
+            ( { model | uploadStatus = Waiting }, Http.cancel "upload" )
+
 
 
 -- VIEW
@@ -81,7 +127,32 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ Html.form
+        [ case model.uploadStatus of
+            Waiting ->
+                input
+                    [ type_ "file"
+                    , multiple True
+                    , on "change" (D.map GotFiles filesDecoder)
+                    ]
+                    []
+
+            Uploading fraction ->
+                div []
+                    [ progress
+                        [ value (String.fromInt (round (100 * fraction)))
+                        , Html.Attributes.max "100"
+                        , style "display" "block"
+                        ]
+                        []
+                    , button [ onClick Cancel ] [ text "Cancel" ]
+                    ]
+
+            Done ->
+                h1 [] [ text "DONE" ]
+
+            Fail ->
+                h1 [] [ text "FAIL" ]
+        , Html.form
             [ method "POST"
             , enctype "multipart/form-data"
             ]
@@ -178,6 +249,15 @@ view model =
 
 
 
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Http.track "upload" GotProgress
+
+
+
 -- JSON ENCODE/DECODE
 
 
@@ -193,12 +273,27 @@ encode model =
         ]
 
 
-decoder : D.Decoder Model
+type alias AlmostModel =
+    { fileName : String
+    , content : String
+    , filePath : String
+    , editable : Bool
+    , uploadedBy : String
+    , uploadedAt : String
+    }
+
+
+decoder : D.Decoder AlmostModel
 decoder =
-    D.map6 Model
+    D.map6 AlmostModel
         (D.field "fileName" D.string)
         (D.field "content" D.string)
         (D.field "filePath" D.string)
         (D.field "editable" D.bool)
         (D.field "uploadedBy" D.string)
         (D.field "uploadedAt" D.string)
+
+
+filesDecoder : D.Decoder (List File)
+filesDecoder =
+    D.at [ "target", "files" ] (D.list File.decoder)
