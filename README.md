@@ -20,8 +20,7 @@ pip install -r requirements.txt
 
 ## Running
 
-Optional: Set development mode
-_powershell_
+Optional: Set development mode (_powershell_)
 ```
 $env:FLASK_ENV="development"
 ```
@@ -35,6 +34,7 @@ flask run
 ## TODO
 - [ ] Accessibility pass
 - [x] Styling with <s>Tailwind</s> Bootstrap
+- [ ] Theming
 - [ ] File previews
 - [ ] Authentication & link tokens (expirable)
 - [x] Full Elm integration
