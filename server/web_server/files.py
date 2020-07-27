@@ -30,7 +30,7 @@ def allowed_file(filename):
 def index():
     db = get_db()
     files = db.execute(
-        "SELECT f.id, file_name, uploaded, user_id, username"
+        "SELECT f.id, file_name, uploaded, user_id, username, file_path"
         " FROM user_file f JOIN user u ON f.user_id = u.id"
         " ORDER BY uploaded DESC"
     ).fetchall()

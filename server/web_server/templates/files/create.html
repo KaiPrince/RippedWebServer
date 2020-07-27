@@ -1,7 +1,20 @@
 {% extends 'base.html' %} {% block header %}
-<h1>{% block title %}Upload File{% endblock %}</h1>
+<div class="row">
+  <div class="col">
+    <h1>{% block title %}Upload File{% endblock %}</h1>
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    <a href="{{ url_for('files.index') }}">Back</a>
+  </div>
+</div>
 {% endblock %} {% block content %}
-<div id="create-container"></div>
+<div class="row mt-4">
+  <div class="col">
+    <div id="create-container"></div>
+  </div>
+</div>
 <!-- <form method="post" enctype=multipart/form-data>
   <label for="file_name">File Name</label>
   <input
@@ -12,18 +25,21 @@
   />
   <label for="file">File</label>
   <input name="file" id="file" type=file required>
-  <input type="submit" value="Save" />
+  <button type="submit" class="btn btn-primary">Submit</button>
 </form> -->
 {% endblock %} {% block js %}
 <script src="{{ url_for('static', filename='dist/index.js') }}"></script>
 <script type="text/javascript">
-  console.log("{{ request.form['file_name'] }}");
   async function elmInit() {
     // Extract the stored data from previous sessions.
     var storedData = null; // await browser.storage.sync.get();
     var flags = Object.assign({}, storedData || null, {
       fileName: "{{ request.form['file_name'] }}",
+      editable: true,
       content: "",
+      filePath: "",
+      uploadedBy: "",
+      uploadedAt: "",
     });
 
     // Load the Elm app, passing in the stored data.
@@ -31,12 +47,6 @@
       node: document.getElementById("create-container"),
       flags: flags,
     });
-
-    // Listen for commands from the `setStorage` port.
-    // Turn the data to a string and put it in localStorage.
-    //   app.ports.setStorage.subscribe(function (state) {
-    //     browser.storage.sync.set(state);
-    //   });
   }
 
   elmInit();
