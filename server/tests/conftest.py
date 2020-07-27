@@ -37,11 +37,6 @@ def app(tmp_path):
     os.close(db_fd)
     os.unlink(db_path)
 
-    # Remove files in temp directory
-    # filesToRemove = [os.path.join(UPLOAD_FOLDER, f) for f in os.listdir(UPLOAD_FOLDER)]
-    # for f in filesToRemove:
-    #     os.remove(f)
-
 
 @pytest.fixture
 def client(app):
