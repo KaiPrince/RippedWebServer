@@ -23,7 +23,7 @@ jobs:
       - python/install-deps
       - python/save-cache
       - persist_to_workspace:
-          root: ~/circleci
+          root: ~/
           paths:
             - .local
   test:
@@ -33,7 +33,7 @@ jobs:
       - attach_workspace:
           at: ~/project
       - attach_workspace:
-          at: ~/circleci
+          at: ~/
       - run:
           command: pytest # ./manage.py test
           name: Test
