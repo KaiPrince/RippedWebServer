@@ -4,7 +4,7 @@ orbs:
   python: circleci/python@0.2.1
 
 jobs:
-  checkout:
+  checkout-project:
     executor: python/default
     working_directory: ~/project
     steps:
@@ -13,54 +13,23 @@ jobs:
           root: .
           paths:
             - ./*
-  build:
-    parameters:
-      project_folder:
-        type: string
+  build-and-test:
     executor: python/default
-    working_directory: ~/project/<< parameters.project_folder >>
+    working_directory: ~/project/server
     steps:
       - attach_workspace:
           at: ~/project
       - python/load-cache
       - python/install-deps
       - python/save-cache
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - .local
-  test:
-    parameters:
-      project_folder:
-        type: string
-    executor: python/default
-    working_directory: ~/project/<< parameters.project_folder >>
-    steps:
-      - attach_workspace:
-          at: ~/project
-      - attach_workspace:
-          at: ~/
       - run:
-          command: python -m pytest
+          command: pytest # ./manage.py test
           name: Test
 
 workflows:
   main:
     jobs:
       - checkout
-      - build:
-          name: build-<< matrix.project_folder >>
+      - build-and-test
           requires:
             - checkout
-          matrix:
-            parameters:
-              # project_folder: ["server", "files", "disk_storage"]
-              project_folder: ["server"]
-      - test:
-          name: test-<< matrix.project_folder >>
-          requires:
-            - build-<< matrix.project_folder >>
-          matrix:
-            parameters:
-              # project_folder: ["server", "files", "disk_storage"]
-              project_folder: ["server"]
