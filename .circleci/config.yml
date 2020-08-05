@@ -35,7 +35,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: pytest # ./manage.py test
+          command: python -m pytest # ./manage.py test
           name: Test
 
 workflows:
