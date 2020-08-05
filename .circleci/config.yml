@@ -26,9 +26,6 @@ jobs:
           root: ~/circleci
           paths:
             - .local
-      - run:
-          command: pytest # ./manage.py test
-          name: Test
   test:
     executor: python/default
     working_directory: ~/project/server
@@ -37,8 +34,9 @@ jobs:
           at: ~/project
       - attach_workspace:
           at: ~/circleci
-      - python/test:
-          pytest: true
+      - run:
+          command: pytest # ./manage.py test
+          name: Test
 
 workflows:
   main:
