@@ -13,7 +13,7 @@ jobs:
           root: .
           paths:
             - ./*
-  build-and-test:
+  build:
     executor: python/default
     working_directory: ~/project/server
     steps:
@@ -22,14 +22,31 @@ jobs:
       - python/load-cache
       - python/install-deps
       - python/save-cache
+      - persist_to_workspace:
+          root: ~/circleci
+          paths:
+            - .local
       - run:
           command: pytest # ./manage.py test
           name: Test
+  test:
+    executor: python/default
+    working_directory: ~/project/server
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - attach_workspace:
+          at: ~/circleci
+      - python/test:
+          pytest: true
 
 workflows:
   main:
     jobs:
       - checkout
-      - build-and-test
+      - build:
           requires:
             - checkout
+      - test:
+          requires:
+            - build
