@@ -1,0 +1,35 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@0.2.1
+
+jobs:
+  checkout-project:
+    executor: python/default
+    working_directory: ~/project
+    steps:
+      - checkout
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./*
+  build-and-test:
+    executor: python/default
+    working_directory: ~/project/server
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
+      - run:
+          command: pytest # ./manage.py test
+          name: Test
+
+workflows:
+  main:
+    jobs:
+      - checkout
+      - build-and-test
+          requires:
+            - checkout
