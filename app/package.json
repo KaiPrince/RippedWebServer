@@ -8,8 +8,7 @@
   "private": true,
   "scripts": {
     "start": "webpack --watch",
-    "build": "webpack",
-    "flask": "flask run"
+    "build": "webpack"
   },
   "devDependencies": {
     "elm-hot-webpack-loader": "^1.1.7",

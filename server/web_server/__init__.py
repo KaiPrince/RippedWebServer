@@ -8,17 +8,18 @@
 
 import os
 from flask import Flask
-from . import db, auth, files
+from . import db, auth, files, config
 
 
 def create_app(test_config=None):
     # create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY="dev",
-        DATABASE=os.path.join(app.instance_path, "web_server.sqlite"),
-        UPLOAD_FOLDER=os.path.join(app.instance_path, "uploads"),
+    app = Flask(
+        __name__,
+        instance_relative_config=True,
     )
+
+    app_config = config.getConfig(app)
+    app.config.from_object(app_config)
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
