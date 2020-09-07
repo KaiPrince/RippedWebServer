@@ -8,7 +8,10 @@
 
 import os
 from flask import Flask
-from . import db, auth, files, config
+from .config import getConfig
+import db
+import files.views
+import auth.views
 
 
 def create_app(test_config=None):
@@ -18,7 +21,7 @@ def create_app(test_config=None):
         instance_relative_config=True,
     )
 
-    app_config = config.getConfig(app)
+    app_config = getConfig(app)
     app.config.from_object(app_config)
 
     if test_config is None:
@@ -36,9 +39,9 @@ def create_app(test_config=None):
 
     db.init_app(app)
     files.init_app(app)
-    app.register_blueprint(auth.bp)
-    app.register_blueprint(files.bp)
+    app.register_blueprint(auth.views.bp)
+    app.register_blueprint(files.views.bp)
 
-    app.add_url_rule("/", endpoint="index", view_func=files.index)
+    app.add_url_rule("/", endpoint="index", view_func=files.views.index)
 
     return app

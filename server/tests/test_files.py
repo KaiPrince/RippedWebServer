@@ -2,7 +2,7 @@ import pytest
 import os
 
 from io import BytesIO
-from web_server.db import get_db
+from db.service import get_db
 
 
 class TestFiles:
@@ -24,7 +24,10 @@ class TestFiles:
 
         data = {
             "file_name": "test2.txt",
-            "file": (BytesIO(b"my file contents"), "test2.txt",),
+            "file": (
+                BytesIO(b"my file contents"),
+                "test2.txt",
+            ),
         }
 
         # Act

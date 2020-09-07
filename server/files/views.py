@@ -9,21 +9,16 @@ from flask import (
     current_app,
     send_from_directory,
 )
-from .db import get_db
-from .auth import login_required
+from db.service import get_db
+from auth.middleware import login_required
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 import os
 
-
-ALLOWED_EXTENSIONS = {"txt", "pdf", "png", "jpg", "jpeg", "gif"}
-
-
-bp = Blueprint("files", __name__, url_prefix="/files")
+# from .utils import allowed_file
 
 
-def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+bp = Blueprint("files", __name__, url_prefix="/files", template_folder="templates")
 
 
 @bp.route("/")
@@ -156,29 +151,3 @@ def delete(id):
 
         return redirect(url_for("files.index"))
     return render_template("files/delete.html", file=db_file)
-
-
-def init_app(app):
-    """ Ensure uploads folder exists. """
-
-    if not os.path.exists(app.config["UPLOAD_FOLDER"]):
-        print("Creating Upload folder at", app.config["UPLOAD_FOLDER"])
-        os.mkdir(app.config["UPLOAD_FOLDER"])
-
-
-def get_file(id):
-    """ Consumes an ID and produces a file name. """
-
-    db = get_db()
-    db_file = db.execute(
-        "SELECT f.id, file_name as name, uploaded, user_id, username, file_path"
-        " FROM user_file f JOIN user u ON f.user_id = u.id"
-        " WHERE f.id = ?"
-        " ORDER BY uploaded DESC",
-        str(id),
-    ).fetchone()
-
-    if not db_file:
-        return None
-
-    return db_file["file_path"]

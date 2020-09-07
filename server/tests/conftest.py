@@ -3,8 +3,8 @@ import tempfile
 
 import pytest
 from web_server import create_app
-from web_server.db import get_db, init_db
-from web_server.utils import copyfile
+from db.service import get_db, init_db
+from files.utils import copyfile
 
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
     _data_sql = f.read().decode("utf8")
@@ -25,7 +25,11 @@ def app(tmp_path):
             copyfile(src, dest_file)
 
     app = create_app(
-        {"TESTING": True, "DATABASE": db_path, "UPLOAD_FOLDER": temp_uploads_folder,}
+        {
+            "TESTING": True,
+            "DATABASE": db_path,
+            "UPLOAD_FOLDER": temp_uploads_folder,
+        }
     )
 
     with app.app_context():
