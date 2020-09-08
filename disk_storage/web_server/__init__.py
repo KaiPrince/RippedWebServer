@@ -21,7 +21,6 @@ def create_app(test_config=None):
         instance_relative_config=True,
     )
 
-    # TODO: collapse with below
     app_config = getConfig(app)
     app.config.from_object(app_config)
 

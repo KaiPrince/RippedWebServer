@@ -19,7 +19,7 @@ from .service import delete_file
 # from .utils import allowed_file
 
 
-bp = Blueprint("files", __name__, url_prefix="/files", template_folder="templates")
+bp = Blueprint("storage", __name__, url_prefix="/storage")
 
 
 @bp.route("/")

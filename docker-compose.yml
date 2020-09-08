@@ -20,10 +20,24 @@ services:
     volumes:
       - dist:/usr/src/web_server/static/dist
       - db:/db
+      - files:/upload
+
+  users:
+    build: ./users
+    ports:
+      - 5001:5000
+
+  disk_storage:
+    build: ./file_storage
+    ports:
+      - 5002:5000
+    volumes:
+      - files:/upload
 
 volumes:
   dist:
   db:
+  files:
 #   db:
 #     image: postgres:9.4
 #     volumes:
