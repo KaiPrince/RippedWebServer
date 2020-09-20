@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  disk_storage:
+    build: .
+    environment:
+      UPLOAD_FOLDER: /upload
+    ports:
+      - 5002:5000
+    volumes:
+      - files:/upload
+
+volumes:
+  files:

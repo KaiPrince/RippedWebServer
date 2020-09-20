@@ -56,10 +56,13 @@ class TestingConfig(Config):
     MODE = "TESTING"
     TESTING = True
 
-    def __init__(self, app: Flask):
+    def __init__(self, app: Flask, UPLOAD_FOLDER=None, **kwargs):
 
         if self.SECRET_KEY is None:
             self.SECRET_KEY = "dev"
+
+        if UPLOAD_FOLDER is not None:
+            self.UPLOAD_FOLDER = UPLOAD_FOLDER
 
         super().__init__(app)
 
