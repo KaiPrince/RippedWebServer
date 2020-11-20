@@ -22,6 +22,15 @@ cd server
 pip install -r requirements.txt
 ```
 
+## Setup
+
+Initalize the database
+
+```
+cd server
+flask init-db
+```
+
 ## Running
 
 Optional: Set development mode (_powershell_)
@@ -45,17 +54,4 @@ flask run
 - [ ] File previews
 - [ ] Authentication & link tokens (expirable)
 - [x] Full Elm integration
-- [x] Upload progress bar
-- [x] Large file uploads
-- [ ] Public links
-- [x] File Storage microservice
-- [ ] Service registry
-- [ ] Users microservice
-- [ ] File Storage auto-deploy?
-- [x] Split docker-compose across microservices
-- [ ] Convert files app to Eve
-- [ ] Add exception handling and remove file from db if creation fails
-- [ ] Register logging service
-- [ ] Handle filename overlap by altering filename (filename_2)
-- [ ] Fix CI
-- [ ] Move repo urls to config and get from env.
+- [ ] Upload progress bar
