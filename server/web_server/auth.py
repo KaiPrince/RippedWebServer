@@ -1,3 +1,12 @@
+"""
+ * Project Name: RippedWebServer
+ * File Name: auth.py
+ * Programmer: Kai Prince
+ * Date: Tue, Nov 17, 2020
+ * Description: This file contains the auth module
+"""
+
+
 import functools
 
 from flask import (
@@ -15,6 +24,13 @@ from werkzeug.security import check_password_hash
 from .db import get_db, create_user
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
+
+"""
+ * Function Name: register
+ * Description: This view function is used to register a new user.
+ * Parameters: None
+ * Returns: None
+"""
 
 
 @bp.route("/register", methods=("GET", "POST"))
