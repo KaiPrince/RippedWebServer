@@ -14,7 +14,7 @@ from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 from db.service import get_db
 from auth.middleware import login_required
-from .service import delete_file
+import files.service as service
 
 # from .utils import allowed_file
 
@@ -24,12 +24,7 @@ bp = Blueprint("files", __name__, url_prefix="/files", template_folder="template
 
 @bp.route("/")
 def index():
-    db = get_db()
-    files = db.execute(
-        "SELECT f.id, file_name, uploaded, user_id, username, file_path"
-        " FROM user_file f JOIN user u ON f.user_id = u.id"
-        " ORDER BY uploaded DESC"
-    ).fetchall()
+    files = service.get_index()
 
     return render_template("files/index.html", files=files)
 
@@ -127,21 +122,14 @@ def download(id):
 @bp.route("/delete/<int:id>", methods=["GET", "POST"])
 @login_required
 def delete(id):
-    db = get_db()
-    db_file = db.execute(
-        "SELECT f.id, file_name as name, uploaded, user_id, username, file_path"
-        " FROM user_file f JOIN user u ON f.user_id = u.id"
-        " WHERE f.id = ?"
-        " ORDER BY uploaded DESC",
-        str(id),
-    ).fetchone()
+    file = service.get_file(id)
 
-    if not db_file:
+    if not file:
         abort(404)
 
     if request.method == "POST":
 
-        delete_file(id)
+        service.delete_file(id)
 
         return redirect(url_for("files.index"))
-    return render_template("files/delete.html", file=db_file)
+    return render_template("files/delete.html", file=file)

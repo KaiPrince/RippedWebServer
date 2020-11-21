@@ -6,7 +6,7 @@ from db.service import get_db
 
 
 class TestFiles:
-    def test_index(self, client):
+    def test_index(self, client, mock_files_app):
         """ Index page displays a file name. """
         # Arrange
         # Act
@@ -60,7 +60,7 @@ class TestFiles:
         assert b"test.txt" in response.data
         assert b"test content" in response.data
 
-    def test_delete_file(self, client, app, auth):
+    def test_delete_file(self, client, app, auth, mock_files_app):
         """ Existing file can be deleted. """
         # Arrange
         auth.login()
@@ -70,10 +70,3 @@ class TestFiles:
 
         # Assert
         assert response.status_code in [200, 302]
-        with app.app_context():
-            db = get_db()
-            count = db.execute(
-                "SELECT COUNT(id) FROM user_file WHERE id = 1"
-            ).fetchone()[0]
-            assert count == 0
-            assert "test.txt" not in os.listdir(app.config["UPLOAD_FOLDER"])

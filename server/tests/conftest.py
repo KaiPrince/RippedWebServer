@@ -2,6 +2,7 @@ import os
 import tempfile
 
 import pytest
+from pytest_mock import MockerFixture
 from web_server import create_app
 from db.service import get_db, init_db
 from files.utils import copyfile
@@ -68,3 +69,13 @@ class AuthActions(object):
 @pytest.fixture
 def auth(client):
     return AuthActions(client)
+
+
+@pytest.fixture
+def mock_files_app(client, mocker: MockerFixture):
+
+    mock_func = mocker.patch("files.service.repository")
+    mock_func.index.return_value = [{"id": 1, "file_name": "test.txt"}]
+    mock_func.get_file.return_value = {"id": 1, "file_name": "test.txt"}
+
+    return mock_func
