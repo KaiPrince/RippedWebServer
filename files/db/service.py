@@ -3,10 +3,6 @@ import os
 
 from flask import current_app, g
 
-from werkzeug.security import generate_password_hash
-
-from .config import DEFAULT_USER, DEFAULT_PASSWORD
-
 
 def get_db():
     if "db" not in g:
@@ -35,15 +31,3 @@ def init_db():
 
     with open(schema_file, "rb") as f:
         db.executescript(f.read().decode("utf8"))
-
-    create_user(DEFAULT_USER, DEFAULT_PASSWORD)
-
-
-def create_user(username, password):
-    db = get_db()
-
-    db.execute(
-        "INSERT INTO user (username, password) VALUES (?, ?)",
-        (username, generate_password_hash(password)),
-    )
-    db.commit()

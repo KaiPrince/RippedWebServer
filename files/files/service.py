@@ -9,8 +9,8 @@ def get_file(id):
 
     db = get_db()
     db_file = db.execute(
-        "SELECT f.id, file_name as name, uploaded, user_id, username, file_path"
-        " FROM user_file f JOIN user u ON f.user_id = u.id"
+        "SELECT f.id, file_name as name, uploaded, user_id, file_path"
+        " FROM user_file f"
         " WHERE f.id = ?"
         " ORDER BY uploaded DESC",
         str(id),

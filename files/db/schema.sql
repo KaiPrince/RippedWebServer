@@ -5,7 +5,5 @@ CREATE TABLE user_file (
   user_id INTEGER NOT NULL,
   uploaded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   file_name VARCHAR NOT NULL,
-  file_path VARCHAR NOT NULL,
-  FOREIGN KEY
-(id)
+  file_path VARCHAR NOT NULL
 );

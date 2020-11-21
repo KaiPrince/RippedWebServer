@@ -29,7 +29,6 @@ def create_app(test_config=None):
         pass
 
     db.init_app(app)
-    files.init_app(app)
     app.register_blueprint(files.views.bp)
 
     app.add_url_rule("/", endpoint="index", view_func=files.views.index)

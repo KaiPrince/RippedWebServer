@@ -9,6 +9,7 @@ from flask import (
     url_for,
     current_app,
     send_from_directory,
+    make_response,
 )
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
@@ -25,49 +26,60 @@ bp = Blueprint("files", __name__, url_prefix="/files", template_folder="template
 def index():
     db = get_db()
     files = db.execute(
-        "SELECT f.id, file_name, uploaded, user_id, username, file_path"
-        " FROM user_file f JOIN user u ON f.user_id = u.id"
+        "SELECT f.id, file_name, uploaded, user_id, file_path"
+        " FROM user_file f"
         " ORDER BY uploaded DESC"
     ).fetchall()
 
-    return render_template("files/index.html", files=files)
+    files_array = list(dict(x) for x in files)
+
+    return {"files": files_array}
 
 
-@bp.route("/create", methods=["GET", "POST"])
+@bp.route("/create", methods=["POST"])
 def create():
-    if request.method == "POST":
-        file_name = request.form["file_name"]
-        file = request.files["file"]
-        error = None
+    file_name = request.form["file_name"]
+    file = request.files["file"]
+    json = request.form
+    error = None
 
-        if not file_name:
-            error = "File name is required."
+    if not file_name:
+        error = "File name is required."
 
-        # check if the post request has the file part
-        if "file" not in request.files:
-            error = "No file part"
+    # check if the post request has the file part
+    if "file" not in request.files:
+        error = "No file part"
 
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == "":
-            error = "No selected file"
+    # if user does not select file, browser also
+    # submit an empty part without filename
+    if file.filename == "":
+        error = "No selected file"
 
-        if error is not None:
-            flash(error)
-        elif file:  # and allowed_file(file.filename):
+    required_params = ["user_id"]
+    if any(x not in json for x in required_params):
+        error_message = "missing required params."
+        current_app.logger.info(error_message)
+        return make_response({"message": error_message}, 400)
 
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
+    user_id = json["user_id"]
 
-            db = get_db()
-            db.execute(
-                "INSERT INTO user_file (file_name, user_id, file_path)"
-                " VALUES (?, ?, ?)",
-                (file_name, g.user["id"], filename),
-            )
-            db.commit()
-            return redirect(url_for("files.index"))
-    return render_template("files/create.html")
+    if error is not None:
+        return make_response(400, {"Error": error})
+    elif file:  # and allowed_file(file.filename):
+
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
+
+        db = get_db()
+        db_cursor = db.execute(
+            "INSERT INTO user_file (file_name, user_id, file_path)" " VALUES (?, ?, ?)",
+            (file_name, user_id, filename),
+        )
+        db.commit()
+
+        file_id = db_cursor.lastrowid
+
+        return {"file_id": file_id}
 
 
 @bp.route("/detail/<int:id>")
@@ -75,8 +87,8 @@ def detail(id):
 
     db = get_db()
     db_file = db.execute(
-        "SELECT f.id, file_name as name, uploaded, user_id, username, file_path"
-        " FROM user_file f JOIN user u ON f.user_id = u.id"
+        "SELECT f.id, file_name as name, uploaded, user_id, file_path"
+        " FROM user_file f"
         " WHERE f.id = ?"
         " ORDER BY uploaded DESC",
         str(id),
@@ -85,7 +97,7 @@ def detail(id):
     if not db_file:
         abort(404)
 
-    file = db_file
+    file = dict(db_file)
 
     file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], db_file["file_path"])
 
@@ -94,7 +106,7 @@ def detail(id):
         with open(file_path, "rt") as f:
             content = "\n".join(f.readlines())
 
-    return render_template("files/detail.html", file=file, content=content)
+    return {"file": file, "content": content}
 
 
 @bp.route("/download/<int:id>")
@@ -104,7 +116,7 @@ def download(id):
     db = get_db()
     db_file = db.execute(
         "SELECT f.id, file_name as name, uploaded, user_id, username, file_path"
-        " FROM user_file f JOIN user u ON f.user_id = u.id"
+        " FROM user_file f"
         " WHERE f.id = ?"
         " ORDER BY uploaded DESC",
         str(id),
@@ -120,12 +132,12 @@ def download(id):
     return send_from_directory(file_dir, file, as_attachment=True)
 
 
-@bp.route("/delete/<int:id>", methods=["GET", "POST"])
+@bp.route("/delete/<int:id>", methods=["POST"])
 def delete(id):
     db = get_db()
     db_file = db.execute(
-        "SELECT f.id, file_name as name, uploaded, user_id, username, file_path"
-        " FROM user_file f JOIN user u ON f.user_id = u.id"
+        "SELECT f.id, file_name as name, uploaded, user_id, file_path"
+        " FROM user_file f"
         " WHERE f.id = ?"
         " ORDER BY uploaded DESC",
         str(id),
@@ -134,9 +146,6 @@ def delete(id):
     if not db_file:
         abort(404)
 
-    if request.method == "POST":
+    delete_file(id)
 
-        delete_file(id)
-
-        return redirect(url_for("files.index"))
-    return render_template("files/delete.html", file=db_file)
+    return "File deleted successfully."

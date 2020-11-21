@@ -19,14 +19,13 @@ class TestFiles:
     def test_upload(self, client, app):
         """ File can be uploaded to web server. """
         # Arrange
-        assert client.get("/files/create").status_code == 200
-
         data = {
             "file_name": "test2.txt",
             "file": (
                 BytesIO(b"my file contents"),
                 "test2.txt",
             ),
+            "user_id": 1,
         }
 
         # Act
