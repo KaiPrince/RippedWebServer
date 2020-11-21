@@ -13,7 +13,6 @@ from flask import (
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 from db.service import get_db
-from auth.middleware import login_required
 from .service import delete_file
 
 # from .utils import allowed_file
@@ -35,7 +34,6 @@ def index():
 
 
 @bp.route("/create", methods=["GET", "POST"])
-@login_required
 def create():
     if request.method == "POST":
         file_name = request.form["file_name"]
@@ -73,7 +71,6 @@ def create():
 
 
 @bp.route("/detail/<int:id>")
-@login_required
 def detail(id):
 
     db = get_db()
@@ -101,7 +98,6 @@ def detail(id):
 
 
 @bp.route("/download/<int:id>")
-@login_required
 def download(id):
     """ View for downloading a file. """
 
@@ -125,7 +121,6 @@ def download(id):
 
 
 @bp.route("/delete/<int:id>", methods=["GET", "POST"])
-@login_required
 def delete(id):
     db = get_db()
     db_file = db.execute(

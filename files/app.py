@@ -1,6 +1,7 @@
-from eve import Eve
+from files import create_app
 
-app = Eve()
+
+app = create_app()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")

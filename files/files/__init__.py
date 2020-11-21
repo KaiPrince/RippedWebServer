@@ -1,10 +1,37 @@
 import os
 from flask import Flask
+from .config import getConfig
+import db
+import files.views
 
 
-def init_app(app: Flask):
-    """ Ensure uploads folder exists. """
+def create_app(test_config=None):
+    # create and configure the app
+    app = Flask(
+        __name__,
+    )
 
-    if not os.path.exists(app.config["UPLOAD_FOLDER"]):
-        print("Creating Upload folder at", app.config["UPLOAD_FOLDER"])
-        os.mkdir(app.config["UPLOAD_FOLDER"])
+    # TODO: collapse with below
+    app_config = getConfig(app)
+    app.config.from_object(app_config)
+
+    if test_config is None:
+        # load the instance config, if it exists, when not testing
+        app.config.from_pyfile("config.py", silent=True)
+    else:
+        # load the test config if passed in
+        app.config.from_mapping(test_config)
+
+    # ensure the instance folder exists
+    try:
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
+
+    db.init_app(app)
+    files.init_app(app)
+    app.register_blueprint(files.views.bp)
+
+    app.add_url_rule("/", endpoint="index", view_func=files.views.index)
+
+    return app

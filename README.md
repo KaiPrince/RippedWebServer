@@ -53,3 +53,4 @@ flask run
 - [ ] Users microservice
 - [ ] File Storage auto-deploy?
 - [ ] Split docker-compose across microservices
+- [ ] Convert files app to Eve
