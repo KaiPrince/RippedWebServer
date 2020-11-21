@@ -1,26 +1,9 @@
 version: "3.8"
 services:
-  app:
-    build: ./app
-    volumes:
-      - dist:/dist
-      - ./app/src:/usr/src/src:ro
-      # - type: bind
-      #   source: ./app
-      #   target: /usr/src
-      #   read_only: true
-
   server:
     build: ./server
-    environment:
-      DATABASE: /db/web_server.sqlite
-      UPLOAD_FOLDER: /upload
     ports:
       - 5000:5000
-    volumes:
-      - dist:/usr/src/web_server/static/dist
-      - db:/db
-      - files:/upload
 
   users:
     build: ./users
@@ -28,14 +11,24 @@ services:
       - 5001:5000
 
   disk_storage:
-    build: ./file_storage
+    build: ./disk_storage
+    environment:
+      UPLOAD_FOLDER: /upload
     ports:
       - 5002:5000
     volumes:
       - files:/upload
 
+  files:
+    build: ./files
+    environment:
+      DATABASE: /db/files_db.sqlite
+    ports:
+      - 5003:5000
+    volumes:
+      - db:/db
+
 volumes:
-  dist:
   db:
   files:
 #   db:
