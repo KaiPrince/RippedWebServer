@@ -8,6 +8,7 @@ from flask import (
     url_for,
     current_app,
     send_from_directory,
+    session,
 )
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
@@ -64,13 +65,19 @@ def create():
                 content_range = f"0-{file_size}"
                 content_total = file_size
 
-            # TODO pass total size and check free disk space
-            file_id = service.create_file(
-                file_name, g.user["id"], filename, content_total
-            )
+            if "file_id" not in session:
+                # ..Send create request on first packet.
+                # TODO pass total size and check free disk space
+                file_id = service.create_file(
+                    file_name, g.user["id"], filename, content_total
+                )
 
-            if not file_id:
-                abort(500, "Couldn't create new file.")
+                if not file_id:
+                    abort(500, "Couldn't create new file.")
+
+                session["file_id"] = file_id
+            else:
+                file_id = session["file_id"]
 
             service.put_file(file_id, content_range, content_total, file)
 

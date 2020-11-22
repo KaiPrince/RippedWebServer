@@ -39,7 +39,7 @@ def create_file(file_name, user_id, file_path, content_total):
             "file_name": file_name,
             "user_id": user_id,
             "file_path": file_path,
-            "content_total": content_total,
+            "content_total": str(content_total),
         },
     )
     return 1

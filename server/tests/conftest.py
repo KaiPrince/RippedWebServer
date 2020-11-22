@@ -3,6 +3,7 @@ import tempfile
 
 import pytest
 from pytest_mock import MockerFixture
+from unittest.mock import MagicMock
 from web_server import create_app
 from db.service import get_db, init_db
 from files.utils import copyfile
@@ -14,7 +15,7 @@ UPLOAD_FOLDER = os.path.join(".", "tests", "uploads")
 
 
 @pytest.fixture
-def app(tmp_path, mock_files_app):
+def app(tmp_path, mock_files_repo):
     db_fd, db_path = tempfile.mkstemp()
 
     temp_uploads_folder = tmp_path
@@ -72,11 +73,14 @@ def auth(client):
 
 
 @pytest.fixture
-def mock_files_app(mocker: MockerFixture):
+def mock_files_repo(mocker: MockerFixture) -> MagicMock:
+    mock_func = mocker.patch("files.repository.requests")
 
-    mock_func = mocker.patch("files.service.repository")
-    mock_func.index.return_value = [{"id": 1, "file_name": "test.txt"}]
-    mock_func.get_file.return_value = {"id": 1, "name": "test.txt"}
-    mock_func.get_file_content.return_value = "test content"
+    # mock_func.post = post
+    # mock_func.put = put
+
+    # mock_func.index.return_value = [{"id": 1, "file_name": "test.txt"}]
+    # mock_func.get_file.return_value = {"id": 1, "name": "test.txt"}
+    # mock_func.get_file_content.return_value = "test content"
 
     return mock_func

@@ -1,12 +1,22 @@
 # import pytest
 
 from io import BytesIO
+import sys
+from unittest.mock import MagicMock
+from werkzeug.datastructures import FileStorage
 
 
 class TestFiles:
-    def test_index(self, client):
+    def test_index(self, client, mock_files_repo: MagicMock, mocker: MagicMock):
         """ Index page displays a file name. """
         # Arrange
+
+        _get_response = mocker.MagicMock()
+        _get_response.json.return_value = {
+            "files": [{"id": 1, "file_name": "test.txt"}]
+        }
+
+        mock_files_repo.get.return_value = _get_response
         # Act
         response = client.get("/files/")
 
@@ -14,7 +24,11 @@ class TestFiles:
         assert response.status_code == 200
         assert b"test.txt" in response.data
 
-    def test_upload(self, client, auth, app):
+        mock_files_repo.get.assert_called_once_with("http://localhost:5003" + "/")
+
+    def test_upload(
+        self, client, auth, app, mock_files_repo: MagicMock, mocker: MagicMock
+    ):
         """ File can be uploaded to web server. """
         # Arrange
         auth.login()
@@ -32,7 +46,6 @@ class TestFiles:
         }
 
         # Act
-
         response = client.post(
             "/files/create",
             buffered=True,
@@ -43,8 +56,36 @@ class TestFiles:
         # Assert
         assert response.status_code < 400  # No error
 
-    def test_upload_parts(self, client, auth, app):
+        # ..repo is called
+        content_size = sys.getsizeof(contents) - 1
+
+        mock_files_repo.post.assert_called_once_with(
+            "http://localhost:5003" + "/files/create",
+            json={
+                "file_name": filename,
+                "user_id": 2,
+                "file_path": filename,
+                "content_total": str(content_size),
+            },
+        )
+
+        # ..temporariliy override the equality comparator
+        FileStorage.__eq__ = lambda self, obj: self.filename == obj.filename
+
+        mock_files_repo.put.assert_called_once_with(
+            "http://localhost:5003" + "/files/create",
+            headers={
+                "Content-Range": f"bytes 0-{content_size}/{content_size}",
+                "file_id": str(1),
+            },
+            data=FileStorage(
+                BytesIO(contents), filename=filename, content_type="text/plain"
+            ),
+        )
+
+    def test_upload_parts(self, client, auth, app, mock_files_repo: MagicMock):
         """ File can be uploaded to web server. """
+
         # Arrange
         auth.login()
         assert client.get("/files/create").status_code == 200
@@ -52,12 +93,15 @@ class TestFiles:
         filename = "test2.txt"
         contents = b"my file contents"
 
-        # Splitting string into equal halves
+        # ..splitting string into equal halves
         contents_parts = contents[: len(contents) // 2], contents[len(contents) // 2 :]
 
         for index, part in enumerate(contents_parts):
-            content_range = f"{len(part) * index}-{len(part)}"
-            content_total = len(contents)
+            begin = sys.getsizeof(part) * index
+            end = begin + sys.getsizeof(part)
+
+            content_range = f"{begin}-{end}"
+            content_total = sys.getsizeof(contents)
 
             data = {
                 "file_name": filename,
@@ -78,6 +122,30 @@ class TestFiles:
 
             # Assert
             assert response.status_code < 400  # No error
+
+            # ..temporariliy override the equality comparator
+            FileStorage.__eq__ = lambda self, obj: self.filename == obj.filename
+
+            mock_files_repo.put.assert_called_with(
+                "http://localhost:5003" + "/files/create",
+                headers={
+                    "Content-Range": f"bytes {content_range}/{content_total}",
+                    "file_id": str(1),
+                },
+                data=FileStorage(
+                    BytesIO(contents), filename=filename, content_type="text/plain"
+                ),
+            )
+
+        mock_files_repo.post.assert_called_once_with(
+            "http://localhost:5003" + "/files/create",
+            json={
+                "file_name": filename,
+                "user_id": 2,
+                "file_path": filename,
+                "content_total": str(content_total),
+            },
+        )
 
     def test_read_file(self, client, auth):
         """ Existing file can be read. """
