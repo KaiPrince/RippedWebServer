@@ -20,17 +20,20 @@ class TestFiles:
         auth.login()
         assert client.get("/files/create").status_code == 200
 
+        filename = "test2.txt"
+        contents = b"my file contents"
+
         data = {
-            "file_name": "test2.txt",
+            "file_name": filename,
             "file": (
-                BytesIO(b"my file contents"),
-                "test2.txt",
+                BytesIO(contents),
+                filename,
             ),
         }
 
         # Act
 
-        response_2 = client.post(
+        response = client.post(
             "/files/create",
             buffered=True,
             content_type="multipart/form-data",
@@ -38,7 +41,43 @@ class TestFiles:
         )
 
         # Assert
-        assert response_2.status_code < 400  # No error
+        assert response.status_code < 400  # No error
+
+    def test_upload_parts(self, client, auth, app):
+        """ File can be uploaded to web server. """
+        # Arrange
+        auth.login()
+        assert client.get("/files/create").status_code == 200
+
+        filename = "test2.txt"
+        contents = b"my file contents"
+
+        # Splitting string into equal halves
+        contents_parts = contents[: len(contents) // 2], contents[len(contents) // 2 :]
+
+        for index, part in enumerate(contents_parts):
+            content_range = f"{len(part) * index}-{len(part)}"
+            content_total = len(contents)
+
+            data = {
+                "file_name": filename,
+                "file": (
+                    BytesIO(part),
+                    filename,
+                ),
+            }
+
+            # Act
+            response = client.post(
+                "/files/create",
+                buffered=True,
+                headers={"Content-Range": f"bytes {content_range}/{content_total}"},
+                content_type="multipart/form-data",
+                data=data,
+            )
+
+            # Assert
+            assert response.status_code < 400  # No error
 
     def test_read_file(self, client, auth):
         """ Existing file can be read. """

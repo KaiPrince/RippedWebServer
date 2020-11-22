@@ -14,6 +14,7 @@ from werkzeug.utils import secure_filename
 from auth.middleware import login_required
 import files.service as service
 import common
+import sys
 
 # from .utils import allowed_file
 
@@ -54,9 +55,14 @@ def create():
 
             filename = secure_filename(file.filename)
 
-            content_range, content_total = common.get_content_metadata(
-                request.headers.get("Content-Range")
-            )
+            if "Content-Range" in request.headers:
+                content_range, content_total = common.get_content_metadata(
+                    request.headers["Content-Range"]
+                )
+            else:
+                file_size = sys.getsizeof(file)
+                content_range = f"0-{file_size}"
+                content_total = file_size
 
             # TODO pass total size and check free disk space
             file_id = service.create_file(
