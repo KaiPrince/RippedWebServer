@@ -14,7 +14,8 @@ from flask import (
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 from db.service import get_db
-from .service import delete_file
+import files.service as service
+import common
 
 # from .utils import allowed_file
 
@@ -36,40 +37,28 @@ def index():
     return {"files": files_array}
 
 
-@bp.route("/create", methods=["POST"])
+@bp.route("/create", methods=["POST", "PUT"])
 def create():
-    file_name = request.form["file_name"]
-    file = request.files["file"]
-    json = request.form
-    error = None
+    if request.method == "POST":
+        # Get params
+        json = request.json
 
-    if not file_name:
-        error = "File name is required."
+        required_params = ["user_id", "file_name", "file_path", "content_total"]
+        if any(x not in json for x in required_params):
+            error_message = "missing required params."
+            current_app.logger.info(error_message)
+            return make_response({"message": error_message}, 400)
 
-    # check if the post request has the file part
-    if "file" not in request.files:
-        error = "No file part"
+        user_id = json["user_id"]
+        file_name = json["file_name"]
+        file_path = json["file_path"]
+        content_total = json["content_total"]
 
-    # if user does not select file, browser also
-    # submit an empty part without filename
-    if file.filename == "":
-        error = "No selected file"
+        # Allocate in disk storage
+        service.create_file(file_name, content_total)
 
-    required_params = ["user_id"]
-    if any(x not in json for x in required_params):
-        error_message = "missing required params."
-        current_app.logger.info(error_message)
-        return make_response({"message": error_message}, 400)
-
-    user_id = json["user_id"]
-
-    if error is not None:
-        return make_response(400, {"Error": error})
-    elif file:  # and allowed_file(file.filename):
-
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
-
+        # Save to database
+        filename = secure_filename(file_name)
         db = get_db()
         db_cursor = db.execute(
             "INSERT INTO user_file (file_name, user_id, file_path)" " VALUES (?, ?, ?)",
@@ -80,6 +69,26 @@ def create():
         file_id = db_cursor.lastrowid
 
         return {"file_id": file_id}
+
+    elif request.method == "PUT":
+        # Get file path by id
+        file_id = request.headers["file_id"]
+        file_path = service.get_file(file_id)["file_path"]
+        content = request.data
+
+        # TODO handle missing header
+        content_range, content_total = common.get_content_metadata(
+            request.headers.get("Content-Range")
+        )
+
+        # Send to disk storage service.
+        service.put_file(file_path, content_range, content_total, content)
+        file_size = 100
+
+        # Do final write check
+        # TODO
+
+        return {"file_size": file_size}
 
 
 @bp.route("/detail/<int:id>")
@@ -146,6 +155,6 @@ def delete(id):
     if not db_file:
         abort(404)
 
-    delete_file(id)
+    service.delete_file(id)
 
     return "File deleted successfully."

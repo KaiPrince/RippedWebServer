@@ -1,4 +1,3 @@
-import os
 from flask import (
     Blueprint,
     flash,
@@ -12,9 +11,9 @@ from flask import (
 )
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
-from db.service import get_db
 from auth.middleware import login_required
 import files.service as service
+import common
 
 # from .utils import allowed_file
 
@@ -55,9 +54,22 @@ def create():
 
             filename = secure_filename(file.filename)
 
-            service.create_file(file_name, g.user["id"], filename)
+            content_range, content_total = common.get_content_metadata(
+                request.headers.get("Content-Range")
+            )
 
-            return redirect(url_for("files.index"))
+            # TODO pass total size and check free disk space
+            file_id = service.create_file(
+                file_name, g.user["id"], filename, content_total
+            )
+
+            if not file_id:
+                abort(500, "Couldn't create new file.")
+
+            service.put_file(file_id, content_range, content_total, file)
+
+            return {"files": [{"name": file_name}]}
+            # return redirect(url_for("files.index"))
     return render_template("files/create.html")
 
 

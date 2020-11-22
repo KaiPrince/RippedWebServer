@@ -41,13 +41,13 @@
             {{ file['username'] }}
           </td>
         </tr>
-        {% endfor %} {% if not files %}
+        {% else %} 
         <tr>
           <td>
             There's nothing here...
           </td>
         </tr>
-        {% endif %}
+        {% endfor %}
       </tbody>
     </table>
   </div>

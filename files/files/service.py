@@ -5,7 +5,7 @@ import logging
 
 
 def get_file(id):
-    """ Consumes an ID and produces a file name. """
+    """ Consumes an ID and produces file details. """
 
     db = get_db()
     db_file = db.execute(
@@ -19,7 +19,17 @@ def get_file(id):
     if not db_file:
         return None
 
-    return db_file["file_path"]
+    return dict(db_file)
+
+
+def create_file(file_name, content_total):
+    pass
+
+
+def put_file(file_path, content_range, content_total, content):
+    # Append to file
+
+    pass
 
 
 def delete_file(id):
