@@ -76,23 +76,7 @@ def detail(id):
 def download(id):
     """ View for downloading a file. """
 
-    db = get_db()
-    db_file = db.execute(
-        "SELECT f.id, file_name as name, uploaded, user_id, username, file_path"
-        " FROM user_file f JOIN user u ON f.user_id = u.id"
-        " WHERE f.id = ?"
-        " ORDER BY uploaded DESC",
-        str(id),
-    ).fetchone()
-
-    if db_file is None or "file_path" not in db_file.keys():
-        abort(404)
-
-    file = db_file["file_path"]
-
-    file_dir = os.path.abspath(current_app.config["UPLOAD_FOLDER"])
-
-    return send_from_directory(file_dir, file, as_attachment=True)
+    return service.download_file(id)
 
 
 @bp.route("/delete/<int:id>", methods=["GET", "POST"])

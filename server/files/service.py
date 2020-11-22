@@ -23,6 +23,11 @@ def get_file_content(id):
     return repository.get_file_content(id)
 
 
+def download_file(id):
+    """ Consumes an ID and produces a response which includes the file. """
+    pass
+
+
 def create_file(file_name, user_id, file_path):
     """ Consumes file details and produces a file id. """
     pass

@@ -1,8 +1,6 @@
-import pytest
-import os
+# import pytest
 
 from io import BytesIO
-from db.service import get_db
 
 
 class TestFiles:
