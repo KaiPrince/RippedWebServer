@@ -14,7 +14,7 @@ UPLOAD_FOLDER = os.path.join(".", "tests", "uploads")
 
 
 @pytest.fixture
-def app(tmp_path):
+def app(tmp_path, mock_files_app):
     db_fd, db_path = tempfile.mkstemp()
 
     temp_uploads_folder = tmp_path
@@ -72,10 +72,11 @@ def auth(client):
 
 
 @pytest.fixture
-def mock_files_app(client, mocker: MockerFixture):
+def mock_files_app(mocker: MockerFixture):
 
     mock_func = mocker.patch("files.service.repository")
     mock_func.index.return_value = [{"id": 1, "file_name": "test.txt"}]
-    mock_func.get_file.return_value = {"id": 1, "file_name": "test.txt"}
+    mock_func.get_file.return_value = {"id": 1, "name": "test.txt"}
+    mock_func.get_file_content.return_value = "test content"
 
     return mock_func

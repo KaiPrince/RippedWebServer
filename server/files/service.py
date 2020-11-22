@@ -17,6 +17,17 @@ def get_file(id):
     return repository.get_file(id)
 
 
+def get_file_content(id):
+    """ Consumes an ID and produces the file's contents. """
+
+    return repository.get_file_content(id)
+
+
+def create_file(file_name, user_id, file_path):
+    """ Consumes file details and produces a file id. """
+    pass
+
+
 def delete_file(id):
     """ Deletes a file from storage. """
 

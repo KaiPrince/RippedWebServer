@@ -54,15 +54,9 @@ def create():
         elif file:  # and allowed_file(file.filename):
 
             filename = secure_filename(file.filename)
-            file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
 
-            db = get_db()
-            db.execute(
-                "INSERT INTO user_file (file_name, user_id, file_path)"
-                " VALUES (?, ?, ?)",
-                (file_name, g.user["id"], filename),
-            )
-            db.commit()
+            service.create_file(file_name, g.user["id"], filename)
+
             return redirect(url_for("files.index"))
     return render_template("files/create.html")
 
@@ -71,26 +65,8 @@ def create():
 @login_required
 def detail(id):
 
-    db = get_db()
-    db_file = db.execute(
-        "SELECT f.id, file_name as name, uploaded, user_id, username, file_path"
-        " FROM user_file f JOIN user u ON f.user_id = u.id"
-        " WHERE f.id = ?"
-        " ORDER BY uploaded DESC",
-        str(id),
-    ).fetchone()
-
-    if not db_file:
-        abort(404)
-
-    file = db_file
-
-    file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], db_file["file_path"])
-
-    content = ""
-    if file_path.endswith("txt"):
-        with open(file_path, "rt") as f:
-            content = "\n".join(f.readlines())
+    file = service.get_file(id)
+    content = service.get_file_content(id)
 
     return render_template("files/detail.html", file=file, content=content)
 

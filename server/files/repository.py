@@ -22,6 +22,11 @@ def get_file(id):
     pass
 
 
+def get_file_content(id):
+    """ Get the contents of the file with the matching id. """
+    pass
+
+
 def delete_file(id):
     """ Delete a file with the matching id. """
     pass

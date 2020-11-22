@@ -6,7 +6,7 @@ from db.service import get_db
 
 
 class TestFiles:
-    def test_index(self, client, mock_files_app):
+    def test_index(self, client):
         """ Index page displays a file name. """
         # Arrange
         # Act
@@ -32,7 +32,7 @@ class TestFiles:
 
         # Act
 
-        client.post(
+        response_2 = client.post(
             "/files/create",
             buffered=True,
             content_type="multipart/form-data",
@@ -40,12 +40,7 @@ class TestFiles:
         )
 
         # Assert
-
-        with app.app_context():
-            db = get_db()
-            count = db.execute("SELECT COUNT(id) FROM user_file").fetchone()[0]
-            assert count == 2
-            assert "test2.txt" in os.listdir(app.config["UPLOAD_FOLDER"])
+        assert response_2.status_code < 400  # No error
 
     def test_read_file(self, client, auth):
         """ Existing file can be read. """
@@ -60,7 +55,7 @@ class TestFiles:
         assert b"test.txt" in response.data
         assert b"test content" in response.data
 
-    def test_delete_file(self, client, app, auth, mock_files_app):
+    def test_delete_file(self, client, app, auth):
         """ Existing file can be deleted. """
         # Arrange
         auth.login()
