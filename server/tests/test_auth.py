@@ -1,6 +1,6 @@
 import pytest
-from flask import g, session
-from web_server.db import get_db
+from db.service import get_db
+from flask import session
 
 
 def test_register(client, app):
@@ -10,7 +10,11 @@ def test_register(client, app):
 
     with app.app_context():
         assert (
-            get_db().execute("select * from user where username = 'a'",).fetchone()
+            get_db()
+            .execute(
+                "select * from user where username = 'a'",
+            )
+            .fetchone()
             is not None
         )
 

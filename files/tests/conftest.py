@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 import pytest
 from db.service import get_db, init_db
 from pytest_mock import MockerFixture
-from web_server import create_app
 
+from files import create_app
 from files.utils import copyfile
 from flask import Flask
 
@@ -56,24 +56,6 @@ def runner(app: Flask):
     return app.test_cli_runner()
 
 
-class AuthActions(object):
-    def __init__(self, client):
-        self._client = client
-
-    def login(self, username="test", password="test"):
-        return self._client.post(
-            "/auth/login", data={"username": username, "password": password}
-        )
-
-    def logout(self):
-        return self._client.get("/auth/logout")
-
-
-@pytest.fixture
-def auth(client):
-    return AuthActions(client)
-
-
 @pytest.fixture
 def mock_files_repo(mocker: MockerFixture) -> MagicMock:
     mock_func = mocker.patch("files.repository.requests")
@@ -82,5 +64,5 @@ def mock_files_repo(mocker: MockerFixture) -> MagicMock:
 
 
 @pytest.fixture
-def files_service_url(app: Flask) -> str:
-    return app.config["FILES_SERVICE_URL"]
+def disk_storage_service_url(app: Flask) -> str:
+    return app.config["DISK_STORAGE_SERVICE_URL"]
