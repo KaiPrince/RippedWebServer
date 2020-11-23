@@ -14,8 +14,11 @@ jobs:
           paths:
             - ./*
   build:
+    parameters:
+      project_folder:
+        type: string
     executor: python/default
-    working_directory: ~/project/server
+    working_directory: ~/project/<< parameters.project_folder >>
     steps:
       - attach_workspace:
           at: ~/project
@@ -27,15 +30,18 @@ jobs:
           paths:
             - .local
   test:
+    parameters:
+      project_folder:
+        type: string
     executor: python/default
-    working_directory: ~/project/server
+    working_directory: ~/project/<< parameters.project_folder >>
     steps:
       - attach_workspace:
           at: ~/project
       - attach_workspace:
           at: ~/
       - run:
-          command: python -m pytest # ./manage.py test
+          command: python -m pytest
           name: Test
 
 workflows:
@@ -45,6 +51,12 @@ workflows:
       - build:
           requires:
             - checkout
+          matrix:
+            parameters:
+              project_folder: ["server"]
       - test:
           requires:
             - build
+          matrix:
+            parameters:
+              project_folder: ["server"]
