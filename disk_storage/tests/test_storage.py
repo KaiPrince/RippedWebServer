@@ -127,6 +127,19 @@ class TestStorage:
         assert response.status_code == 200
         assert b"test content" in response.data
 
+    def test_download_file(self, client, app):
+        """ Existing file can be downloaded. """
+
+        # Arrange
+        file_name = "test.txt"
+
+        # Act
+        response = client.get(f"/storage/download/{file_name}")
+
+        # Assert
+        assert response.status_code == 200
+        assert b"test content" in response.data
+
     def test_delete_file(self, client, app):
         """ Existing file can be deleted. """
         # Arrange

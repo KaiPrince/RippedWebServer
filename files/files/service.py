@@ -62,6 +62,12 @@ def put_file(file_path, content_range, content_total, content):
     return response.json()["file_size"]
 
 
+def download_file(file_path):
+    """ Consumes a file path and produces a response which includes the file. """
+
+    return repository.download_file(file_path)
+
+
 def delete_file(id):
     """ Deletes a file from storage. """
 
