@@ -66,4 +66,6 @@ def put_file(file_id, content_range, content_total, content):
 
 def delete_file(id):
     """ Delete a file with the matching id. """
-    pass
+    response = requests.post(f"{base_url}/delete/{id}")
+
+    return response

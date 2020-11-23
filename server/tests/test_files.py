@@ -181,7 +181,14 @@ class TestFiles:
         assert b"test.txt" in response.data
         assert b"test content" in response.data
 
-    def test_delete_file(self, client, app, auth):
+        mock_files_repo.get.assert_any_call(
+            "http://localhost:5003" + "/file/1",
+        )
+        mock_files_repo.get.assert_any_call(
+            "http://localhost:5003" + "/file-content/1",
+        )
+
+    def test_delete_file(self, client, app, auth, mock_files_repo):
         """ Existing file can be deleted. """
         # Arrange
         auth.login()
@@ -191,3 +198,7 @@ class TestFiles:
 
         # Assert
         assert response.status_code in [200, 302]
+
+        mock_files_repo.post.assert_called_once_with(
+            "http://localhost:5003" + "/delete/1",
+        )
