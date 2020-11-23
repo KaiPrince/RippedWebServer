@@ -30,9 +30,14 @@ def get_file_content(id):
 def download_file(id):
     """ Consumes an ID and produces a response which includes the file. """
 
+    file_path = repository.get_file(id)["file_path"]
     result = repository.download_file(id)
+
     return send_file(
-        BytesIO(result.content),
+        (
+            BytesIO(result.contents),
+            file_path,
+        ),
         mimetype=result.headers["Content-Type"],
         as_attachment=True,
     )
