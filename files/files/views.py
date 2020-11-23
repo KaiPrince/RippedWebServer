@@ -147,7 +147,7 @@ def download(id):
 
     db = get_db()
     db_file = db.execute(
-        "SELECT f.id, file_name as name, uploaded, user_id, username, file_path"
+        "SELECT f.id, file_name as name, uploaded, user_id, file_path"
         " FROM user_file f"
         " WHERE f.id = ?"
         " ORDER BY uploaded DESC",
