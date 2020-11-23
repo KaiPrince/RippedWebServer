@@ -34,6 +34,8 @@ def get_file_content(id):
 def create_file(file_name, file_size):
     response = repository.create_file(file_name, file_size)
 
+    response.raise_for_status()
+
     return response
 
 
@@ -42,7 +44,9 @@ def put_file(file_path, content_range, content_total, content):
 
     response = repository.put_file(file_path, content_range, content_total, content)
 
-    return response
+    response.raise_for_status()
+
+    return response.json()["file_size"]
 
 
 def delete_file(id):

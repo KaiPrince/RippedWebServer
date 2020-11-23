@@ -17,6 +17,7 @@ from werkzeug.utils import secure_filename
 from db.service import get_db
 import files.service as service
 import common
+from requests import HTTPError
 
 # from .utils import allowed_file
 
@@ -56,14 +57,14 @@ def create():
         content_total = json["content_total"]
 
         # Allocate in disk storage
-        service.create_file(file_name, content_total)
+        service.create_file(file_path, content_total)
 
         # Save to database
-        filename = secure_filename(file_name)
+        # filename = secure_filename(file_name)
         db = get_db()
         db_cursor = db.execute(
             "INSERT INTO user_file (file_name, user_id, file_path)" " VALUES (?, ?, ?)",
-            (file_name, user_id, filename),
+            (file_name, user_id, file_path),
         )
         db.commit()
 
@@ -74,7 +75,11 @@ def create():
     elif request.method == "PUT":
         # Get file path by id
         file_id = request.headers["file_id"]
-        file_path = service.get_file(file_id)["file_path"]
+        file_info = service.get_file(file_id)
+        if not file_info:
+            return NotFound(f"File id {file_id} not found.")
+
+        file_path = file_info["file_path"]
 
         # file = request.files["file"]
         content = request.data
@@ -85,13 +90,17 @@ def create():
         )
 
         # Send to disk storage service.
-        service.put_file(file_path, content_range, content_total, content)
-        file_size = 100
+        try:
+            file_size = service.put_file(
+                file_path, content_range, content_total, content
+            )
 
-        # Do final write check
-        # TODO
+            # Do final write check
+            # TODO
 
-        return {"file_size": file_size}
+            return {"file_size": file_size}
+        except HTTPError:
+            return abort(500, "Unable to write to file.")
 
 
 @bp.route("/<int:id>")
