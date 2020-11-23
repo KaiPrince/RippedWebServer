@@ -1,0 +1,4 @@
+Flask
+wfastcgi
+gunicorn
+python-dotenv
