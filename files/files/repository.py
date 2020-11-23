@@ -63,7 +63,7 @@ def put_file(file_path, content_range, content_total, content):
 
 def download_file(file_path):
     """ Consumes a file id and returns an Http Response. """
-    return requests.post(f"{_base_url()}/storage/download/{file_path}")
+    return requests.get(f"{_base_url()}/storage/download/{file_path}")
 
 
 def delete_file(file_path):
