@@ -54,3 +54,4 @@ flask run
 - [ ] File Storage auto-deploy?
 - [ ] Split docker-compose across microservices
 - [ ] Convert files app to Eve
+- [ ] Add exception handling and remove file from db if creation fails
