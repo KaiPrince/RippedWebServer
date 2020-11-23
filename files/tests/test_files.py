@@ -70,7 +70,7 @@ class TestFiles:
         # ..repo is called
 
         mock_files_repo.post.assert_called_once_with(
-            "http://localhost:5002" + "/files/create",
+            "http://localhost:5002" + "/storage/create",
             json={
                 "file_path": file_path,
                 "content_total": str(content_size),
@@ -81,7 +81,7 @@ class TestFiles:
         FileStorage.__eq__ = lambda self, obj: self.filename == obj.filename
 
         mock_files_repo.put.assert_called_once_with(
-            "http://localhost:5002" + "/files/create",
+            "http://localhost:5002" + "/storage/create",
             headers={
                 "Content-Range": f"bytes 0-{content_size}/{content_size}",
                 "file_path": file_path,
@@ -137,7 +137,7 @@ class TestFiles:
         assert response.status_code < 400  # No error
 
         mock_files_repo.post.assert_called_once_with(
-            "http://localhost:5002" + "/files/create",
+            "http://localhost:5002" + "/storage/create",
             json={
                 "file_path": file_path,
                 "content_total": str(content_size),
@@ -181,7 +181,7 @@ class TestFiles:
             FileStorage.__eq__ = lambda self, obj: self.filename == obj.filename
 
             mock_files_repo.put.assert_called_with(
-                "http://localhost:5002" + "/files/create",
+                "http://localhost:5002" + "/storage/create",
                 headers={
                     "Content-Range": f"bytes {content_range}/{content_total}",
                     "file_path": file_path,
@@ -251,7 +251,7 @@ class TestFiles:
         assert response.data == bytes(content, "utf-8")
 
         mock_files_repo.get.assert_called_with(
-            "http://localhost:5002" + "/files/file-content",
+            "http://localhost:5002" + "/storage/file-content",
             headers={
                 "file_path": file_path,
             },
@@ -276,7 +276,7 @@ class TestFiles:
             assert count == 0
 
         mock_files_repo.post.assert_called_with(
-            "http://localhost:5002" + "/files/delete",
+            "http://localhost:5002" + "/storage/delete",
             headers={
                 "file_path": file_path,
             },

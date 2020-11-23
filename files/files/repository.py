@@ -27,7 +27,7 @@ def get_file(file_path):
 def get_file_content(file_path):
     """ Get the contents of the file at the given path. """
     response = requests.get(
-        f"{base_url}/files/file-content", headers={"file_path": file_path}
+        f"{base_url}/storage/file-content", headers={"file_path": file_path}
     )
 
     return response.content
@@ -37,7 +37,7 @@ def create_file(file_name, file_size):
     """ Consumes a file name and returns a file path. """
 
     return requests.post(
-        base_url + "/files/create",
+        base_url + "/storage/create",
         json={
             "file_path": file_name,
             "content_total": str(file_size),
@@ -50,7 +50,7 @@ def put_file(file_path, content_range, content_total, content):
     print("put_file", file_path, content_range, content_total, content)
 
     return requests.put(
-        base_url + "/files/create",
+        base_url + "/storage/create",
         headers={
             "Content-Range": f"bytes {content_range}/{content_total}",
             "file_path": file_path,
@@ -62,7 +62,7 @@ def put_file(file_path, content_range, content_total, content):
 def delete_file(file_path):
     """ Delete a file at the given file path. """
     response = requests.post(
-        base_url + "/files/delete",
+        base_url + "/storage/delete",
         headers={
             "file_path": file_path,
         },

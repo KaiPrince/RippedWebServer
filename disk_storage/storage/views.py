@@ -9,8 +9,11 @@ from flask.helpers import BadRequest, NotFound
 
 # from http import HTTPStatus
 
+from werkzeug.datastructures import FileStorage
+
 # from werkzeug.exceptions import abort
-from .service import list_files, get_file, create_file, delete_file
+import storage.service as service
+import common
 
 # from .utils import allowed_file
 
@@ -21,44 +24,62 @@ bp = Blueprint("storage", __name__, url_prefix="/storage")
 @bp.route("/")
 def index():
 
-    files = list_files()
+    files = service.list_files()
 
     return {"files": files}
 
 
-@bp.route("/create", methods=["POST"])
+@bp.route("/create", methods=["POST", "PUT"])
 def create():
-    file_name = request.form["file_name"]
-    file = request.files["file"]
-    error = None
+    if request.method == "POST":
+        # Get params
+        json = request.json
 
-    if not file_name:
-        error = "File name is required."
+        required_params = ["file_path", "content_total"]
+        if any(x not in json for x in required_params):
+            error_message = "missing required params."
+            current_app.logger.info(error_message)
+            return BadRequest(error_message)
 
-    # check if the post request has the file part
-    if "file" not in request.files:
-        error = "No file part"
+        file_path = request.json["file_path"]
+        content_total = request.json["content_total"]
 
-    # if user does not select file, browser also
-    # submit an empty part without filename
-    if file.filename == "":
-        error = "No selected file"
+        response = service.create_file(file_path)
+        return {"file_name": response}
 
-    if error is not None:
-        return BadRequest(error)
+    elif request.method == "PUT":
+        # TODO handle missing header
+        content_range, content_total = common.get_content_metadata(
+            request.headers.get("Content-Range")
+        )
+        file_path = request.headers["file_path"]
 
-    response = create_file(file_name, file)
-    return {"file_name": response}
+        file: FileStorage = request.files["file"]
+        # TODO add buffer to protect memory
+        content = file.stream.read()
+
+        error = None
+        # check if the post request has the file part
+        if "file" not in request.files:
+            error = "No file part"
+
+        if error is not None:
+            return BadRequest(error)
+
+        insert_position = int(content_range.split("-")[0])
+
+        file_size = service.put_file(file_path, insert_position, content)
+        return {"file_size": file_size}
 
 
-@bp.route("/detail", methods=["POST"])
+@bp.route("/file-content")
 def detail():
 
-    file_name = request.form["file_name"]
+    file_name = request.headers["file_path"]
 
     file_path = current_app.config["UPLOAD_FOLDER"]
 
-    contents = get_file(os.path.join(file_path, file_name))
+    contents = service.get_file(os.path.join(file_path, file_name))
 
     # if not db_file:
     #     abort(404)
@@ -98,7 +119,7 @@ def delete(file_name):
     #     abort(404)
 
     try:
-        delete_file(file_name)
+        service.delete_file(file_name)
     except FileNotFoundError:
         return NotFound(file_name)
 
