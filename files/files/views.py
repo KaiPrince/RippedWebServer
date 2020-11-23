@@ -74,7 +74,7 @@ def create():
         # Get file path by id
         file_id = request.headers["file_id"]
         file_path = service.get_file(file_id)["file_path"]
-        content = request.data
+        file = request.files["file"]
 
         # TODO handle missing header
         content_range, content_total = common.get_content_metadata(
@@ -82,13 +82,27 @@ def create():
         )
 
         # Send to disk storage service.
-        service.put_file(file_path, content_range, content_total, content)
+        service.put_file(file_path, content_range, content_total, file)
         file_size = 100
 
         # Do final write check
         # TODO
 
         return {"file_size": file_size}
+
+
+@bp.route("/<int:id>")
+def file_info(id):
+    """ Returns the file info given a file id. """
+
+    return service.get_file(id)
+
+
+@bp.route("/content/<int:id>")
+def file_content(id):
+    """ Returns the file content given a file id. """
+
+    return service.get_file_content(id)
 
 
 @bp.route("/detail/<int:id>")

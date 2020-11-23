@@ -2,6 +2,7 @@ import os
 from db.service import get_db
 from flask import current_app
 import logging
+import files.repository as repository
 
 
 def get_file(id):
@@ -22,14 +23,26 @@ def get_file(id):
     return dict(db_file)
 
 
-def create_file(file_name, content_total):
-    pass
+def get_file_content(id):
+    """ Consumes an ID and produces a byte stream or bytes. """
+
+    file_path = get_file(id)["file_path"]
+
+    return repository.get_file_content(file_path)
+
+
+def create_file(file_name, file_size):
+    response = repository.create_file(file_name, file_size)
+
+    return response
 
 
 def put_file(file_path, content_range, content_total, content):
     # Append to file
 
-    pass
+    response = repository.put_file(file_path, content_range, content_total, content)
+
+    return response
 
 
 def delete_file(id):
@@ -37,15 +50,10 @@ def delete_file(id):
 
     db = get_db()
 
-    db_file = get_file(id)
+    file_path = get_file(id)["file_path"]
 
-    file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], db_file)
+    repository.delete_file(file_path)
 
-    try:
-        db.execute("DELETE from user_file" " WHERE id = ?", str(id))
+    db.execute("DELETE from user_file" " WHERE id = ?", str(id))
 
-        os.remove(file_path)
-    except FileNotFoundError as e:
-        logging.error(f"Failed to delete {file_path}.", exc_info=e)
-    finally:
-        db.commit()
+    db.commit()
