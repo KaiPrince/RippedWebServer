@@ -157,11 +157,9 @@ def download(id):
     if db_file is None or "file_path" not in db_file.keys():
         abort(404)
 
-    file = db_file["file_path"]
+    file_path = db_file["file_path"]
 
-    file_dir = os.path.abspath(current_app.config["UPLOAD_FOLDER"])
-
-    return send_from_directory(file_dir, file, as_attachment=True)
+    return service.download_file(file_path)
 
 
 @bp.route("/delete/<int:id>", methods=["POST"])

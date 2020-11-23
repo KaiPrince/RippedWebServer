@@ -27,7 +27,8 @@ def get_file_content(id):
 
 def download_file(id):
     """ Consumes an ID and produces a response which includes the file. """
-    pass
+
+    return repository.download_file(id)
 
 
 def create_file(file_name, user_id, file_path, content_total):
