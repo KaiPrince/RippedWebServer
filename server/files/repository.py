@@ -21,12 +21,17 @@ def index():
 
 def get_file(id):
     """ Get a file with the matching id. """
-    pass
+
+    response = requests.get(f"{base_url}/file/{id}")
+
+    return response.json()
 
 
 def get_file_content(id):
     """ Get the contents of the file with the matching id. """
-    pass
+    response = requests.get(f"{base_url}/file-content/{id}")
+
+    return response.content
 
 
 def create_file(file_name, user_id, file_path, content_total):

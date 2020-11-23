@@ -147,10 +147,31 @@ class TestFiles:
             },
         )
 
-    def test_read_file(self, client, auth):
+    def test_read_file(
+        self, client, auth, mock_files_repo: MagicMock, mocker: MagicMock
+    ):
         """ Existing file can be read. """
         # Arrange
         auth.login()
+
+        filename = "test.txt"
+        content = "test content"
+
+        _get_response = mocker.MagicMock()
+        _get_response.json.return_value = {
+            "id": str(1),
+            "name": filename,
+            "file_path": "C:\\" + filename,
+            "username": "admin",
+            "uploaded": "Jan 1 2010",
+        }
+
+        _get_response_2 = mocker.MagicMock()
+        _get_response_2.content = content
+
+        mock_files_repo.get = mocker.MagicMock(
+            side_effect=[_get_response, _get_response_2]
+        )
 
         # Act
         response = client.get("/files/detail/1")
