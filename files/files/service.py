@@ -14,7 +14,7 @@ def get_file(id):
         " FROM user_file f"
         " WHERE f.id = ?"
         " ORDER BY uploaded DESC",
-        str(id),
+        [str(id)],
     ).fetchone()
 
     if not db_file:
@@ -54,6 +54,6 @@ def delete_file(id):
 
     repository.delete_file(file_path)
 
-    db.execute("DELETE from user_file" " WHERE id = ?", str(id))
+    db.execute("DELETE from user_file" " WHERE id = ?", [str(id)])
 
     db.commit()

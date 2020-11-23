@@ -11,6 +11,7 @@ from flask import (
     send_from_directory,
     make_response,
 )
+from flask.helpers import NotFound
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 from db.service import get_db
@@ -74,7 +75,9 @@ def create():
         # Get file path by id
         file_id = request.headers["file_id"]
         file_path = service.get_file(file_id)["file_path"]
-        file = request.files["file"]
+
+        # file = request.files["file"]
+        content = request.data
 
         # TODO handle missing header
         content_range, content_total = common.get_content_metadata(
@@ -82,7 +85,7 @@ def create():
         )
 
         # Send to disk storage service.
-        service.put_file(file_path, content_range, content_total, file)
+        service.put_file(file_path, content_range, content_total, content)
         file_size = 100
 
         # Do final write check
@@ -95,7 +98,12 @@ def create():
 def file_info(id):
     """ Returns the file info given a file id. """
 
-    return service.get_file(id)
+    file_info = service.get_file(id)
+
+    if not file_info:
+        return NotFound(f"File Id {id} does not exist.")
+
+    return file_info
 
 
 @bp.route("/content/<int:id>")
@@ -114,7 +122,7 @@ def detail(id):
         " FROM user_file f"
         " WHERE f.id = ?"
         " ORDER BY uploaded DESC",
-        str(id),
+        [str(id)],
     ).fetchone()
 
     if not db_file:
@@ -142,7 +150,7 @@ def download(id):
         " FROM user_file f"
         " WHERE f.id = ?"
         " ORDER BY uploaded DESC",
-        str(id),
+        [str(id)],
     ).fetchone()
 
     if db_file is None or "file_path" not in db_file.keys():
@@ -163,7 +171,7 @@ def delete(id):
         " FROM user_file f"
         " WHERE f.id = ?"
         " ORDER BY uploaded DESC",
-        str(id),
+        [str(id)],
     ).fetchone()
 
     if not db_file:

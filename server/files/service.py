@@ -36,7 +36,11 @@ def create_file(file_name, user_id, file_path, content_total):
 def put_file(file_id, content_range, content_total, content):
     """Consumes a file id, file content and content-range,
     and produces a file size."""
-    return repository.put_file(file_id, content_range, content_total, content)
+    response = repository.put_file(file_id, content_range, content_total, content)
+
+    response.raise_for_status()
+
+    return response
 
 
 def delete_file(id):

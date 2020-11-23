@@ -10,12 +10,14 @@ from flask import (
     send_from_directory,
     session,
 )
+from flask.helpers import NotFound
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 from auth.middleware import login_required
 import files.service as service
 import common
 import sys
+from requests import HTTPError
 
 # from .utils import allowed_file
 
@@ -79,7 +81,16 @@ def create():
             else:
                 file_id = session["file_id"]
 
-            service.put_file(file_id, content_range, content_total, file)
+            try:
+                service.put_file(file_id, content_range, content_total, file)
+
+                # Clean session
+                content_range_end = int(content_range.split("-")[0])
+                if content_range_end >= content_total:
+                    session.pop("file_id", None)
+            except HTTPError:
+                flash("File upload failed.")
+                session.pop("file_id", None)
 
             return {"files": [{"name": file_name}]}
             # return redirect(url_for("files.index"))
@@ -90,7 +101,12 @@ def create():
 @login_required
 def detail(id):
 
-    file = service.get_file(id)
+    try:
+        file = service.get_file(id)
+    except HTTPError as e:
+        message = e.response.reason
+        return NotFound(message)
+
     content = service.get_file_content(id)
 
     return render_template("files/detail.html", file=file, content=content)

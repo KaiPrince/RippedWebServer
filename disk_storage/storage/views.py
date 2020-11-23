@@ -54,17 +54,10 @@ def create():
         )
         file_path = request.headers["file_path"]
 
-        file: FileStorage = request.files["file"]
+        # file: FileStorage = request.files["file"]
         # TODO add buffer to protect memory
-        content = file.stream.read()
-
-        error = None
-        # check if the post request has the file part
-        if "file" not in request.files:
-            error = "No file part"
-
-        if error is not None:
-            return BadRequest(error)
+        # content = file.stream.read()
+        content = request.data
 
         insert_position = int(content_range.split("-")[0])
 
@@ -108,15 +101,12 @@ def download(file_name):
 
 
 @bp.route(
-    "/delete/<path:file_name>",
+    "/delete",  # /<path:file_name>",
     methods=["POST"],
 )
-def delete(file_name):
+def delete():  # file_name):
 
-    # file_name = request.form["file_name"]
-
-    # if not db_file:
-    #     abort(404)
+    file_name = request.headers["file_path"]
 
     try:
         service.delete_file(file_name)

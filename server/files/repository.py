@@ -22,14 +22,16 @@ def index():
 def get_file(id):
     """ Get a file with the matching id. """
 
-    response = requests.get(f"{base_url}/file/{id}")
+    response = requests.get(f"{base_url}/files/{id}")
+
+    response.raise_for_status()
 
     return response.json()
 
 
 def get_file_content(id):
     """ Get the contents of the file with the matching id. """
-    response = requests.get(f"{base_url}/file-content/{id}")
+    response = requests.get(f"{base_url}/files/content/{id}")
 
     return response.content
 
@@ -38,7 +40,7 @@ def create_file(file_name, user_id, file_path, content_total):
     """ Consumes file details and returns a file id. """
 
     print("create_file", file_name, user_id, file_path)
-    requests.post(
+    response = requests.post(
         base_url + "/files/create",
         json={
             "file_name": file_name,
@@ -47,7 +49,7 @@ def create_file(file_name, user_id, file_path, content_total):
             "content_total": str(content_total),
         },
     )
-    return 1
+    return response.json()["file_id"]
 
 
 def put_file(file_id, content_range, content_total, content):
@@ -66,6 +68,6 @@ def put_file(file_id, content_range, content_total, content):
 
 def delete_file(id):
     """ Delete a file with the matching id. """
-    response = requests.post(f"{base_url}/delete/{id}")
+    response = requests.post(f"{base_url}/files/delete/{id}")
 
     return response
