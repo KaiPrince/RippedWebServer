@@ -45,14 +45,15 @@ flask run
 - [ ] File previews
 - [ ] Authentication & link tokens (expirable)
 - [x] Full Elm integration
-- [ ] Upload progress bar
-- [ ] Large file uploads
+- [x] Upload progress bar
+- [x] Large file uploads
 - [ ] Public links
-- [ ] File Storage microservice
+- [x] File Storage microservice
 - [ ] Service registry
 - [ ] Users microservice
 - [ ] File Storage auto-deploy?
-- [ ] Split docker-compose across microservices
+- [x] Split docker-compose across microservices
 - [ ] Convert files app to Eve
 - [ ] Add exception handling and remove file from db if creation fails
 - [ ] Register logging service
+- [ ] Handle filename overlap by altering filename (filename_2)
