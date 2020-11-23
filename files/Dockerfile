@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Initialize DB
-# RUN if [ ! -f "$DATABASE" ]; then echo "Initializing DB..."; flask init-db; fi
+RUN if [ ! -f "$DATABASE" ]; then echo "Initializing DB..."; flask init-db; fi
 
 ENTRYPOINT [ "gunicorn" ]
 
