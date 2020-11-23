@@ -1,6 +1,8 @@
 import logging
 import os
 
+import sys
+
 from flask import current_app  # send_from_directory,
 from werkzeug.utils import secure_filename
 
@@ -38,6 +40,7 @@ def put_file(file_path, seek_position, content):
     filename = secure_filename(file_path)
     file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
 
+    current_app.logger.info(f"Writing {sys.getsizeof(content)} bytes to {filename}.")
     with open(file_path, "ab") as f:
         f.seek(seek_position)
         f.write(content)
