@@ -7,9 +7,10 @@
 """
 
 import os
-from flask import Flask
-from config import getConfig, TestingConfig
+
 import storage.views
+from config import TestingConfig, getConfig
+from flask import Flask
 
 
 def create_app(test_config=None):

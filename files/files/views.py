@@ -1,23 +1,14 @@
 import os
-from flask import (
-    Blueprint,
-    flash,
-    g,
-    redirect,
-    render_template,
-    request,
-    url_for,
-    current_app,
-    send_from_directory,
-    make_response,
-)
-from flask.helpers import NotFound
-from werkzeug.exceptions import abort
-from werkzeug.utils import secure_filename
-from db.service import get_db
-import files.service as service
+
 import common
+from db.service import get_db
+from flask import (Blueprint, current_app, make_response, request,
+                   send_from_directory)
+from flask.helpers import NotFound
 from requests import HTTPError
+from werkzeug.exceptions import abort
+
+import files.service as service
 
 # from .utils import allowed_file
 

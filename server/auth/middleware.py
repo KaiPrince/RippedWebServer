@@ -1,14 +1,9 @@
 import functools
 
-from flask import (
-    g,
-    redirect,
-    url_for,
-    session,
-)
+from db.service import get_db
+from flask import g, redirect, session, url_for
 
 from .views import bp
-from db.service import get_db
 
 
 @bp.before_app_request

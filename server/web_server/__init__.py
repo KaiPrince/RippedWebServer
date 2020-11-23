@@ -7,11 +7,14 @@
 """
 
 import os
-from flask import Flask
-from .config import getConfig
-import db
-import files.views
+
 import auth.views
+import db
+from flask import Flask
+
+import files.views
+
+from .config import getConfig
 
 
 def create_app(test_config=None):

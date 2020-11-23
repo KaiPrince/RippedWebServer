@@ -1,11 +1,10 @@
-import sqlite3
 import os
+import sqlite3
 
 from flask import current_app, g
-
 from werkzeug.security import generate_password_hash
 
-from .config import DEFAULT_USER, DEFAULT_PASSWORD
+from .config import DEFAULT_PASSWORD, DEFAULT_USER
 
 
 def get_db():

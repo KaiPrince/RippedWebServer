@@ -1,10 +1,7 @@
-import os
 import logging
-from flask import (
-    current_app,
-    send_from_directory,
-)
+import os
 
+from flask import current_app  # send_from_directory,
 from werkzeug.utils import secure_filename
 
 
@@ -35,7 +32,8 @@ def create_file(file_name):
 
 
 def put_file(file_path, seek_position, content):
-    """ Consumes a file path, insertion position, and file content, and produces a file size. """
+    """Consumes a file path, insertion position, and file content,
+    and produces a file size."""
 
     filename = secure_filename(file_path)
     file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)

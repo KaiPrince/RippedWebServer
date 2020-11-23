@@ -1,12 +1,12 @@
-import pytest
 import os
-
-from io import BytesIO
-from db.service import get_db
 import sys
-from unittest.mock import MagicMock
-from werkzeug.datastructures import FileStorage
 from datetime import datetime
+from io import BytesIO
+from unittest.mock import MagicMock
+
+import pytest
+from db.service import get_db
+from werkzeug.datastructures import FileStorage
 
 
 class TestFiles:

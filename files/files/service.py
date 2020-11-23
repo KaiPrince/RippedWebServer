@@ -1,7 +1,6 @@
-import os
 from db.service import get_db
 from flask import current_app
-import logging
+
 import files.repository as repository
 
 

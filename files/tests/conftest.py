@@ -1,11 +1,12 @@
 import os
 import tempfile
+from unittest.mock import MagicMock
 
 import pytest
-from pytest_mock import MockerFixture
-from unittest.mock import MagicMock
-from files import create_app
 from db.service import get_db, init_db
+from pytest_mock import MockerFixture
+
+from files import create_app
 from files.utils import copyfile
 
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:

@@ -1,8 +1,8 @@
 import sqlite3
 
+import db.command
 import pytest
 from db.service import get_db
-import db.command
 
 
 def test_get_close_db(app):

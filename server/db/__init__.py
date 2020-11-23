@@ -1,6 +1,7 @@
 from flask import Flask
-from .service import close_db
+
 from .command import init_db_command
+from .service import close_db
 
 
 def init_app(app: Flask):

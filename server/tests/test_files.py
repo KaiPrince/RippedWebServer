@@ -1,8 +1,9 @@
 # import pytest
 
-from io import BytesIO
 import sys
+from io import BytesIO
 from unittest.mock import MagicMock
+
 from werkzeug.datastructures import FileStorage
 
 

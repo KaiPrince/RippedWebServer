@@ -1,8 +1,8 @@
 import os
-import pytest
-from web_server import create_app
-from storage.utils import copyfile
 
+import pytest
+from storage.utils import copyfile
+from web_server import create_app
 
 UPLOAD_FOLDER = os.path.join(".", "tests", "uploads")
 

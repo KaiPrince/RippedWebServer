@@ -1,8 +1,11 @@
 import os
-from flask import Flask
-from .config import getConfig
+
 import db
+from flask import Flask
+
 import files.views
+
+from .config import getConfig
 
 
 def create_app(test_config=None):
