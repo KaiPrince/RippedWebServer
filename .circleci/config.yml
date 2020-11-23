@@ -49,14 +49,16 @@ workflows:
     jobs:
       - checkout
       - build:
+          name: build-<< matrix.project_folder >>
           requires:
             - checkout
           matrix:
             parameters:
-              project_folder: ["server"]
+              project_folder: ["server", "files", "disk_storage"]
       - test:
+          name: test-<< matrix.project_folder >>
           requires:
-            - build
+            - build-<< matrix.project_folder >>
           matrix:
             parameters:
-              project_folder: ["server"]
+              project_folder: ["server", "files", "disk_storage"]
