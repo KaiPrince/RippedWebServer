@@ -76,11 +76,4 @@ def auth(client):
 def mock_files_repo(mocker: MockerFixture) -> MagicMock:
     mock_func = mocker.patch("files.repository.requests")
 
-    # mock_func.post = post
-    # mock_func.put = put
-
-    # mock_func.index.return_value = [{"id": 1, "file_name": "test.txt"}]
-    # mock_func.get_file.return_value = {"id": 1, "name": "test.txt"}
-    # mock_func.get_file_content.return_value = "test content"
-
     return mock_func
