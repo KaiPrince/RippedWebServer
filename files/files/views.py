@@ -2,8 +2,7 @@ import os
 
 import common
 from db.service import get_db
-from flask import (Blueprint, current_app, make_response, request,
-                   send_from_directory)
+from flask import Blueprint, current_app, make_response, request, send_from_directory
 from flask.helpers import NotFound
 from requests import HTTPError
 from werkzeug.exceptions import abort
@@ -65,6 +64,7 @@ def create():
 
     elif request.method == "PUT":
         # Get file path by id
+
         file_id = request.headers["file_id"]
         file_info = service.get_file(file_id)
         if not file_info:

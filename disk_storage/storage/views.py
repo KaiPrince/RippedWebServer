@@ -1,6 +1,7 @@
 import os
 
 import common
+
 # from werkzeug.exceptions import abort
 import storage.service as service
 from flask import Blueprint, current_app, request, send_from_directory
@@ -42,6 +43,7 @@ def create():
         return {"file_name": response}
 
     elif request.method == "PUT":
+
         # TODO handle missing header
         content_range, content_total = common.get_content_metadata(
             request.headers.get("Content-Range")

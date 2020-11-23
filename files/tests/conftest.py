@@ -8,6 +8,7 @@ from pytest_mock import MockerFixture
 
 from files import create_app
 from files.utils import copyfile
+from flask import Flask
 
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
     _data_sql = f.read().decode("utf8")
@@ -16,7 +17,7 @@ UPLOAD_FOLDER = os.path.join(".", "tests", "uploads")
 
 
 @pytest.fixture
-def app(tmp_path, mock_files_repo):
+def app(tmp_path, mock_files_repo) -> Flask:
     db_fd, db_path = tempfile.mkstemp()
 
     temp_uploads_folder = tmp_path
@@ -46,12 +47,12 @@ def app(tmp_path, mock_files_repo):
 
 
 @pytest.fixture
-def client(app):
+def client(app: Flask):
     return app.test_client()
 
 
 @pytest.fixture
-def runner(app):
+def runner(app: Flask):
     return app.test_cli_runner()
 
 
@@ -60,3 +61,8 @@ def mock_files_repo(mocker: MockerFixture) -> MagicMock:
     mock_func = mocker.patch("files.repository.requests")
 
     return mock_func
+
+
+@pytest.fixture
+def disk_storage_service_url(app: Flask) -> str:
+    return app.config["DISK_STORAGE_SERVICE_URL"]

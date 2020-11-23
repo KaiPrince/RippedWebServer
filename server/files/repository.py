@@ -11,7 +11,7 @@ from flask import current_app
 
 
 def _base_url():
-    return current_app.config["DISK_STORAGE_SERVICE_URL"]
+    return current_app.config["FILES_SERVICE_URL"]
 
 
 def index():

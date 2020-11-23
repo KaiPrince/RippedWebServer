@@ -15,6 +15,7 @@ class Config(object):
     SECRET_KEY = os.getenv("SECRET_KEY")
     DATABASE = os.getenv("DATABASE")
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
+    DISK_STORAGE_SERVICE_URL = os.getenv("DISK_STORAGE_SERVICE_URL")
 
     def __init__(self, app: Flask):
 
@@ -28,6 +29,10 @@ class Config(object):
         if self.UPLOAD_FOLDER is None:
             logging.warning("UPLOAD_FOLDER environment variable not set.")
             self.UPLOAD_FOLDER = os.path.join(app.instance_path, "uploads")
+
+        if self.DISK_STORAGE_SERVICE_URL is None:
+            logging.warning("DISK_STORAGE_SERVICE_URL environment variable not set.")
+            self.DISK_STORAGE_SERVICE_URL = "http://rippedwebserver_disk_storage_1:5000"
 
 
 # class Config(object):

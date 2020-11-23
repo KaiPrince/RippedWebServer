@@ -2,8 +2,6 @@ import os
 import sys
 from io import BytesIO
 
-import pytest
-
 
 class TestStorage:
     # @pytest.mark.parametrize([])
@@ -21,7 +19,6 @@ class TestStorage:
         """ File can be uploaded to web server. """
 
         # Arrange
-        file_name = "test2.txt"
         file_path = "test2.txt"
         contents = b"my file contents"
         content_size = sys.getsizeof(contents) - 1
@@ -29,24 +26,14 @@ class TestStorage:
         content_range = f"0-{content_size}"
         content_total = content_size
 
-        data = {
-            "file_name": file_name,
-            "file": (
-                BytesIO(contents),
-                file_name,
-            ),
-        }
-
-        json = {
-            "file_path": file_path,
-            "content_total": str(content_size),
-        }
-
         # Act
 
         response = client.post(
             "/storage/create",
-            json=json,
+            json={
+                "file_path": file_path,
+                "content_total": str(content_size),
+            },
         )
         assert response.status_code in [200, 201]
         assert file_path in response.json["file_name"]
@@ -54,12 +41,11 @@ class TestStorage:
         response = client.put(
             "/storage/create",
             buffered=True,
-            content_type="multipart/form-data",
             headers={
                 "Content-Range": f"bytes {content_range}/{content_total}",
                 "file_path": file_path,
             },
-            data=data,
+            data=BytesIO(contents),
         )
         assert response.status_code == 200
 
@@ -74,7 +60,6 @@ class TestStorage:
         """ File can be uploaded to web server. """
 
         # Arrange
-        file_name = "test2.txt"
         file_path = "test2.txt"
         contents = b"my file contents"
         content_size = sys.getsizeof(contents) - 1
@@ -82,16 +67,14 @@ class TestStorage:
         content_range = f"0-{content_size}"
         content_total = content_size
 
-        json = {
-            "file_path": file_path,
-            "content_total": str(content_size),
-        }
-
         # Act
 
         response = client.post(
             "/storage/create",
-            json=json,
+            json={
+                "file_path": file_path,
+                "content_total": str(content_size),
+            },
         )
         assert response.status_code in [200, 201]
         assert file_path in response.json["file_name"]
@@ -109,23 +92,14 @@ class TestStorage:
             content_range = f"{begin}-{end}"
             content_total = sys.getsizeof(contents)
 
-            data = {
-                "file_name": file_name,
-                "file": (
-                    BytesIO(part),
-                    file_name,
-                ),
-            }
-
             response = client.put(
                 "/storage/create",
                 buffered=True,
-                content_type="multipart/form-data",
                 headers={
                     "Content-Range": f"bytes {content_range}/{content_total}",
                     "file_path": file_path,
                 },
-                data=data,
+                data=BytesIO(part),
             )
             assert response.status_code == 200
 
@@ -159,7 +133,7 @@ class TestStorage:
         file_name = "test.txt"
 
         # Act
-        response = client.post(f"/storage/delete/{file_name}")
+        response = client.post("/storage/delete", headers={"file_path": file_name})
 
         # Assert
         assert response.status_code in [200, 302]

@@ -83,4 +83,4 @@ def mock_files_repo(mocker: MockerFixture) -> MagicMock:
 
 @pytest.fixture
 def files_service_url(app: Flask) -> str:
-    return app.config["DISK_STORAGE_SERVICE_URL"]
+    return app.config["FILES_SERVICE_URL"]
