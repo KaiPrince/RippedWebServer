@@ -55,3 +55,4 @@ flask run
 - [ ] Split docker-compose across microservices
 - [ ] Convert files app to Eve
 - [ ] Add exception handling and remove file from db if creation fails
+- [ ] Register logging service
