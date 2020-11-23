@@ -34,7 +34,7 @@ def download_file(id):
     result = repository.download_file(id)
 
     return send_file(
-        BytesIO(result.contents),
+        BytesIO(result.content),
         mimetype=result.headers["Content-Type"],
         as_attachment=True,
         attachment_filename=file_path,
