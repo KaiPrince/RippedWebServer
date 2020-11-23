@@ -1,10 +1,9 @@
 import logging
 import os
-from io import BytesIO
 
 
 from db.service import get_db
-from flask import current_app, send_file
+from flask import current_app
 
 import files.repository as repository
 
@@ -28,17 +27,19 @@ def get_file_content(id):
 
 
 def download_file(id):
-    """ Consumes an ID and produces a response which includes the file. """
+    """ Consumes an ID and produces binary data and meta data. """
 
     file_path = repository.get_file(id)["file_path"]
     result = repository.download_file(id)
 
-    return send_file(
-        BytesIO(result.content),
-        mimetype=result.headers["Content-Type"],
-        as_attachment=True,
-        attachment_filename=file_path,
-    )
+    # headers = dict(r.raw.headers)
+    # def generate():
+    #     for chunk in r.raw.stream(decode_content=False):
+    #         yield chunk
+    # out = Response(generate(), headers=headers)
+    # out.status_code = r.status_code
+
+    return (result.content, result.headers["Content-Type"], file_path)
 
 
 def create_file(file_name, user_id, file_path, content_total):
