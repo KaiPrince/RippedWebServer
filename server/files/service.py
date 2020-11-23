@@ -1,8 +1,10 @@
 import logging
 import os
+from io import BytesIO
+
 
 from db.service import get_db
-from flask import current_app
+from flask import current_app, send_file
 
 import files.repository as repository
 
@@ -28,7 +30,12 @@ def get_file_content(id):
 def download_file(id):
     """ Consumes an ID and produces a response which includes the file. """
 
-    return repository.download_file(id)
+    result = repository.download_file(id)
+    return send_file(
+        BytesIO(result.content),
+        mimetype=result.headers["Content-Type"],
+        as_attachment=True,
+    )
 
 
 def create_file(file_name, user_id, file_path, content_total):
