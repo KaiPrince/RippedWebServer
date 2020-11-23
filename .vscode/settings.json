@@ -6,7 +6,6 @@
   "python.testing.unittestEnabled": true,
   "python.testing.cwd": "${workspaceFolder}/server",
   "python.linting.flake8Args": ["--config=server/setup.cfg"],
-  "python.venvPath": "${workspaceFolder}/server/env",
   "python.terminal.activateEnvInCurrentTerminal": true,
-  "python.pythonPath": "server\\env\\Scripts\\python.exe"
+  "python.linting.pylintEnabled": false
 }

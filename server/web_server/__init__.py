@@ -7,18 +7,26 @@
 """
 
 import os
+
+import auth.views
+import db
 from flask import Flask
-from . import db, auth, files
+
+import files.views
+
+from .config import getConfig
 
 
 def create_app(test_config=None):
     # create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY="dev",
-        DATABASE=os.path.join(app.instance_path, "web_server.sqlite"),
-        UPLOAD_FOLDER=os.path.join(app.instance_path, "uploads"),
+    app = Flask(
+        __name__,
+        instance_relative_config=True,
     )
+
+    # TODO: collapse with below
+    app_config = getConfig(app)
+    app.config.from_object(app_config)
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -35,9 +43,9 @@ def create_app(test_config=None):
 
     db.init_app(app)
     files.init_app(app)
-    app.register_blueprint(auth.bp)
-    app.register_blueprint(files.bp)
+    app.register_blueprint(auth.views.bp)
+    app.register_blueprint(files.views.bp)
 
-    app.add_url_rule("/", endpoint="index", view_func=files.index)
+    app.add_url_rule("/", endpoint="index", view_func=files.views.index)
 
     return app

@@ -1,0 +1,19 @@
+{
+  "name": "rippedwebserver",
+  "version": "1.0.0",
+  "description": "A web server for serving files.",
+  "main": "index.js",
+  "author": "KaiPrince <34746763+KaiPrince@users.noreply.github.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "webpack --watch",
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "elm-hot-webpack-loader": "^1.1.7",
+    "elm-webpack-loader": "^6.0.1",
+    "webpack": "^4.44.0",
+    "webpack-cli": "^3.3.12"
+  }
+}
