@@ -8,7 +8,9 @@ from werkzeug.datastructures import FileStorage
 
 
 class TestFiles:
-    def test_index(self, client, mock_files_repo: MagicMock, mocker: MagicMock):
+    def test_index(
+        self, client, mock_files_repo: MagicMock, mocker: MagicMock, files_service_url
+    ):
         """ Index page displays a file name. """
         # Arrange
 
@@ -25,10 +27,16 @@ class TestFiles:
         assert response.status_code == 200
         assert b"test.txt" in response.data
 
-        mock_files_repo.get.assert_called_once_with("http://localhost:5003" + "/")
+        mock_files_repo.get.assert_called_once_with(files_service_url + "/")
 
     def test_upload(
-        self, client, auth, app, mock_files_repo: MagicMock, mocker: MagicMock
+        self,
+        client,
+        auth,
+        app,
+        mock_files_repo: MagicMock,
+        mocker: MagicMock,
+        files_service_url,
     ):
         """ File can be uploaded to web server. """
         # Arrange
@@ -37,6 +45,13 @@ class TestFiles:
 
         filename = "test2.txt"
         contents = b"my file contents"
+
+        file_id = 1
+
+        _get_response = mocker.MagicMock()
+        _get_response.json.return_value = {"file_id": str(file_id)}
+
+        mock_files_repo.post.return_value = _get_response
 
         data = {
             "file_name": filename,
@@ -61,7 +76,7 @@ class TestFiles:
         content_size = sys.getsizeof(contents) - 1
 
         mock_files_repo.post.assert_called_once_with(
-            "http://localhost:5003" + "/files/create",
+            files_service_url + "/files/create",
             json={
                 "file_name": filename,
                 "user_id": 2,
@@ -74,17 +89,25 @@ class TestFiles:
         FileStorage.__eq__ = lambda self, obj: self.filename == obj.filename
 
         mock_files_repo.put.assert_called_once_with(
-            "http://localhost:5003" + "/files/create",
+            files_service_url + "/files/create",
             headers={
                 "Content-Range": f"bytes 0-{content_size}/{content_size}",
-                "file_id": str(1),
+                "file_id": str(file_id),
             },
             data=FileStorage(
                 BytesIO(contents), filename=filename, content_type="text/plain"
             ),
         )
 
-    def test_upload_parts(self, client, auth, app, mock_files_repo: MagicMock):
+    def test_upload_parts(
+        self,
+        client,
+        auth,
+        app,
+        mock_files_repo: MagicMock,
+        mocker: MagicMock,
+        files_service_url,
+    ):
         """ File can be uploaded to web server. """
 
         # Arrange
@@ -93,6 +116,13 @@ class TestFiles:
 
         filename = "test2.txt"
         contents = b"my file contents"
+
+        file_id = 1
+
+        _get_response = mocker.MagicMock()
+        _get_response.json.return_value = {"file_id": str(file_id)}
+
+        mock_files_repo.post.return_value = _get_response
 
         # ..splitting string into equal halves
         contents_parts = contents[: len(contents) // 2], contents[len(contents) // 2 :]
@@ -128,10 +158,10 @@ class TestFiles:
             FileStorage.__eq__ = lambda self, obj: self.filename == obj.filename
 
             mock_files_repo.put.assert_called_with(
-                "http://localhost:5003" + "/files/create",
+                files_service_url + "/files/create",
                 headers={
                     "Content-Range": f"bytes {content_range}/{content_total}",
-                    "file_id": str(1),
+                    "file_id": str(file_id),
                 },
                 data=FileStorage(
                     BytesIO(contents), filename=filename, content_type="text/plain"
@@ -139,7 +169,7 @@ class TestFiles:
             )
 
         mock_files_repo.post.assert_called_once_with(
-            "http://localhost:5003" + "/files/create",
+            files_service_url + "/files/create",
             json={
                 "file_name": filename,
                 "user_id": 2,
@@ -149,7 +179,12 @@ class TestFiles:
         )
 
     def test_read_file(
-        self, client, auth, mock_files_repo: MagicMock, mocker: MagicMock
+        self,
+        client,
+        auth,
+        mock_files_repo: MagicMock,
+        mocker: MagicMock,
+        files_service_url,
     ):
         """ Existing file can be read. """
         # Arrange
@@ -183,13 +218,15 @@ class TestFiles:
         assert b"test content" in response.data
 
         mock_files_repo.get.assert_any_call(
-            "http://localhost:5003" + "/file/1",
+            files_service_url + "/files/1",
         )
         mock_files_repo.get.assert_any_call(
-            "http://localhost:5003" + "/file-content/1",
+            files_service_url + "/files/content/1",
         )
 
-    def test_delete_file(self, client, app, auth, mock_files_repo):
+    def test_delete_file(
+        self, client, app, auth, mock_files_repo: MagicMock, files_service_url
+    ):
         """ Existing file can be deleted. """
         # Arrange
         auth.login()
@@ -201,5 +238,5 @@ class TestFiles:
         assert response.status_code in [200, 302]
 
         mock_files_repo.post.assert_called_once_with(
-            "http://localhost:5003" + "/delete/1",
+            files_service_url + "/files/delete/1",
         )

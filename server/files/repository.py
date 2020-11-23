@@ -7,14 +7,17 @@
 """
 
 import requests
+from flask import current_app
 
-base_url = "http://rippedwebserver_files_1:5000"
+
+def _base_url():
+    return current_app.config["DISK_STORAGE_SERVICE_URL"]
 
 
 def index():
     """ Get all files from files service. """
 
-    response = requests.get(base_url + "/")
+    response = requests.get(_base_url() + "/")
 
     return response.json()["files"]
 
@@ -22,7 +25,7 @@ def index():
 def get_file(id):
     """ Get a file with the matching id. """
 
-    response = requests.get(f"{base_url}/files/{id}")
+    response = requests.get(f"{_base_url()}/files/{id}")
 
     response.raise_for_status()
 
@@ -31,7 +34,7 @@ def get_file(id):
 
 def get_file_content(id):
     """ Get the contents of the file with the matching id. """
-    response = requests.get(f"{base_url}/files/content/{id}")
+    response = requests.get(f"{_base_url()}/files/content/{id}")
 
     return response.content
 
@@ -40,7 +43,7 @@ def create_file(file_name, user_id, file_path, content_total):
     """ Consumes file details and returns a file id. """
 
     response = requests.post(
-        base_url + "/files/create",
+        _base_url() + "/files/create",
         json={
             "file_name": file_name,
             "user_id": user_id,
@@ -55,7 +58,7 @@ def put_file(file_id, content_range, content_total, content):
     """ Consumes a file id, content, and content data, and produces a file size. """
 
     return requests.put(
-        base_url + "/files/create",
+        _base_url() + "/files/create",
         headers={
             "Content-Range": f"bytes {content_range}/{content_total}",
             "file_id": str(file_id),
@@ -66,6 +69,6 @@ def put_file(file_id, content_range, content_total, content):
 
 def delete_file(id):
     """ Delete a file with the matching id. """
-    response = requests.post(f"{base_url}/files/delete/{id}")
+    response = requests.post(f"{_base_url()}/files/delete/{id}")
 
     return response
