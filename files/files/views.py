@@ -77,6 +77,7 @@ def create():
         file_id = request.headers["file_id"]
         file_info = service.get_file(file_id)
         if not file_info:
+            current_app.logger.debug("File id not found. " + str({"file_id": file_id}))
             return NotFound(f"File id {file_id} not found.")
 
         file_path = file_info["file_path"]

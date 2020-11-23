@@ -2,18 +2,23 @@ version: "3.8"
 services:
   server:
     build: ./server
+    environment:
+      FLASK_ENV: "development" # TEMP
+      SECRET_KEY: "dev" # TEMP
     ports:
       - 5000:5000
 
-  users:
-    build: ./users
-    ports:
-      - 5001:5000
+  # users:
+  #   build: ./users
+  #   ports:
+  #     - 5001:5000
 
   disk_storage:
     build: ./disk_storage
     environment:
       UPLOAD_FOLDER: /upload
+      FLASK_ENV: "development" # TEMP
+      SECRET_KEY: "dev" # TEMP
     ports:
       - 5002:5000
     volumes:
@@ -23,6 +28,8 @@ services:
     build: ./files
     environment:
       DATABASE: /db/files_db.sqlite
+      FLASK_ENV: "development" # TEMP
+      SECRET_KEY: "dev" # TEMP
     ports:
       - 5003:5000
     volumes:

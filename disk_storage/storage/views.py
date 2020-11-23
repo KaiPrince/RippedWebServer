@@ -111,6 +111,6 @@ def delete():  # file_name):
     try:
         service.delete_file(file_name)
     except FileNotFoundError:
-        return NotFound(file_name)
+        return NotFound(f"File {file_name} was not found.")
 
-    return ""
+    return f"File {file_name} was deleted."

@@ -1,6 +1,5 @@
 FROM python:3
 
-# ENV FLASK_ENV=development
 ENV FLASK_ENV=production
 
 WORKDIR /usr/src

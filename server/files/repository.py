@@ -8,7 +8,7 @@
 
 import requests
 
-base_url = "http://localhost:5003"
+base_url = "http://rippedwebserver_files_1:5000"
 
 
 def index():
@@ -39,7 +39,6 @@ def get_file_content(id):
 def create_file(file_name, user_id, file_path, content_total):
     """ Consumes file details and returns a file id. """
 
-    print("create_file", file_name, user_id, file_path)
     response = requests.post(
         base_url + "/files/create",
         json={
@@ -54,7 +53,6 @@ def create_file(file_name, user_id, file_path, content_total):
 
 def put_file(file_id, content_range, content_total, content):
     """ Consumes a file id, content, and content data, and produces a file size. """
-    print("put_file", file_id, content_range, content_total, content)
 
     return requests.put(
         base_url + "/files/create",

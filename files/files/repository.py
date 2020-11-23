@@ -8,7 +8,7 @@
 
 import requests
 
-base_url = "http://localhost:5002"
+base_url = "http://rippedwebserver_disk_storage_1:5000"
 
 
 def index():
@@ -47,7 +47,6 @@ def create_file(file_name, file_size):
 
 def put_file(file_path, content_range, content_total, content):
     """ Consumes a file path, content, and content data, and produces a file size. """
-    print("put_file", file_path, content_range, content_total, content)
 
     return requests.put(
         base_url + "/storage/create",

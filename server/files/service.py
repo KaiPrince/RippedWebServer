@@ -30,17 +30,34 @@ def download_file(id):
 
 def create_file(file_name, user_id, file_path, content_total):
     """ Consumes file details and produces a file id. """
+    current_app.logger.debug(
+        "create_file "
+        + str({"file_name": file_name, "user_id": user_id, "file_path": file_path}),
+    )
+
     return repository.create_file(file_name, user_id, file_path, content_total)
 
 
 def put_file(file_id, content_range, content_total, content):
     """Consumes a file id, file content and content-range,
     and produces a file size."""
+    current_app.logger.debug(
+        "put_file "
+        + str(
+            {
+                "file_id": file_id,
+                "content_range": content_range,
+                "content_total": content_total,
+                "content": content,
+            }
+        ),
+    )
+
     response = repository.put_file(file_id, content_range, content_total, content)
 
     response.raise_for_status()
 
-    return response
+    return response.json()["file_size"]
 
 
 def delete_file(id):

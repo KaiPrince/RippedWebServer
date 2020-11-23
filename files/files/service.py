@@ -32,6 +32,10 @@ def get_file_content(id):
 
 
 def create_file(file_name, file_size):
+    current_app.logger.debug(
+        "create_file " + str({"file_name": file_name, "file_size": file_size}),
+    )
+
     response = repository.create_file(file_name, file_size)
 
     response.raise_for_status()
@@ -41,6 +45,16 @@ def create_file(file_name, file_size):
 
 def put_file(file_path, content_range, content_total, content):
     # Append to file
+    current_app.logger.debug(
+        "put_file "
+        + str(
+            {
+                "file_path": file_path,
+                "content_range": content_range,
+                "content_total": content_total,
+            }
+        ),
+    )
 
     response = repository.put_file(file_path, content_range, content_total, content)
 

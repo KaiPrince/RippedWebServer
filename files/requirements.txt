@@ -1,3 +1,4 @@
 eve
 python-dotenv
 gunicorn
+requests
