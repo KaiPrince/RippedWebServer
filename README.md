@@ -57,3 +57,5 @@ flask run
 - [ ] Add exception handling and remove file from db if creation fails
 - [ ] Register logging service
 - [ ] Handle filename overlap by altering filename (filename_2)
+- [ ] Fix CI
+- [ ] Move repo urls to config and get from env.
