@@ -1,10 +1,12 @@
 import logging
 import os
 
+
 from db.service import get_db
 from flask import current_app
 
 import files.repository as repository
+from werkzeug.exceptions import abort
 
 
 def get_index():
@@ -26,8 +28,23 @@ def get_file_content(id):
 
 
 def download_file(id):
-    """ Consumes an ID and produces a response which includes the file. """
-    pass
+    """ Consumes an ID and produces binary data and meta data. """
+
+    file_path = repository.get_file(id)["file_path"]
+    result = repository.download_file(id)
+
+    result.raise_for_status()
+
+    raw = result.raw
+
+    headers = dict(raw.headers)
+
+    def generate():
+        for chunk in raw.stream(decode_content=False):
+            yield chunk
+
+    # return (result.content, result.headers["Content-Type"], file_path)
+    return (generate(), headers, file_path)
 
 
 def create_file(file_name, user_id, file_path, content_total):
