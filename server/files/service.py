@@ -6,6 +6,7 @@ from db.service import get_db
 from flask import current_app
 
 import files.repository as repository
+from werkzeug.exceptions import abort
 
 
 def get_index():
@@ -32,14 +33,18 @@ def download_file(id):
     file_path = repository.get_file(id)["file_path"]
     result = repository.download_file(id)
 
-    # headers = dict(r.raw.headers)
-    # def generate():
-    #     for chunk in r.raw.stream(decode_content=False):
-    #         yield chunk
-    # out = Response(generate(), headers=headers)
-    # out.status_code = r.status_code
+    result.raise_for_status()
 
-    return (result.content, result.headers["Content-Type"], file_path)
+    raw = result.raw
+
+    headers = dict(raw.headers)
+
+    def generate():
+        for chunk in raw.stream(decode_content=False):
+            yield chunk
+
+    # return (result.content, result.headers["Content-Type"], file_path)
+    return (generate(), headers, file_path)
 
 
 def create_file(file_name, user_id, file_path, content_total):

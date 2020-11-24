@@ -13,6 +13,7 @@ from flask import (
     session,
     url_for,
     send_file,
+    Response,
 )
 from io import BytesIO
 
@@ -166,14 +167,20 @@ def detail(id):
 def download(id):
     """ View for downloading a file. """
 
-    (content, mimetype, filename) = service.download_file(id)
+    try:
+        (content, headers, filename) = service.download_file(id)
 
-    return send_file(
-        BytesIO(content),
-        mimetype=mimetype,
-        as_attachment=True,
-        attachment_filename=filename,
-    )
+        out = Response(content, headers=headers)
+        return out
+
+        # return send_file(
+        #     BytesIO(content),
+        #     mimetype=headers["Content-Type"],
+        #     as_attachment=True,
+        #     attachment_filename=filename,
+        # )
+    except HTTPError as e:
+        return abort(e.response.status_code)
 
 
 @bp.route("/delete/<int:id>", methods=["GET", "POST"])
