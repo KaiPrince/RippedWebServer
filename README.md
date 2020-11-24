@@ -1,6 +1,6 @@
 # RippedWebServer
 
-A web server written in Flask + Elm
+A microservice-based web server written in Flask + Elm.
 
 ## Install
 
@@ -8,6 +8,7 @@ Requirements:
 
 - Python
 - Yarn
+- Docker
 
 Compile Elm
 
@@ -24,16 +25,41 @@ pip install -r requirements.txt
 
 ## Running
 
+### Production
+
+Optional: Add `--build` to rebuild after changes.
+
+```
+docker-compose up
+```
+
+
+### Development
+
 Optional: Set development mode (_powershell_)
 
 ```
 $env:FLASK_ENV="development"
 ```
 
-Run Flask
+Run server
 
 ```
 cd server
+flask run
+```
+
+Run files service
+
+```
+cd files
+flask run
+```
+
+Run disk storage service
+
+```
+cd disk_storage
 flask run
 ```
 
