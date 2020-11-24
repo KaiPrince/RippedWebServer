@@ -147,7 +147,7 @@ def download(id):
 
     db = get_db()
     db_file = db.execute(
-        "SELECT f.id, file_name as name, uploaded, user_id, username, file_path"
+        "SELECT f.id, file_name as name, uploaded, user_id, file_path"
         " FROM user_file f"
         " WHERE f.id = ?"
         " ORDER BY uploaded DESC",
@@ -157,11 +157,9 @@ def download(id):
     if db_file is None or "file_path" not in db_file.keys():
         abort(404)
 
-    file = db_file["file_path"]
+    file_path = db_file["file_path"]
 
-    file_dir = os.path.abspath(current_app.config["UPLOAD_FOLDER"])
-
-    return send_from_directory(file_dir, file, as_attachment=True)
+    return service.download_file(file_path)
 
 
 @bp.route("/delete/<int:id>", methods=["POST"])

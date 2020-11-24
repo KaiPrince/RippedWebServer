@@ -3,8 +3,20 @@ import sys
 import common
 from auth.middleware import login_required
 from flask import (
-    Blueprint, current_app, flash, g, redirect, render_template, request,
-    session, url_for)
+    Blueprint,
+    current_app,
+    flash,
+    g,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+    send_file,
+    Response,
+)
+from io import BytesIO
+
 from flask.helpers import NotFound
 from requests import HTTPError
 from werkzeug.exceptions import abort
@@ -155,7 +167,20 @@ def detail(id):
 def download(id):
     """ View for downloading a file. """
 
-    return service.download_file(id)
+    try:
+        (content, headers, filename) = service.download_file(id)
+
+        out = Response(content, headers=headers)
+        return out
+
+        # return send_file(
+        #     BytesIO(content),
+        #     mimetype=headers["Content-Type"],
+        #     as_attachment=True,
+        #     attachment_filename=filename,
+        # )
+    except HTTPError as e:
+        return abort(e.response.status_code)
 
 
 @bp.route("/delete/<int:id>", methods=["GET", "POST"])

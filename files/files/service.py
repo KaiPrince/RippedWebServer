@@ -1,5 +1,5 @@
 from db.service import get_db
-from flask import current_app
+from flask import current_app, Response
 
 import files.repository as repository
 
@@ -60,6 +60,22 @@ def put_file(file_path, content_range, content_total, content):
     response.raise_for_status()
 
     return response.json()["file_size"]
+
+
+def download_file(file_path) -> Response:
+    """ Consumes a file path and produces a response which includes the file. """
+
+    r = repository.download_file(file_path)
+    headers = dict(r.raw.headers)
+
+    def generate():
+        for chunk in r.raw.stream(decode_content=False):
+            yield chunk
+
+    out = Response(generate(), headers=headers)
+    out.status_code = r.status_code
+
+    return out
 
 
 def delete_file(id):
