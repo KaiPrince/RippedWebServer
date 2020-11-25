@@ -1,11 +1,5 @@
 {% extends 'base.html' %}
 {% block head %} 
-<style>
-  .bar {
-    height: 18px;
-    background: green;
-  }
-</style>
 {% endblock %}
 {% block header %}
 <div class="row">
@@ -22,33 +16,26 @@
 <div class="row mt-4">
   <div class="col">
     <div id="create-container">
-      <div id="progress">
-        <div class="bar" style="width: 0%;"></div>
-      </div>
+      <progress id="progress" max="100" value="0" hidden>
+      </progress>
+      <form method="POST" enctype="multipart/form-data">
+        <div class="form-group row">
+          <label for="file_name" class="col-sm-2 col-form-label">File Name</label>
+          <div class="col-sm-10">
+            <input name="file_name" id="file_name" class="form-control" value="{{ request.form['file_name'] }}" required />
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="file" class="col-sm-2 col-form-label">File</label>
+          <div class="col-sm-10">
+            <input name="file" id="file" type=file required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
     </div>
   </div>
 </div>
-<form method="post">
-  <div class="form-group row">
-    <label for="file_name" class="col-sm-2 col-form-label">File Name</label>
-    <div class="col-sm-10">
-      <input
-      name="file_name"
-      id="file_name"
-      class="form-control"
-      value="{{ request.form['file_name'] }}"
-      required
-      />
-    </div>
-  </div>
-  <div class="form-group row">
-    <label for="file" class="col-sm-2 col-form-label">File</label>
-    <div class="col-sm-10">
-      <input name="file" id="file" type=file required>
-    </div>
-  </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-</form>
 {% endblock %}
 {% block js %} 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
@@ -57,26 +44,40 @@
 <script src="{{ url_for('static', filename='js/jquery.fileupload.js') }}"></script>
 <script>
   $(function () {
-    $('#file').fileupload({
+    $('#create-container').fileupload({
       dataType: 'json',
       maxChunkSize: 10000000, // 10 MB
       // multipart: false,
       autoUpload: false,
+      replaceFileInput: false,
       done: function (e, data) {
         $.each(data.result.files, function (index, file) {
           $('<p></p>').text(file.name).appendTo(document.body);
         });
         console.log("done", e, data)
       },
-      send: function (e, data) {
-        console.log("sending", e, data)
+      always: function (e, data) {
+        const { jqXHR } = data
+        const contentType = jqXHR.getResponseHeader("Content-Type")
+        const json = "application/json"
+        const html = "text/html"
+
+        // If the server sends back an html response, abort the 
+        //  transfer and reload the page.
+        if (contentType.includes(html)) {
+          jqXHR.abort()
+
+          var newDoc = document.open("text/html", "replace");
+          newDoc.write(jqXHR.responseText);
+          newDoc.close();
+        }
       },
       progressall: function (e, data) {
         var progress = parseInt(data.loaded / data.total * 100, 10);
-        $('#progress .bar').css(
-          'width',
-          progress + '%'
-        );
+
+        $('#progress').val(progress)
+        $('#progress').text(`${progress}%`)
+        $('#progress').removeAttr("hidden")
       },
       add: function (e, data) {
         data.context = $('<button></button>').text('Upload')
