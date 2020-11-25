@@ -104,6 +104,9 @@ def create():
                     current_app.logger.debug(
                         "Removed File Id from session. " + str({"session": session})
                     )
+
+                    return redirect(url_for("files.index"))
+
             except HTTPError as e:
                 current_app.logger.warn(
                     "PUT file to files service has failed. "
@@ -127,7 +130,6 @@ def create():
                 raise e
 
             return {"files": [{"name": file_name}]}
-            # return redirect(url_for("files.index"))
 
     if "file_id" in session:
         current_app.logger.debug(
