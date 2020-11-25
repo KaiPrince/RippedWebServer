@@ -122,6 +122,8 @@ def create():
                 current_app.logger.debug(
                     "Removed File Id from session. " + str({"session": session})
                 )
+
+                return redirect(url_for("files.index"))
             except Exception as e:
                 session.pop("file_id", None)
                 current_app.logger.debug(
