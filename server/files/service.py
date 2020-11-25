@@ -3,16 +3,23 @@ import os
 
 
 from db.service import get_db
-from flask import current_app
+from flask import current_app, flash
 
 import files.repository as repository
 from werkzeug.exceptions import abort
+from requests import HTTPError, ConnectionError
 
 
 def get_index():
     """ Consumes nothing and produces a list of files. """
 
-    return repository.index()
+    try:
+        files = repository.index()
+    except (HTTPError, ConnectionError):
+        flash("Could not retrieve file index.", category="error")
+        files = []
+
+    return files
 
 
 def get_file(id):
