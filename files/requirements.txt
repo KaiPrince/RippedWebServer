@@ -1,4 +1,11 @@
-eve
-python-dotenv
+black
+flake8
+pytest
+Flask
+wfastcgi
 gunicorn
+python-dotenv
+flask-mongoengine
+pytest-mock
 requests
+eve
