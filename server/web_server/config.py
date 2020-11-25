@@ -6,7 +6,6 @@ from flask import Flask
 
 
 class Config(object):
-    MODE = None
 
     # Import config from .env file
     load_dotenv(find_dotenv())
