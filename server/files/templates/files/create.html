@@ -1,5 +1,12 @@
 {% extends 'base.html' %}
 {% block head %} 
+<style>
+  progress {
+    width: 100%;
+    /* height: 1.5rem; */
+    margin-bottom: 2rem;
+  }
+</style>
 {% endblock %}
 {% block header %}
 <div class="row">
@@ -16,8 +23,12 @@
 <div class="row mt-4">
   <div class="col">
     <div id="create-container">
-      <progress id="progress" max="100" value="0" hidden>
-      </progress>
+      <div class="row">
+        <div class="col">
+          <progress id="progress" class="progress" max="100" value="0" hidden>
+          </progress>
+        </div>
+      </div>
       <form method="POST" enctype="multipart/form-data">
         <div class="form-group row">
           <label for="file_name" class="col-sm-2 col-form-label">File Name</label>
