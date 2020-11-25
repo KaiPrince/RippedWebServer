@@ -31,7 +31,7 @@
             <input name="file" id="file" type=file required>
           </div>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button id="submit-btn" type="submit" class="btn btn-primary" disabled>Submit</button>
       </form>
     </div>
   </div>
@@ -50,27 +50,13 @@
       // multipart: false,
       autoUpload: false,
       replaceFileInput: false,
-      done: function (e, data) {
-        $.each(data.result.files, function (index, file) {
-          $('<p></p>').text(file.name).appendTo(document.body);
-        });
-        console.log("done", e, data)
-      },
-      always: function (e, data) {
-        const { jqXHR } = data
-        const contentType = jqXHR.getResponseHeader("Content-Type")
-        const json = "application/json"
-        const html = "text/html"
+      add: function (e, data) {
+        $('#create-container').on('submit', function (e) {
+          e.preventDefault()
+          data.submit()
+        })
 
-        // If the server sends back an html response, abort the 
-        //  transfer and reload the page.
-        if (contentType.includes(html)) {
-          jqXHR.abort()
-
-          var newDoc = document.open("text/html", "replace");
-          newDoc.write(jqXHR.responseText);
-          newDoc.close();
-        }
+        $('#submit-btn').removeAttr('disabled')
       },
       progressall: function (e, data) {
         var progress = parseInt(data.loaded / data.total * 100, 10);
@@ -79,13 +65,19 @@
         $('#progress').text(`${progress}%`)
         $('#progress').removeAttr("hidden")
       },
-      add: function (e, data) {
-        data.context = $('<button></button>').text('Upload')
-          .appendTo(document.body)
-          .click(function () {
-            data.context = $('<p></p>').text('Uploading...').replaceAll($(this));
-            data.submit();
-          });
+      always: function (e, data) {
+        const { jqXHR } = data
+        const contentType = jqXHR.getResponseHeader("Content-Type")
+
+        // If the server sends back an html page, abort the 
+        //  transfer and load the page.
+        if (contentType.includes("text/html")) {
+          jqXHR.abort()
+
+          var newDoc = document.open("text/html", "replace");
+          newDoc.write(jqXHR.responseText);
+          newDoc.close();
+        }
       },
     });
   });
