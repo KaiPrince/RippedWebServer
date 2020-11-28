@@ -1,0 +1,57 @@
+import pytest
+from db.service import get_db
+
+
+@pytest.mark.skip
+def test_register(client, app):
+    response = client.post("/auth/register", data={"username": "a", "password": "a"})
+    assert "http://localhost/auth/login" == response.headers["Location"]
+
+    with app.app_context():
+        assert (
+            get_db()
+            .execute(
+                "select * from user where username = 'a'",
+            )
+            .fetchone()
+            is not None
+        )
+
+
+@pytest.mark.parametrize(
+    ("username", "password", "user_id", "permissions"),
+    [
+        [
+            "test",
+            "test",
+            2,
+            [
+                "read: files",
+                "write: files",
+                "read: disk_storage",
+                "write: disk_storage",
+            ],
+        ],
+        [
+            "other",
+            "othertest",
+            3,
+            [
+                "read: files",
+                "read: disk_storage",
+            ],
+        ],
+    ],
+)
+def test_login(client, app, username, password, user_id, permissions):
+    # Arrange
+
+    # Act
+    response = client.post(
+        "/auth/login", json={"username": username, "password": password}
+    )
+
+    # Assert
+    assert response.status_code == 200
+    assert response.json["user_id"] == user_id
+    assert response.json["permissions"] == permissions
