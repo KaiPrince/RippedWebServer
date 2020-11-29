@@ -15,6 +15,7 @@ class Config(object):
     DATABASE = os.getenv("DATABASE")
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
     FILES_SERVICE_URL = os.getenv("FILES_SERVICE_URL")
+    AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL")
 
     def __init__(self, app: Flask):
 
@@ -32,6 +33,10 @@ class Config(object):
         if self.FILES_SERVICE_URL is None:
             logging.warning("FILES_SERVICE_URL environment variable not set.")
             self.FILES_SERVICE_URL = "http://rippedwebserver_files_1:5000"
+
+        if self.AUTH_SERVICE_URL is None:
+            logging.warning("AUTH_SERVICE_URL environment variable not set.")
+            self.AUTH_SERVICE_URL = "http://rippedwebserver_auth_1:5000"
 
 
 # class Config(object):

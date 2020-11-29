@@ -1,7 +1,8 @@
 from db.service import create_user, get_db
-from flask import (Blueprint, flash, redirect, render_template, request,
-                   session, url_for)
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash
+import auth.service as service
+from requests.exceptions import HTTPError
 
 bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder="templates")
 
@@ -41,23 +42,19 @@ def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        db = get_db()
-        error = None
-        user = db.execute(
-            "SELECT * FROM user WHERE username = ?", (username,)
-        ).fetchone()
 
-        if user is None:
-            error = "Incorrect username."
-        elif not check_password_hash(user["password"], password):
-            error = "Incorrect password."
+        try:
+            auth_token = service.get_auth_token(username, password)
+            user = service.get_user_data_from_auth_token(auth_token)
 
-        if error is None:
             session.clear()
-            session["user_id"] = user["id"]
+
+            session["user"] = {"username": user["name"], "id": user["sub"]}
+            session["auth_token"] = auth_token
             return redirect(url_for("index"))
 
-        flash(error)
+        except HTTPError:
+            flash("Log in failed.")
 
     return render_template("auth/login.html")
 

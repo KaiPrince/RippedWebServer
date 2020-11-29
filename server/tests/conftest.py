@@ -9,6 +9,7 @@ from web_server import create_app
 
 from files.utils import copyfile
 from flask import Flask
+from authlib.jose import jwt
 
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
     _data_sql = f.read().decode("utf8")
@@ -57,21 +58,40 @@ def runner(app: Flask):
 
 
 class AuthActions(object):
-    def __init__(self, client):
+    def __init__(self, app, client, mock_func, mocker):
+        self._app = app
         self._client = client
+        self._mock_func = mock_func
+        self._mocker = mocker
 
-    def login(self, username="test", password="test"):
-        return self._client.post(
+    def login(self, username="test", password="test", permissions=""):
+
+        mock_token = jwt.encode(
+            {"alg": "HS256"},
+            {"sub": 2, "name": username, "permissions": permissions},
+            self._app.secret_key,
+        ).decode("utf-8")
+
+        _get_response = self._mocker.MagicMock()
+        _get_response.json.return_value = {"JWT": mock_token}
+
+        self._mock_func.post.return_value = _get_response
+
+        response = self._client.post(
             "/auth/login", data={"username": username, "password": password}
         )
+
+        self._mock_func.clear()
+
+        return response
 
     def logout(self):
         return self._client.get("/auth/logout")
 
 
 @pytest.fixture
-def auth(client):
-    return AuthActions(client)
+def auth(app, client, mock_auth_repo, mocker):
+    return AuthActions(app, client, mock_auth_repo, mocker)
 
 
 @pytest.fixture
@@ -84,3 +104,15 @@ def mock_files_repo(mocker: MockerFixture) -> MagicMock:
 @pytest.fixture
 def files_service_url(app: Flask) -> str:
     return app.config["FILES_SERVICE_URL"]
+
+
+@pytest.fixture
+def mock_auth_repo(mocker: MockerFixture) -> MagicMock:
+    mock_func = mocker.patch("auth.service.requests")
+
+    return mock_func
+
+
+@pytest.fixture
+def auth_service_url(app: Flask) -> str:
+    return app.config["AUTH_SERVICE_URL"]
