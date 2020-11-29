@@ -73,3 +73,4 @@ def create_permissions():
             "INSERT INTO user_permissions (user_id, permission_id) " "VALUES (?, ?)",
             [x[0], x[1]],
         )
+        db.commit()

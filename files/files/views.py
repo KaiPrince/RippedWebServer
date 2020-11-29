@@ -17,7 +17,7 @@ bp = Blueprint("files", __name__, url_prefix="/files", template_folder="template
 
 
 @bp.route("/")
-@permission_required("read: files")
+# @permission_required("list: files")
 def index():
     db = get_db()
     files = db.execute(

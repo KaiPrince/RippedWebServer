@@ -8,7 +8,7 @@
 
 from functools import wraps
 
-from flask import g, redirect, session, url_for, request, abort
+from flask import g, redirect, session, url_for, request, abort, current_app
 import auth.service as service
 
 # from files.views import bp
@@ -38,18 +38,54 @@ def permission_required(required_perm):
         def wrapped_view(**kwargs):
             auth_token = request.headers.get("Authorization")
             if not auth_token:
+                current_app.logger.info(
+                    "Auth token missing. "
+                    + str(
+                        {
+                            "route": request.path,
+                        }
+                    )
+                )
                 return abort(401)
 
             try:
                 claims = service.decode_auth_token(auth_token)
-                permissions = claims.get("permissions")
 
-                if not permissions:
+                if "permissions" not in claims:
+                    current_app.logger.info(
+                        "Auth token is missing permissions key. "
+                        + str(
+                            {
+                                "name": claims.get("name"),
+                                "keys": claims.keys(),
+                                "route": request.path,
+                            }
+                        )
+                    )
                     return abort(401)
 
+                permissions = claims["permissions"]
                 if required_perm not in permissions:
+                    current_app.logger.info(
+                        "User unauthorized. "
+                        + str(
+                            {
+                                "name": claims.get("name"),
+                                "permissions": permissions,
+                                "route": request.path,
+                            }
+                        )
+                    )
                     return abort(403)
             except RuntimeError:
+                current_app.logger.info(
+                    "Auth token could not be decoded. "
+                    + str(
+                        {
+                            "route": request.path,
+                        }
+                    )
+                )
                 return abort(401)
 
             return view(**kwargs)
