@@ -14,6 +14,7 @@ class Config(object):
     SECRET_KEY = os.getenv("SECRET_KEY")
     DATABASE = os.getenv("DATABASE")
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
+    JWT_KEY = os.getenv("JWT_KEY")
 
     def __init__(self, app: Flask):
 
@@ -27,6 +28,10 @@ class Config(object):
         if self.UPLOAD_FOLDER is None:
             logging.warning("UPLOAD_FOLDER environment variable not set.")
             self.UPLOAD_FOLDER = os.path.join(app.instance_path, "uploads")
+
+        if self.JWT_KEY is None:
+            logging.warning("JWT_KEY environment variable not set.")
+            self.JWT_KEY = "dev"
 
 
 # class Config(object):

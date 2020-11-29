@@ -7,6 +7,8 @@ import storage.service as service
 from flask import Blueprint, current_app, request, send_from_directory
 from flask.helpers import BadRequest, NotFound
 
+from auth.middleware import permission_required
+
 # from http import HTTPStatus
 
 
@@ -17,6 +19,7 @@ bp = Blueprint("storage", __name__, url_prefix="/storage")
 
 
 @bp.route("/")
+@permission_required("read: disk_storage")
 def index():
 
     files = service.list_files()
@@ -25,6 +28,7 @@ def index():
 
 
 @bp.route("/create", methods=["POST", "PUT"])
+@permission_required("write: disk_storage")
 def create():
     if request.method == "POST":
         # Get params
@@ -62,6 +66,7 @@ def create():
 
 
 @bp.route("/file-content")
+@permission_required("read: disk_storage")
 def detail():
 
     file_name = request.headers["file_path"]
@@ -85,6 +90,7 @@ def detail():
 
 
 @bp.route("/download/<path:file_name>")
+@permission_required("read: disk_storage")
 def download(file_name):
     """ View for downloading a file. """
 
@@ -100,6 +106,7 @@ def download(file_name):
     "/delete",  # /<path:file_name>",
     methods=["POST"],
 )
+@permission_required("write: disk_storage")
 def delete():  # file_name):
 
     file_name = request.headers["file_path"]
