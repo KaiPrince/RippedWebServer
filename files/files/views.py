@@ -8,6 +8,7 @@ from requests import HTTPError
 from werkzeug.exceptions import abort
 
 import files.service as service
+from auth.middleware import permission_required
 
 # from .utils import allowed_file
 
@@ -16,6 +17,7 @@ bp = Blueprint("files", __name__, url_prefix="/files", template_folder="template
 
 
 @bp.route("/")
+@permission_required("read: files")
 def index():
     db = get_db()
     files = db.execute(
@@ -30,6 +32,7 @@ def index():
 
 
 @bp.route("/create", methods=["POST", "PUT"])
+@permission_required("write: files")
 def create():
     if request.method == "POST":
         # Get params
@@ -96,6 +99,7 @@ def create():
 
 
 @bp.route("/<int:id>")
+@permission_required("read: files")
 def file_info(id):
     """ Returns the file info given a file id. """
 
@@ -108,6 +112,7 @@ def file_info(id):
 
 
 @bp.route("/content/<int:id>")
+@permission_required("read: files")
 def file_content(id):
     """ Returns the file content given a file id. """
 
@@ -115,6 +120,7 @@ def file_content(id):
 
 
 @bp.route("/detail/<int:id>")
+@permission_required("read: files")
 def detail(id):
 
     db = get_db()
@@ -142,6 +148,7 @@ def detail(id):
 
 
 @bp.route("/download/<int:id>")
+@permission_required("read: files")
 def download(id):
     """ View for downloading a file. """
 
@@ -163,6 +170,7 @@ def download(id):
 
 
 @bp.route("/delete/<int:id>", methods=["POST"])
+@permission_required("write: files")
 def delete(id):
     db = get_db()
     db_file = db.execute(

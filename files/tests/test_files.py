@@ -11,11 +11,16 @@ from werkzeug.datastructures import FileStorage
 
 
 class TestFiles:
-    def test_index(self, client):
+    def test_index(self, client, auth_token):
         """ Index page displays a file name. """
         # Arrange
         # Act
-        response = client.get("/files/")
+        response = client.get(
+            "/files/",
+            headers={
+                "Authorization": auth_token,
+            },
+        )
 
         # Assert
         assert response.status_code == 200
@@ -25,6 +30,7 @@ class TestFiles:
         self,
         client,
         app: Flask,
+        auth_token,
         mock_files_repo: MagicMock,
         mocker: MagicMock,
         disk_storage_service_url,
@@ -56,7 +62,13 @@ class TestFiles:
         }
 
         # Act
-        response = client.post("/files/create", json=json)
+        response = client.post(
+            "/files/create",
+            headers={
+                "Authorization": auth_token,
+            },
+            json=json,
+        )
 
         assert response.status_code < 400  # No error
 
@@ -64,6 +76,7 @@ class TestFiles:
             "/files/create",
             buffered=True,
             headers={
+                "Authorization": auth_token,
                 "Content-Range": f"bytes {content_range}/{content_total}",
                 "file_id": str(file_id),
             },
@@ -116,6 +129,7 @@ class TestFiles:
         self,
         client,
         app: Flask,
+        auth_token,
         mock_files_repo: MagicMock,
         mocker: MagicMock,
         disk_storage_service_url,
@@ -144,7 +158,13 @@ class TestFiles:
         }
 
         # Act
-        response = client.post("/files/create", json=json)
+        response = client.post(
+            "/files/create",
+            headers={
+                "Authorization": auth_token,
+            },
+            json=json,
+        )
 
         # Assert
 
@@ -175,6 +195,7 @@ class TestFiles:
                 "/files/create",
                 buffered=True,
                 headers={
+                    "Authorization": auth_token,
                     "Content-Range": f"bytes {content_range}/{content_total}",
                     "file_id": str(file_id),
                 },
@@ -214,6 +235,7 @@ class TestFiles:
         self,
         app: Flask,
         client,
+        auth_token,
         mock_files_repo: MagicMock,
         mocker: MagicMock,
         disk_storage_service_url,
@@ -241,7 +263,12 @@ class TestFiles:
         mock_files_repo.get.return_value = _get_response
 
         # Act
-        response = client.get("/files/1")
+        response = client.get(
+            "/files/1",
+            headers={
+                "Authorization": auth_token,
+            },
+        )
 
         # Assert
         assert response.json == {
@@ -253,7 +280,12 @@ class TestFiles:
         }
         assert response.status_code == 200
 
-        response = client.get("/files/content/1")
+        response = client.get(
+            "/files/content/1",
+            headers={
+                "Authorization": auth_token,
+            },
+        )
         assert response.status_code == 200
         assert response.data == bytes(content, "utf-8")
 
@@ -265,7 +297,12 @@ class TestFiles:
         )
 
     def test_delete_file(
-        self, client, app: Flask, mock_files_repo: MagicMock, disk_storage_service_url
+        self,
+        client,
+        app: Flask,
+        auth_token,
+        mock_files_repo: MagicMock,
+        disk_storage_service_url,
     ):
         """ Existing file can be deleted. """
         # Arrange
@@ -273,7 +310,12 @@ class TestFiles:
         file_path = "test.txt"
 
         # Act
-        response = client.post("/files/delete/" + str(file_id))
+        response = client.post(
+            "/files/delete/" + str(file_id),
+            headers={
+                "Authorization": auth_token,
+            },
+        )
 
         # Assert
         assert response.status_code in [200, 302]

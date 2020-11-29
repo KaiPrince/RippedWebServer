@@ -4,6 +4,7 @@ import db
 from flask import Flask
 
 import files.views
+import auth
 
 from .config import getConfig
 
@@ -32,6 +33,7 @@ def create_app(test_config=None):
         pass
 
     db.init_app(app)
+    auth.init_app(app)
     app.register_blueprint(files.views.bp)
 
     app.add_url_rule("/", endpoint="index", view_func=files.views.index)
