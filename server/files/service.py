@@ -1,8 +1,6 @@
 import logging
 import os
 
-
-from db.service import get_db
 from flask import current_app, flash
 
 import files.repository as repository

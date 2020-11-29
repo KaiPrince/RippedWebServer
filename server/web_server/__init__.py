@@ -9,7 +9,6 @@
 import os
 
 import auth.views
-import db
 from flask import Flask
 
 import files.views
@@ -41,7 +40,6 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    db.init_app(app)
     files.init_app(app)
     app.register_blueprint(auth.views.bp)
     app.register_blueprint(files.views.bp)

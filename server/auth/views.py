@@ -1,4 +1,3 @@
-from db.service import create_user, get_db
 from flask import (
     Blueprint,
     flash,
@@ -9,7 +8,6 @@ from flask import (
     url_for,
     current_app,
 )
-from werkzeug.security import check_password_hash
 import auth.service as service
 from requests.exceptions import HTTPError
 
@@ -21,24 +19,15 @@ def register():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        db = get_db()
         error = None
 
         # TEMP disable adding new users TODO: Remove.
         # error = "User registration is disabled."
 
-        if not username:
-            error = "Username is required."
-        elif not password:
-            error = "Password is required."
-        elif (
-            db.execute("SELECT id FROM user WHERE username = ?", (username,)).fetchone()
-            is not None
-        ):
-            error = "User {} is already registered.".format(username)
+        # TODO
 
         if error is None:
-            create_user(username, password)
+            # create_user(username, password)
             return redirect(url_for("auth.login"))
 
         flash(error)
