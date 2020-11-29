@@ -5,6 +5,8 @@ services:
     environment:
       FLASK_ENV: "development" # TEMP
       SECRET_KEY: "dev" # TEMP
+      FILES_SERVICE_URL: http://rippedwebserver_files_1:5000
+      AUTH_SERVICE_URL: http://rippedwebserver_auth_1:5000
     ports:
       - 5000:5000
 
@@ -19,6 +21,7 @@ services:
       UPLOAD_FOLDER: /upload
       FLASK_ENV: "development" # TEMP
       SECRET_KEY: "dev" # TEMP
+      AUTH_SERVICE_URL: http://rippedwebserver_auth_1:5000
     ports:
       - 5002:5000
     volumes:
@@ -30,6 +33,8 @@ services:
       DATABASE: /db/files_db.sqlite
       FLASK_ENV: "development" # TEMP
       SECRET_KEY: "dev" # TEMP
+      DISK_STORAGE_SERVICE_URL: http://rippedwebserver_disk_storage_1:5000
+      AUTH_SERVICE_URL: http://rippedwebserver_auth_1:5000
     ports:
       - 5003:5000
     volumes:

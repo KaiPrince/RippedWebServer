@@ -49,6 +49,17 @@ def login():
 
             session["user"] = {"username": user["name"], "id": user["sub"]}
             session["auth_token"] = auth_token
+
+            current_app.logger.debug(
+                "Log in successful. "
+                + str(
+                    {
+                        "username": user["name"],
+                        "id": user["sub"],
+                        "auth_token": auth_token,
+                    }
+                )
+            )
             return redirect(url_for("index"))
 
         except HTTPError as e:
