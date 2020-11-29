@@ -70,6 +70,14 @@ def disk_storage_service_url(app: Flask) -> str:
 
 @pytest.fixture
 def auth_token() -> str:
+    """
+    {
+        "sub": "1",
+        "name": "admin",
+        "permissions": ["read: files", "write: files"],
+        "iat": 1516239022
+    }
+    """
     return (
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
         "eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicGVybWlzc"
