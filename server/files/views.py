@@ -157,13 +157,13 @@ def detail(id):
         message = e.response.reason
         return NotFound(message)
 
-    file_path = file["file_path"]
-    if file_path.endswith("txt"):
-        content = service.get_file_content(id)
-    else:
-        content = ""
+    # file_path = file["file_path"]
+    # if file_path.endswith("txt"):
+    #     content = service.get_file_content(id)
+    # else:
+    #     content = ""
 
-    return render_template("files/detail.html", file=file, content=content)
+    return render_template("files/detail.html", file=file, content="")
 
 
 @bp.route("/download/<int:id>")

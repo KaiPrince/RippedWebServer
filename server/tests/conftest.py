@@ -8,6 +8,7 @@ from web_server import create_app
 from files.utils import copyfile
 from flask import Flask
 from authlib.jose import jwt
+import requests
 
 
 UPLOAD_FOLDER = os.path.join(".", "tests", "uploads")
@@ -45,19 +46,15 @@ def runner(app: Flask):
 
 
 class AuthActions(object):
-    def __init__(self, app, client, mock_func, mocker):
-        self._app = app
+    def __init__(self, client, auth_token, mock_func, mocker):
+        self._auth_token = auth_token
         self._client = client
         self._mock_func = mock_func
         self._mocker = mocker
 
     def login(self, username="test", password="test", permissions=""):
 
-        mock_token = jwt.encode(
-            {"alg": "HS256"},
-            {"sub": 2, "name": username, "permissions": permissions},
-            self._app.secret_key,
-        ).decode("utf-8")
+        mock_token = self._auth_token
 
         _get_response = self._mocker.MagicMock()
         _get_response.json.return_value = {"JWT": mock_token}
@@ -77,8 +74,8 @@ class AuthActions(object):
 
 
 @pytest.fixture
-def auth(app, client, mock_auth_repo, mocker):
-    return AuthActions(app, client, mock_auth_repo, mocker)
+def auth(client, auth_token, mock_auth_repo, mocker):
+    return AuthActions(client, auth_token, mock_auth_repo, mocker)
 
 
 @pytest.fixture
@@ -103,3 +100,46 @@ def mock_auth_repo(mocker: MockerFixture) -> MagicMock:
 @pytest.fixture
 def auth_service_url(app: Flask) -> str:
     return app.config["AUTH_SERVICE_URL"]
+
+
+@pytest.fixture
+def auth_token(app) -> str:
+    """
+    {
+        "sub": "1",
+        "name": "test",
+        "permissions": ["read: files", "write: files"],
+        "iat": 1516239022
+    }
+    """
+
+    username = "test"
+    permissions = [
+        "read: files",
+        "write: files",
+        "read: disk_storage",
+        "write: disk_storage",
+    ]
+
+    token = jwt.encode(
+        {"alg": "HS256"},
+        {"sub": 2, "name": username, "permissions": permissions},
+        app.config["JWT_KEY"],
+    ).decode("utf-8")
+
+    return token
+
+
+@pytest.fixture
+def make_request() -> requests.PreparedRequest:
+    """ Consumes any arguments and returns a prepared request. """
+
+    def func(*args, **kwargs):
+
+        req: requests.PreparedRequest = requests.Request(
+            "GET", *args, **kwargs
+        ).prepare()
+
+        return req
+
+    return func

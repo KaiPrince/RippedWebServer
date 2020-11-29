@@ -11,9 +11,10 @@ from werkzeug.datastructures import FileStorage
 
 
 class TestFiles:
-    def test_index(self, client, auth_token):
+    def test_index(self, client, auth_token, disk_storage_service_url):
         """ Index page displays a file name. """
         # Arrange
+
         # Act
         response = client.get(
             "/files/",
@@ -23,8 +24,19 @@ class TestFiles:
         )
 
         # Assert
+        upload_url = disk_storage_service_url + "/storage/create/" + "test.txt"
+        download_url = disk_storage_service_url + "/storage/download/" + "test.txt"
+
         assert response.status_code == 200
         assert b"test.txt" in response.data
+
+        files = response.json["files"]
+        file = files[0]
+        assert file["id"] == 1
+        assert file["file_name"] == "test.txt"
+        assert file["file_path"] == "test.txt"
+        assert file["download_url"] == download_url
+        assert file["upload_url"] == upload_url
 
     def test_upload(
         self,
@@ -44,15 +56,12 @@ class TestFiles:
         user_id = 2
         file_id = 2
 
-        content_range = f"0-{content_size}"
-        content_total = content_size
+        upload_url = disk_storage_service_url + "/storage/create/" + file_path
 
         _get_response = mocker.MagicMock()
-        _get_response.json.return_value = {"file_size": str(content_size)}
+        _get_response.json.return_value = {"upload_url": upload_url}
 
-        mock_files_repo.put.return_value = _get_response
-
-        data = BytesIO(contents)
+        mock_files_repo.post.return_value = _get_response
 
         json = {
             "file_name": filename,
@@ -62,6 +71,7 @@ class TestFiles:
         }
 
         # Act
+        # ..create file
         response = client.post(
             "/files/create",
             headers={
@@ -70,24 +80,9 @@ class TestFiles:
             json=json,
         )
 
-        assert response.status_code < 400  # No error
-
-        response = client.put(
-            "/files/create",
-            buffered=True,
-            headers={
-                "Authorization": auth_token,
-                "Content-Range": f"bytes {content_range}/{content_total}",
-                "file_id": str(file_id),
-            },
-            data=data,
-        )
-
         # Assert
-        assert response.status_code < 400  # No error
 
         # ..repo is called
-
         mock_files_repo.post.assert_called_once_with(
             disk_storage_service_url + "/storage/create",
             json={
@@ -96,124 +91,12 @@ class TestFiles:
             },
         )
 
-        # ..temporariliy override the equality comparator
-        FileStorage.__eq__ = lambda self, obj: self.filename == obj.filename
+        # ..No error
+        assert response.status_code < 400
+        # ..Upload url returned
+        assert response.json["upload_url"] == upload_url
 
-        mock_files_repo.put.assert_called_once_with(
-            disk_storage_service_url + "/storage/create",
-            headers={
-                "Content-Range": f"bytes 0-{content_size}/{content_size}",
-                "file_path": file_path,
-            },
-            data=contents,
-        )
-
-        with app.app_context():
-            db = get_db()
-
-            count = db.execute("SELECT COUNT(id) FROM user_file").fetchone()[0]
-            assert count == 2
-
-            db_file = db.execute(
-                "SELECT f.id, file_name as name, uploaded, user_id, file_path"
-                " FROM user_file f"
-                " WHERE f.id = ?"
-                " ORDER BY uploaded DESC",
-                str(file_id),
-            ).fetchone()
-            assert db_file["name"] == filename
-            assert db_file["user_id"] == user_id
-            assert db_file["file_path"] == file_path
-
-    def test_upload_parts(
-        self,
-        client,
-        app: Flask,
-        auth_token,
-        mock_files_repo: MagicMock,
-        mocker: MagicMock,
-        disk_storage_service_url,
-    ):
-        """ File can be uploaded to web server. """
-
-        # Arrange
-        filename = "test2.txt"
-        contents = b"my file contents"
-        content_size = sys.getsizeof(contents) - 1
-        file_path = filename
-
-        user_id = 1
-        file_id = 2
-
-        _get_response = mocker.MagicMock()
-        _get_response.json.return_value = {"file_size": str(content_size)}
-
-        mock_files_repo.put.return_value = _get_response
-
-        json = {
-            "file_name": filename,
-            "user_id": user_id,
-            "file_path": file_path,
-            "content_total": str(content_size),
-        }
-
-        # Act
-        response = client.post(
-            "/files/create",
-            headers={
-                "Authorization": auth_token,
-            },
-            json=json,
-        )
-
-        # Assert
-
-        assert response.status_code < 400  # No error
-
-        mock_files_repo.post.assert_called_once_with(
-            disk_storage_service_url + "/storage/create",
-            json={
-                "file_path": file_path,
-                "content_total": str(content_size),
-            },
-        )
-
-        # ..splitting string into equal halves
-        contents_parts = contents[: len(contents) // 2], contents[len(contents) // 2 :]
-
-        for index, part in enumerate(contents_parts):
-            begin = sys.getsizeof(part) * index
-            end = begin + sys.getsizeof(part)
-
-            content_range = f"{begin}-{end}"
-            content_total = sys.getsizeof(contents)
-
-            data = BytesIO(part)
-
-            # Act
-            response = client.put(
-                "/files/create",
-                buffered=True,
-                headers={
-                    "Authorization": auth_token,
-                    "Content-Range": f"bytes {content_range}/{content_total}",
-                    "file_id": str(file_id),
-                },
-                data=data,
-            )
-
-            # Assert
-            assert response.status_code < 400  # No error
-
-            mock_files_repo.put.assert_called_with(
-                disk_storage_service_url + "/storage/create",
-                headers={
-                    "Content-Range": f"bytes {content_range}/{content_total}",
-                    "file_path": file_path,
-                },
-                data=part,
-            )
-
+        # ..DB entry created
         with app.app_context():
             db = get_db()
 
@@ -245,7 +128,6 @@ class TestFiles:
         file_id = 1
         filename = "test.txt"
         file_path = "test.txt"
-        content = "test content"
 
         with app.app_context():
             db = get_db()
@@ -257,12 +139,15 @@ class TestFiles:
                 str(file_id),
             ).fetchone()[0]
 
+        download_url = disk_storage_service_url + "/storage/download/" + file_path
+
         _get_response = mocker.MagicMock()
-        _get_response.content = content
+        _get_response.json.return_value = {"download_url": download_url}
 
         mock_files_repo.get.return_value = _get_response
 
         # Act
+        # ..get file details
         response = client.get(
             "/files/1",
             headers={
@@ -280,21 +165,18 @@ class TestFiles:
         }
         assert response.status_code == 200
 
+        # Act
+        # .. get file content
         response = client.get(
-            "/files/content/1",
+            "/files/download/1",
             headers={
                 "Authorization": auth_token,
             },
         )
-        assert response.status_code == 200
-        assert response.data == bytes(content, "utf-8")
 
-        mock_files_repo.get.assert_called_with(
-            disk_storage_service_url + "/storage/file-content",
-            headers={
-                "file_path": file_path,
-            },
-        )
+        # Assert
+        assert response.status_code == 200
+        assert response.json["download_url"] == download_url
 
     def test_delete_file(
         self,

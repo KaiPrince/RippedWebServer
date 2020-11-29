@@ -1,19 +1,29 @@
 import logging
 import os
 
-from flask import current_app, flash
+from flask import current_app, flash, session
 
-import files.repository as repository
+from files.repository import get_repository as _get_repository, IRepository
 from werkzeug.exceptions import abort
 from requests import HTTPError, ConnectionError
+
+
+def get_repository() -> IRepository:
+    base_url = current_app.config["FILES_SERVICE_URL"]
+    auth_token = session.get("auth_token")
+
+    return _get_repository(base_url, auth_token)
 
 
 def get_index():
     """ Consumes nothing and produces a list of files. """
 
+    repository = get_repository()
+
     try:
         files = repository.index()
     except (HTTPError, ConnectionError):
+        # TODO move library-specific errors to repo and make custom errors
         flash("Could not retrieve file index.", category="error")
         files = []
 
@@ -23,19 +33,17 @@ def get_index():
 def get_file(id):
     """ Consumes an ID and produces a file name. """
 
-    return repository.get_file(id)
+    repository = get_repository()
 
-
-def get_file_content(id):
-    """ Consumes an ID and produces the file's contents. """
-
-    return repository.get_file_content(id)
+    return repository.get_by_id(id)
 
 
 def download_file(id):
     """ Consumes an ID and produces binary data and meta data. """
 
-    file_path = repository.get_file(id)["file_path"]
+    repository = get_repository()
+
+    file_path = repository.get_by_id(id)["file_path"]
     result = repository.download_file(id)
 
     result.raise_for_status()
@@ -59,7 +67,9 @@ def create_file(file_name, user_id, file_path, content_total):
         + str({"file_name": file_name, "user_id": user_id, "file_path": file_path}),
     )
 
-    return repository.create_file(file_name, user_id, file_path, content_total)
+    repository = get_repository()
+
+    return repository.create(file_name, user_id, file_path, content_total)
 
 
 def put_file(file_id, content_range, content_total, content):
@@ -76,8 +86,9 @@ def put_file(file_id, content_range, content_total, content):
             }
         ),
     )
+    repository = get_repository()
 
-    response = repository.put_file(file_id, content_range, content_total, content)
+    response = repository.write(file_id, content_range, content_total, content)
 
     response.raise_for_status()
 
@@ -86,5 +97,6 @@ def put_file(file_id, content_range, content_total, content):
 
 def delete_file(id):
     """ Deletes a file from storage. """
+    repository = get_repository()
 
-    return repository.delete_file(id)
+    return repository.delete(id)

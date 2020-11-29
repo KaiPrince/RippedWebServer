@@ -22,10 +22,12 @@ def get_file(file_name):
     return content
 
 
-def create_file(file_name):
+def create_file(file_name, file_size):
 
     filename = secure_filename(file_name)
     file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
+
+    # TODO check enough free space
 
     with open(file_path, "wb"):
         pass

@@ -4,7 +4,7 @@ import common
 
 # from werkzeug.exceptions import abort
 import storage.service as service
-from flask import Blueprint, current_app, request, send_from_directory
+from flask import Blueprint, current_app, request, send_from_directory, url_for, abort
 from flask.helpers import BadRequest, NotFound
 
 from auth.middleware import permission_required
@@ -27,66 +27,52 @@ def index():
     return {"files": files}
 
 
-@bp.route("/create", methods=["POST", "PUT"])
+@bp.route("/create/", methods=["POST"])
 @permission_required("write: disk_storage")
 def create():
-    if request.method == "POST":
-        # Get params
-        json = request.json
+    # Get params
+    json = request.json
 
-        required_params = ["file_path", "content_total"]
-        if any(x not in json for x in required_params):
-            error_message = "missing required params."
-            current_app.logger.info(error_message)
-            return BadRequest(error_message)
+    required_params = ["file_path", "content_total"]
+    if any(x not in json for x in required_params):
+        error_message = "missing required params."
+        current_app.logger.info(error_message)
+        return BadRequest(error_message)
 
-        file_path = request.json["file_path"]
-        content_total = request.json["content_total"]
+    file_path = request.json["file_path"]
+    file_size = request.json["content_total"]
 
-        response = service.create_file(file_path)
-        return {"file_name": response}
+    file_name_on_disk = service.create_file(file_path, file_size)
+    if not file_name_on_disk:
+        return abort(507)
 
-    elif request.method == "PUT":
-
-        # TODO handle missing header
-        content_range, content_total = common.get_content_metadata(
-            request.headers.get("Content-Range")
-        )
-        file_path = request.headers["file_path"]
-
-        # file: FileStorage = request.files["file"]
-        # TODO add buffer to protect memory
-        # content = file.stream.read()
-        content = request.data
-
-        insert_position = int(content_range.split("-")[0])
-
-        file_size = service.put_file(file_path, insert_position, content)
-        return {"file_size": file_size}
+    return {
+        "file_name": file_name_on_disk,
+        "upload_url": url_for("storage.write", file_path=file_path),
+    }
 
 
-@bp.route("/file-content")
-@permission_required("read: disk_storage")
-def detail():
+@bp.route("/create/<path:file_path>", methods=["PUT"])
+@permission_required("write: disk_storage")
+def write(file_path):
 
-    file_name = request.headers["file_path"]
+    # TODO handle missing header
+    content_range, content_total = common.get_content_metadata(
+        request.headers.get("Content-Range")
+    )
 
-    file_path = current_app.config["UPLOAD_FOLDER"]
+    if file_path is None:
+        return NotFound("File path required.")
 
-    contents = service.get_file(os.path.join(file_path, file_name))
+    # file: FileStorage = request.files["file"]
+    # TODO add buffer to protect memory
+    # content = file.stream.read()
+    content = request.data
 
-    # if not db_file:
-    #     abort(404)
+    insert_position = int(content_range.split("-")[0])
 
-    # file_path = os.path.join(current_app.config["UPLOAD_FOLDER"],
-    # db_file["file_path"])
-
-    # content = ""
-    # if file_path.endswith("txt"):
-    #     with open(file_path, "rt") as f:
-    #         content = "\n".join(f.readlines())
-
-    return contents
+    file_size = service.put_file(file_path, insert_position, content)
+    return {"file_size": file_size}
 
 
 @bp.route("/download/<path:file_name>")
@@ -102,14 +88,9 @@ def download(file_name):
     return send_from_directory(file_dir, file_name, as_attachment=True)
 
 
-@bp.route(
-    "/delete",  # /<path:file_name>",
-    methods=["POST"],
-)
+@bp.route("/delete/<path:file_name>", methods=["POST"])
 @permission_required("write: disk_storage")
-def delete():  # file_name):
-
-    file_name = request.headers["file_path"]
+def delete(file_name):
 
     try:
         service.delete_file(file_name)

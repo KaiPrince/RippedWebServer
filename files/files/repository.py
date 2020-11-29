@@ -14,19 +14,6 @@ def _base_url():
     return current_app.config["DISK_STORAGE_SERVICE_URL"]
 
 
-def index():
-    """ Get all files from files service. """
-
-    response = requests.get(_base_url() + "/")
-
-    return response.json()["files"]
-
-
-def get_file(file_path):
-    """ Get the file details at the given path. """
-    pass
-
-
 def get_file_content(file_path):
     """ Get the contents of the file at the given path. """
     response = requests.get(
@@ -62,8 +49,8 @@ def put_file(file_path, content_range, content_total, content):
 
 
 def download_file(file_path):
-    """ Consumes a file id and returns an Http Response. """
-    return requests.get(f"{_base_url()}/storage/download/{file_path}", stream=True)
+    """ Consumes a file path and returns an Http Response. """
+    return requests.get(f"{_base_url()}/storage/download/{file_path}")
 
 
 def delete_file(file_path):

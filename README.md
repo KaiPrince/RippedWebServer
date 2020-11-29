@@ -33,7 +33,6 @@ Optional: Add `--build` to rebuild after changes.
 docker-compose up
 ```
 
-
 ### Development
 
 Optional: Set development mode (_powershell_)
@@ -85,3 +84,4 @@ flask run
 - [ ] Handle filename overlap by altering filename (filename_2)
 - [ ] Fix CI
 - [ ] Move repo urls to config and get from env.
+- [ ] Add file size
