@@ -7,8 +7,10 @@ from flask import (
     session,
     url_for,
     make_response,
+    current_app,
 )
 import auth.service as service
+from authlib.jose import jwt
 
 bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder="templates")
 
@@ -57,10 +59,18 @@ def login():
         error = "Incorrect password."
 
     if error is None:
-        return {
-            "user_id": user["id"],
+        header = {"alg": "HS256"}
+
+        payload = {
+            "sub": user["id"],
+            "name": user["username"],
             "permissions": service.get_user_permissions(user["id"]),
         }
+
+        key = current_app.secret_key
+        token = jwt.encode(header, payload, key).decode("utf-8")
+
+        return {"JWT": token}
 
     return make_response(error, 400)
 

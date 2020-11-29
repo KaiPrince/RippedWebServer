@@ -1,6 +1,8 @@
 import pytest
 from db.service import get_db
 
+from authlib.jose import jwt
+
 
 @pytest.mark.skip
 def test_register(client, app):
@@ -53,5 +55,14 @@ def test_login(client, app, username, password, user_id, permissions):
 
     # Assert
     assert response.status_code == 200
-    assert response.json["user_id"] == user_id
-    assert response.json["permissions"] == permissions
+
+    token = response.json["JWT"]
+
+    claims = jwt.decode(
+        token,
+        app.secret_key,
+    )
+
+    assert claims["sub"] == user_id
+    assert claims["name"] == username
+    assert claims["permissions"] == permissions
