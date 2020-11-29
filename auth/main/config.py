@@ -13,6 +13,7 @@ class Config(object):
     # Import config from environment
     SECRET_KEY = os.getenv("SECRET_KEY")
     DATABASE = os.getenv("DATABASE")
+    JWT_KEY = os.getenv("JWT_KEY")
 
     def __init__(self, app: Flask):
 
@@ -22,6 +23,10 @@ class Config(object):
         if self.DATABASE is None:
             logging.warning("DATABASE environment variable not set.")
             self.DATABASE = os.path.join(app.instance_path, "web_server.sqlite")
+
+        if self.JWT_KEY is None:
+            logging.warning("JWT_KEY environment variable not set.")
+            self.JWT_KEY = "dev"
 
 
 # class Config(object):

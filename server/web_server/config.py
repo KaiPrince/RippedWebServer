@@ -16,6 +16,7 @@ class Config(object):
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
     FILES_SERVICE_URL = os.getenv("FILES_SERVICE_URL")
     AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL")
+    JWT_KEY = os.getenv("JWT_KEY")
 
     def __init__(self, app: Flask):
 
@@ -37,6 +38,10 @@ class Config(object):
         if self.AUTH_SERVICE_URL is None:
             logging.warning("AUTH_SERVICE_URL environment variable not set.")
             self.AUTH_SERVICE_URL = "http://rippedwebserver_auth_1:5000"
+
+        if self.JWT_KEY is None:
+            logging.warning("JWT_KEY environment variable not set.")
+            self.JWT_KEY = "dev"
 
 
 # class Config(object):
