@@ -70,7 +70,13 @@ def login():
         key = current_app.config["JWT_KEY"]
         token = jwt.encode(header, payload, key).decode("utf-8")
 
+        current_app.logger.info(
+            "User successfully logged in. " + str({"username": username})
+        )
+
         return {"JWT": token}
+
+    current_app.logger.info("User failed to log in. " + str({"username": username}))
 
     return make_response(error, 400)
 
