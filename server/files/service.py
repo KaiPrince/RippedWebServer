@@ -37,6 +37,10 @@ def get_file(id):
 
     return repository.get_by_id(id)
 
+def get_download_url(id):
+    repository = get_repository()
+
+    return repository.get_download_url(id)
 
 def download_file(id):
     """ Consumes an ID and produces binary data and meta data. """

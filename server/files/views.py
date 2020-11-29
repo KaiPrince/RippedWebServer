@@ -171,20 +171,8 @@ def detail(id):
 def download(id):
     """ View for downloading a file. """
 
-    try:
-        (content, headers, filename) = service.download_file(id)
-
-        out = Response(content, headers=headers)
-        return out
-
-        # return send_file(
-        #     BytesIO(content),
-        #     mimetype=headers["Content-Type"],
-        #     as_attachment=True,
-        #     attachment_filename=filename,
-        # )
-    except HTTPError as e:
-        return abort(e.response.status_code)
+    download_url = service.get_download_url(id)
+    redirect(download_url)
 
 
 @bp.route("/delete/<int:id>", methods=["GET", "POST"])
