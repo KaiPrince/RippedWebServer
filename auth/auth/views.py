@@ -67,7 +67,7 @@ def login():
             "permissions": service.get_user_permissions(user["id"]),
         }
 
-        key = current_app.secret_key
+        key = current_app.config["JWT_KEY"]
         token = jwt.encode(header, payload, key).decode("utf-8")
 
         return {"JWT": token}
