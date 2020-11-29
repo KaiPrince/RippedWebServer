@@ -78,7 +78,7 @@ def build_download_url(file_path: str) -> str:
     """ Consumes a file path and returns a full url. """
 
     url_path = f"/storage/download/{file_path}"
-    url_base = current_app.config["DISK_STORAGE_SERVICE_URL"]
+    url_base = current_app.config["PUBLIC_DISK_STORAGE_SERVICE_URL"]
 
     url = url_base + url_path
 
@@ -89,7 +89,7 @@ def build_upload_url(file_path: str) -> str:
     """ Consumes a file path and returns a full url. """
 
     url_path = f"/storage/create/{file_path}"
-    url_base = current_app.config["DISK_STORAGE_SERVICE_URL"]
+    url_base = current_app.config["PUBLIC_DISK_STORAGE_SERVICE_URL"]
 
     url = url_base + url_path
 
