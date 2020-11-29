@@ -1,5 +1,14 @@
 from db.service import create_user, get_db
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import (
+    Blueprint,
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+    current_app,
+)
 from werkzeug.security import check_password_hash
 import auth.service as service
 from requests.exceptions import HTTPError
@@ -53,7 +62,10 @@ def login():
             session["auth_token"] = auth_token
             return redirect(url_for("index"))
 
-        except HTTPError:
+        except HTTPError as e:
+            current_app.logger.debug(
+                "Log in failed. " + str({"status_code": e.response.status_code})
+            )
             flash("Log in failed.")
 
     return render_template("auth/login.html")
