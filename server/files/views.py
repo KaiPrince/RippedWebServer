@@ -172,7 +172,7 @@ def download(id):
     """ View for downloading a file. """
 
     download_url = service.get_download_url(id)
-    redirect(download_url)
+    return redirect(download_url)
 
 
 @bp.route("/delete/<int:id>", methods=["GET", "POST"])
