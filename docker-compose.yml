@@ -8,10 +8,10 @@ services:
     ports:
       - 5000:5000
 
-  # users:
-  #   build: ./users
-  #   ports:
-  #     - 5001:5000
+  auth:
+    build: ./auth
+    ports:
+      - 5001:5000
 
   disk_storage:
     build: ./disk_storage
