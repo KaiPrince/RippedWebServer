@@ -17,7 +17,7 @@ def _base_url():
 
 def get_auth_token(username, password) -> dict:
     response = requests.post(
-        f"{_base_url()}/login",
+        f"{_base_url()}/auth/login",
         json={
             # TODO This is a terrible security problem! Encrypt this first
             "username": username,
