@@ -13,7 +13,6 @@ class Config(object):
     # Import config from environment
     SECRET_KEY = os.getenv("SECRET_KEY")
     DATABASE = os.getenv("DATABASE")
-    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
     JWT_KEY = os.getenv("JWT_KEY")
 
     def __init__(self, app: Flask):
@@ -24,10 +23,6 @@ class Config(object):
         if self.DATABASE is None:
             logging.warning("DATABASE environment variable not set.")
             self.DATABASE = os.path.join(app.instance_path, "web_server.sqlite")
-
-        if self.UPLOAD_FOLDER is None:
-            logging.warning("UPLOAD_FOLDER environment variable not set.")
-            self.UPLOAD_FOLDER = os.path.join(app.instance_path, "uploads")
 
         if self.JWT_KEY is None:
             logging.warning("JWT_KEY environment variable not set.")
@@ -61,13 +56,10 @@ class TestingConfig(Config):
     MODE = "TESTING"
     TESTING = True
 
-    def __init__(self, app: Flask, UPLOAD_FOLDER=None, **kwargs):
+    def __init__(self, app: Flask):
 
         if self.SECRET_KEY is None:
             self.SECRET_KEY = "dev"
-
-        if UPLOAD_FOLDER is not None:
-            self.UPLOAD_FOLDER = UPLOAD_FOLDER
 
         super().__init__(app)
 

@@ -5,17 +5,17 @@ from io import BytesIO
 
 class TestStorage:
     # @pytest.mark.parametrize([])
-    def test_index(self, client):
+    def test_index(self, client, auth_token):
         """ Index page displays a file name. """
         # Arrange
         # Act
-        response = client.get("/storage/")
+        response = client.get("/storage/", headers={"Authorization": auth_token})
 
         # Assert
         assert response.status_code == 200
         assert b"test.txt" in response.data
 
-    def test_upload(self, client, app):
+    def test_upload(self, client, app, auth_token):
         """ File can be uploaded to web server. """
 
         # Arrange
@@ -29,7 +29,8 @@ class TestStorage:
         # Act
 
         response = client.post(
-            "/storage/create",
+            "/storage/create/",
+            headers={"Authorization": auth_token},
             json={
                 "file_path": file_path,
                 "content_total": str(content_size),
@@ -37,13 +38,18 @@ class TestStorage:
         )
         assert response.status_code in [200, 201]
         assert file_path in response.json["file_name"]
+        assert response.json["upload_url"] == "/storage/create/" + file_path
+
+        with app.app_context():
+            assert file_path in os.listdir(app.config["UPLOAD_FOLDER"])
 
         response = client.put(
-            "/storage/create",
+            "/storage/create/" + file_path,
             buffered=True,
             headers={
+                "Authorization": auth_token,
                 "Content-Range": f"bytes {content_range}/{content_total}",
-                "file_path": file_path,
+                # "file_path": file_path,
             },
             data=BytesIO(contents),
         )
@@ -56,7 +62,7 @@ class TestStorage:
             with open(os.path.join(app.config["UPLOAD_FOLDER"], file_path), "rb") as f:
                 assert contents in f.read()
 
-    def test_upload_parts(self, client, app):
+    def test_upload_parts(self, client, app, auth_token):
         """ File can be uploaded to web server. """
 
         # Arrange
@@ -70,7 +76,8 @@ class TestStorage:
         # Act
 
         response = client.post(
-            "/storage/create",
+            "/storage/create/",
+            headers={"Authorization": auth_token},
             json={
                 "file_path": file_path,
                 "content_total": str(content_size),
@@ -78,6 +85,7 @@ class TestStorage:
         )
         assert response.status_code in [200, 201]
         assert file_path in response.json["file_name"]
+        assert response.json["upload_url"] == "/storage/create/" + file_path
 
         with app.app_context():
             assert file_path in os.listdir(app.config["UPLOAD_FOLDER"])
@@ -93,11 +101,12 @@ class TestStorage:
             content_total = sys.getsizeof(contents)
 
             response = client.put(
-                "/storage/create",
+                "/storage/create/" + file_path,
                 buffered=True,
                 headers={
+                    "Authorization": auth_token,
                     "Content-Range": f"bytes {content_range}/{content_total}",
-                    "file_path": file_path,
+                    # "file_path": file_path,
                 },
                 data=BytesIO(part),
             )
@@ -110,45 +119,36 @@ class TestStorage:
             with open(os.path.join(app.config["UPLOAD_FOLDER"], file_path), "rb") as f:
                 assert contents in f.read()
 
-    def test_read_file(self, client):
-        """ Existing file can be read. """
+    def test_download_file(self, client, app, auth_token):
+        """ Existing file can be downloaded. """
+
         # Arrange
         file_path = "test.txt"
 
         # Act
         response = client.get(
-            "/storage/file-content",
-            headers={
-                "file_path": file_path,
-            },
+            f"/storage/download/{file_path}", headers={"Authorization": auth_token}
         )
 
         # Assert
         assert response.status_code == 200
         assert b"test content" in response.data
 
-    def test_download_file(self, client, app):
-        """ Existing file can be downloaded. """
-
-        # Arrange
-        file_name = "test.txt"
-
-        # Act
-        response = client.get(f"/storage/download/{file_name}")
-
-        # Assert
-        assert response.status_code == 200
-        assert b"test content" in response.data
-
-    def test_delete_file(self, client, app):
+    def test_delete_file(self, client, app, auth_token):
         """ Existing file can be deleted. """
         # Arrange
-        file_name = "test.txt"
+        file_path = "test.txt"
 
         # Act
-        response = client.post("/storage/delete", headers={"file_path": file_name})
+        response = client.post(
+            "/storage/delete/" + file_path,
+            headers={
+                "Authorization": auth_token,
+                # "file_path": file_path,
+            },
+        )
 
         # Assert
         assert response.status_code in [200, 302]
         with app.app_context():
-            assert file_name not in os.listdir(app.config["UPLOAD_FOLDER"])
+            assert file_path not in os.listdir(app.config["UPLOAD_FOLDER"])

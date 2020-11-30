@@ -2,3 +2,4 @@ Flask
 wfastcgi
 gunicorn
 python-dotenv
+authlib

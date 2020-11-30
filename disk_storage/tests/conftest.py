@@ -40,3 +40,22 @@ def client(app):
 @pytest.fixture
 def runner(app):
     return app.test_cli_runner()
+
+
+@pytest.fixture
+def auth_token() -> str:
+    """
+    {
+        "sub": "1",
+        "name": "admin",
+        "permissions": ["read: disk_storage", "write: disk_storage"],
+        "iat": 1516239022
+    }
+    """
+    return (
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+        "eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicGVybWlzc"
+        "2lvbnMiOlsicmVhZDogZGlza19zdG9yYWdlIiwid3JpdGU6"
+        "IGRpc2tfc3RvcmFnZSJdLCJpYXQiOjE1MTYyMzkwMjJ9."
+        "4bNBGPPgRThOmkJcf_AUCI-RGCejUsDPUzjoJtX92Pc"
+    )

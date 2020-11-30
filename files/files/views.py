@@ -8,6 +8,7 @@ from requests import HTTPError
 from werkzeug.exceptions import abort
 
 import files.service as service
+from auth.middleware import permission_required
 
 # from .utils import allowed_file
 
@@ -16,6 +17,7 @@ bp = Blueprint("files", __name__, url_prefix="/files", template_folder="template
 
 
 @bp.route("/")
+# @permission_required("list: files")
 def index():
     db = get_db()
     files = db.execute(
@@ -26,10 +28,15 @@ def index():
 
     files_array = list(dict(x) for x in files)
 
+    for file in files_array:
+        file["download_url"] = service.build_download_url(file["file_path"])
+        file["upload_url"] = service.build_upload_url(file["file_path"])
+
     return {"files": files_array}
 
 
 @bp.route("/create", methods=["POST", "PUT"])
+@permission_required("write: files")
 def create():
     if request.method == "POST":
         # Get params
@@ -60,7 +67,9 @@ def create():
 
         file_id = db_cursor.lastrowid
 
-        return {"file_id": file_id}
+        upload_url = service.build_upload_url(file_path)
+
+        return {"file_id": file_id, "upload_url": upload_url}
 
     elif request.method == "PUT":
         # Get file path by id
@@ -96,6 +105,7 @@ def create():
 
 
 @bp.route("/<int:id>")
+@permission_required("read: files")
 def file_info(id):
     """ Returns the file info given a file id. """
 
@@ -107,62 +117,21 @@ def file_info(id):
     return file_info
 
 
-@bp.route("/content/<int:id>")
-def file_content(id):
-    """ Returns the file content given a file id. """
-
-    return service.get_file_content(id)
-
-
-@bp.route("/detail/<int:id>")
-def detail(id):
-
-    db = get_db()
-    db_file = db.execute(
-        "SELECT f.id, file_name as name, uploaded, user_id, file_path"
-        " FROM user_file f"
-        " WHERE f.id = ?"
-        " ORDER BY uploaded DESC",
-        [str(id)],
-    ).fetchone()
-
-    if not db_file:
-        abort(404)
-
-    file = dict(db_file)
-
-    file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], db_file["file_path"])
-
-    content = ""
-    if file_path.endswith("txt"):
-        with open(file_path, "rt") as f:
-            content = "\n".join(f.readlines())
-
-    return {"file": file, "content": content}
-
-
 @bp.route("/download/<int:id>")
+@permission_required("read: files")
 def download(id):
     """ View for downloading a file. """
 
-    db = get_db()
-    db_file = db.execute(
-        "SELECT f.id, file_name as name, uploaded, user_id, file_path"
-        " FROM user_file f"
-        " WHERE f.id = ?"
-        " ORDER BY uploaded DESC",
-        [str(id)],
-    ).fetchone()
+    download_url = service.get_download_url(id)
 
-    if db_file is None or "file_path" not in db_file.keys():
+    if not download_url:
         abort(404)
 
-    file_path = db_file["file_path"]
-
-    return service.download_file(file_path)
+    return {"download_url": download_url}
 
 
 @bp.route("/delete/<int:id>", methods=["POST"])
+@permission_required("write: files")
 def delete(id):
     db = get_db()
     db_file = db.execute(

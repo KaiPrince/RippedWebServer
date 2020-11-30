@@ -66,3 +66,22 @@ def mock_files_repo(mocker: MockerFixture) -> MagicMock:
 @pytest.fixture
 def disk_storage_service_url(app: Flask) -> str:
     return app.config["DISK_STORAGE_SERVICE_URL"]
+
+
+@pytest.fixture
+def auth_token() -> str:
+    """
+    {
+        "sub": "1",
+        "name": "admin",
+        "permissions": ["read: files", "write: files"],
+        "iat": 1516239022
+    }
+    """
+    return (
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+        "eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicGVybWlzc"
+        "2lvbnMiOlsicmVhZDogZmlsZXMiLCJ3cml0ZTogZmlsZXM"
+        "iXSwiaWF0IjoxNTE2MjM5MDIyfQ."
+        "mSqI0DqmeJfOewzvfgm9pUxQtEnV8EYGaoESpqLWais"
+    )

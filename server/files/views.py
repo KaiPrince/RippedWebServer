@@ -157,13 +157,13 @@ def detail(id):
         message = e.response.reason
         return NotFound(message)
 
-    file_path = file["file_path"]
-    if file_path.endswith("txt"):
-        content = service.get_file_content(id)
-    else:
-        content = ""
+    # file_path = file["file_path"]
+    # if file_path.endswith("txt"):
+    #     content = service.get_file_content(id)
+    # else:
+    #     content = ""
 
-    return render_template("files/detail.html", file=file, content=content)
+    return render_template("files/detail.html", file=file, content="")
 
 
 @bp.route("/download/<int:id>")
@@ -171,20 +171,14 @@ def detail(id):
 def download(id):
     """ View for downloading a file. """
 
-    try:
-        (content, headers, filename) = service.download_file(id)
+    download_url = service.get_download_url(id)
 
-        out = Response(content, headers=headers)
-        return out
+    # TODO add expiry!
+    auth_token = g.auth_token
 
-        # return send_file(
-        #     BytesIO(content),
-        #     mimetype=headers["Content-Type"],
-        #     as_attachment=True,
-        #     attachment_filename=filename,
-        # )
-    except HTTPError as e:
-        return abort(e.response.status_code)
+    full_url = f"{download_url}?token={auth_token}"
+
+    return redirect(full_url)
 
 
 @bp.route("/delete/<int:id>", methods=["GET", "POST"])

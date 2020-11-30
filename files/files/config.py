@@ -15,6 +15,8 @@ class Config(object):
     DATABASE = os.getenv("DATABASE")
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
     DISK_STORAGE_SERVICE_URL = os.getenv("DISK_STORAGE_SERVICE_URL")
+    JWT_KEY = os.getenv("JWT_KEY")
+    PUBLIC_DISK_STORAGE_SERVICE_URL = os.getenv("PUBLIC_DISK_STORAGE_SERVICE_URL")
 
     def __init__(self, app: Flask):
 
@@ -32,6 +34,16 @@ class Config(object):
         if self.DISK_STORAGE_SERVICE_URL is None:
             logging.warning("DISK_STORAGE_SERVICE_URL environment variable not set.")
             self.DISK_STORAGE_SERVICE_URL = "http://rippedwebserver_disk_storage_1:5000"
+
+        if self.JWT_KEY is None:
+            logging.warning("JWT_KEY environment variable not set.")
+            self.JWT_KEY = "dev"
+
+        if self.PUBLIC_DISK_STORAGE_SERVICE_URL is None:
+            logging.warning(
+                "PUBLIC_DISK_STORAGE_SERVICE_URL environment variable not set."
+            )
+            self.PUBLIC_DISK_STORAGE_SERVICE_URL = "http://localhost:5002"
 
 
 # class Config(object):

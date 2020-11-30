@@ -1,24 +1,21 @@
 import os
-import tempfile
 from unittest.mock import MagicMock
 
 import pytest
-from db.service import get_db, init_db
 from pytest_mock import MockerFixture
 from web_server import create_app
 
 from files.utils import copyfile
 from flask import Flask
+from authlib.jose import jwt
+import requests
 
-with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
-    _data_sql = f.read().decode("utf8")
 
 UPLOAD_FOLDER = os.path.join(".", "tests", "uploads")
 
 
 @pytest.fixture
 def app(tmp_path, mock_files_repo) -> Flask:
-    db_fd, db_path = tempfile.mkstemp()
 
     temp_uploads_folder = tmp_path
     # Copy files in test uploads folder to temp directory
@@ -31,19 +28,11 @@ def app(tmp_path, mock_files_repo) -> Flask:
     app = create_app(
         {
             "TESTING": True,
-            "DATABASE": db_path,
             "UPLOAD_FOLDER": temp_uploads_folder,
         }
     )
 
-    with app.app_context():
-        init_db()
-        get_db().executescript(_data_sql)
-
     yield app
-
-    os.close(db_fd)
-    os.unlink(db_path)
 
 
 @pytest.fixture
@@ -57,21 +46,36 @@ def runner(app: Flask):
 
 
 class AuthActions(object):
-    def __init__(self, client):
+    def __init__(self, client, auth_token, mock_func, mocker):
+        self._auth_token = auth_token
         self._client = client
+        self._mock_func = mock_func
+        self._mocker = mocker
 
-    def login(self, username="test", password="test"):
-        return self._client.post(
+    def login(self, username="test", password="test", permissions=""):
+
+        mock_token = self._auth_token
+
+        _get_response = self._mocker.MagicMock()
+        _get_response.json.return_value = {"JWT": mock_token}
+
+        self._mock_func.post.return_value = _get_response
+
+        response = self._client.post(
             "/auth/login", data={"username": username, "password": password}
         )
+
+        self._mock_func.clear()
+
+        return response
 
     def logout(self):
         return self._client.get("/auth/logout")
 
 
 @pytest.fixture
-def auth(client):
-    return AuthActions(client)
+def auth(client, auth_token, mock_auth_repo, mocker):
+    return AuthActions(client, auth_token, mock_auth_repo, mocker)
 
 
 @pytest.fixture
@@ -84,3 +88,58 @@ def mock_files_repo(mocker: MockerFixture) -> MagicMock:
 @pytest.fixture
 def files_service_url(app: Flask) -> str:
     return app.config["FILES_SERVICE_URL"]
+
+
+@pytest.fixture
+def mock_auth_repo(mocker: MockerFixture) -> MagicMock:
+    mock_func = mocker.patch("auth.service.requests")
+
+    return mock_func
+
+
+@pytest.fixture
+def auth_service_url(app: Flask) -> str:
+    return app.config["AUTH_SERVICE_URL"]
+
+
+@pytest.fixture
+def auth_token(app) -> str:
+    """
+    {
+        "sub": "1",
+        "name": "test",
+        "permissions": ["read: files", "write: files"],
+        "iat": 1516239022
+    }
+    """
+
+    username = "test"
+    permissions = [
+        "read: files",
+        "write: files",
+        "read: disk_storage",
+        "write: disk_storage",
+    ]
+
+    token = jwt.encode(
+        {"alg": "HS256"},
+        {"sub": 2, "name": username, "permissions": permissions},
+        app.config["JWT_KEY"],
+    ).decode("utf-8")
+
+    return token
+
+
+@pytest.fixture
+def make_request() -> requests.PreparedRequest:
+    """ Consumes any arguments and returns a prepared request. """
+
+    def func(*args, **kwargs):
+
+        req: requests.PreparedRequest = requests.Request(
+            "GET", *args, **kwargs
+        ).prepare()
+
+        return req
+
+    return func

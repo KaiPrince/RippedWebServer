@@ -1,21 +1,35 @@
 import functools
 
-from db.service import get_db
-from flask import g, redirect, session, url_for
+from flask import g, redirect, session, url_for, request, current_app, flash
+from requests.auth import AuthBase
 
 from .views import bp
+from .service import is_token_expired
 
 
 @bp.before_app_request
 def load_logged_in_user():
-    user_id = session.get("user_id")
+    user = session.get("user")
 
-    if user_id is None:
-        g.user = None
-    else:
-        g.user = (
-            get_db().execute("SELECT * FROM user WHERE id = ?", (user_id,)).fetchone()
-        )
+    g.user = user
+
+
+@bp.before_app_request
+def load_auth_token():
+    g.auth_token = session.get("auth_token")
+    g.auth_token_data = session.get("auth_token_data")
+
+
+@bp.before_app_request
+def refresh_auth_token():
+    token_data = session.get("auth_token_data")
+
+    if token_data is not None and is_token_expired(token_data):
+        session.clear()
+        flash("Session expired. Please log in again.")
+
+        current_app.logger.debug("Auth token expired " + str(token_data))
+        return redirect(url_for("auth.login"))
 
 
 def login_required(view):
@@ -27,3 +41,24 @@ def login_required(view):
         return view(**kwargs)
 
     return wrapped_view
+
+
+class JWTAuth(AuthBase):
+    """
+    * Class Name: JWTAuth
+    * Purpose: This purpose of this class is to inject an auth token into request
+    *   headers.
+    """
+
+    def __init__(self, auth_token):
+        # setup any auth-related data here
+        self._auth_token = auth_token
+
+    def __call__(self, r):
+        # modify and return the request
+        r.headers["Authorization"] = self._auth_token
+        return r
+
+
+def get_auth_middleware(auth_token: str) -> AuthBase:
+    return JWTAuth(auth_token)

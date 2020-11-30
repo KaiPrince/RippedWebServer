@@ -9,3 +9,4 @@ flask-mongoengine
 pytest-mock
 requests
 eve
+authlib

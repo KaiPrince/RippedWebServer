@@ -62,6 +62,40 @@ def put_file(file_path, content_range, content_total, content):
     return response.json()["file_size"]
 
 
+def get_download_url(id) -> str:
+    """ Consumes a file id and produces a url. """
+    db_file = get_file(id)
+
+    if db_file is None or "file_path" not in db_file.keys():
+        return None
+
+    file_path = db_file["file_path"]
+
+    return build_download_url(file_path)
+
+
+def build_download_url(file_path: str) -> str:
+    """ Consumes a file path and returns a full url. """
+
+    url_path = f"/storage/download/{file_path}"
+    url_base = current_app.config["PUBLIC_DISK_STORAGE_SERVICE_URL"]
+
+    url = url_base + url_path
+
+    return url
+
+
+def build_upload_url(file_path: str) -> str:
+    """ Consumes a file path and returns a full url. """
+
+    url_path = f"/storage/create/{file_path}"
+    url_base = current_app.config["PUBLIC_DISK_STORAGE_SERVICE_URL"]
+
+    url = url_base + url_path
+
+    return url
+
+
 def download_file(file_path) -> Response:
     """ Consumes a file path and produces a response which includes the file. """
 

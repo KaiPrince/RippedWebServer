@@ -9,7 +9,12 @@ from werkzeug.datastructures import FileStorage
 
 class TestFiles:
     def test_index(
-        self, client, mock_files_repo: MagicMock, mocker: MagicMock, files_service_url
+        self,
+        client,
+        mock_files_repo: MagicMock,
+        mocker: MagicMock,
+        files_service_url,
+        make_request,
     ):
         """ Index page displays a file name. """
         # Arrange
@@ -27,86 +32,119 @@ class TestFiles:
         assert response.status_code == 200
         assert b"test.txt" in response.data
 
-        mock_files_repo.get.assert_called_once_with(files_service_url + "/")
+        calls = mock_files_repo.get.call_args_list
+        for call in calls:
+            req = make_request(*call.args, **call.kwargs)
+
+            assert req.url == files_service_url + "/"
 
     def test_upload(
         self,
         client,
         auth,
+        auth_token,
         app,
         mock_files_repo: MagicMock,
         mocker: MagicMock,
         files_service_url,
+        make_request,
     ):
         """ File can be uploaded to web server. """
         # Arrange
         auth.login()
         assert client.get("/files/create").status_code == 200
 
+        # ..file data
+        file_id = 1
         filename = "test2.txt"
         contents = b"my file contents"
+        content_size = sys.getsizeof(contents) - 1
 
-        file_id = 1
+        # ..service data
+        upload_url = "http://rippedtoastserver.ddns.net/storage/create/" + filename
 
+        # ..mock creation response from files service
         _get_response = mocker.MagicMock()
-        _get_response.json.return_value = {"file_id": str(file_id)}
-
+        _get_response.json.return_value = {
+            "file_id": str(file_id),
+            "upload_url": upload_url,
+        }
         mock_files_repo.post.return_value = _get_response
 
-        data = {
-            "file_name": filename,
-            "file": (
-                BytesIO(contents),
-                filename,
-            ),
+        # ..mock info response from files service
+        _get_response2 = mocker.MagicMock()
+        _get_response2.json.return_value = {
+            "file_id": str(file_id),
+            "upload_url": upload_url,
         }
+        mock_files_repo.get.return_value = _get_response2
 
         # Act
+        # ..create file
         response = client.post(
             "/files/create",
             buffered=True,
             content_type="multipart/form-data",
-            data=data,
+            data={
+                "file_name": filename,
+                "file": (
+                    BytesIO(contents),
+                    filename,
+                ),
+            },
         )
 
         # Assert
-        assert response.status_code < 400  # No error
+        # ..no error
+        assert response.status_code < 400
 
-        # ..repo is called
-        content_size = sys.getsizeof(contents) - 1
+        # ..files service "create" is called
+        calls = mock_files_repo.post.call_args_list
+        for call in calls:
+            req = make_request(*call.args, **call.kwargs)
 
-        mock_files_repo.post.assert_called_once_with(
-            files_service_url + "/files/create",
-            json={
+            assert req.url == files_service_url + "/files/create"
+            assert req.headers == {
+                "Authorization": auth_token,
+                "Content-Length": "89",
+                "Content-Type": "application/json",
+            }
+            assert call.kwargs["json"] == {
                 "file_name": filename,
                 "user_id": 2,
                 "file_path": filename,
                 "content_total": str(content_size),
-            },
-        )
+            }
 
         # ..temporariliy override the equality comparator
         FileStorage.__eq__ = lambda self, obj: self.filename == obj.filename
 
-        mock_files_repo.put.assert_called_once_with(
-            files_service_url + "/files/create",
-            headers={
+        # ..disk storage service "put" is called
+        calls = mock_files_repo.put.call_args_list
+        for call in calls:
+
+            kwargs = {k: v for k, v in call.kwargs.items() if k not in ["data"]}
+            req = make_request(*call.args, **kwargs)
+
+            assert req.url == upload_url
+            assert req.headers == {
+                "Authorization": auth_token,
                 "Content-Range": f"bytes 0-{content_size}/{content_size}",
-                "file_id": str(file_id),
-            },
-            data=FileStorage(
+            }
+            assert call.kwargs["data"] == FileStorage(
                 BytesIO(contents), filename=filename, content_type="text/plain"
-            ),
-        )
+            )
 
     def test_upload_parts(
         self,
         client,
         auth,
+        auth_token,
         app,
         mock_files_repo: MagicMock,
         mocker: MagicMock,
         files_service_url,
+        make_request,
     ):
         """ File can be uploaded to web server. """
 
@@ -114,17 +152,31 @@ class TestFiles:
         auth.login()
         assert client.get("/files/create").status_code == 200
 
+        # ..file data
+        file_id = 1
         filename = "test2.txt"
         contents = b"my file contents"
 
-        file_id = 1
+        # ..service data
+        upload_url = "http://rippedtoastserver.ddns.net/storage/create/" + filename
 
+        # ..mock creation response from files service
         _get_response = mocker.MagicMock()
-        _get_response.json.return_value = {"file_id": str(file_id)}
-
+        _get_response.json.return_value = {
+            "file_id": str(file_id),
+            "upload_url": upload_url,
+        }
         mock_files_repo.post.return_value = _get_response
 
-        # ..splitting string into equal halves
+        # ..mock info response from files service
+        _get_response2 = mocker.MagicMock()
+        _get_response2.json.return_value = {
+            "file_id": str(file_id),
+            "upload_url": upload_url,
+        }
+        mock_files_repo.get.return_value = _get_response2
+
+        # ..split contents into equal halves
         contents_parts = contents[: len(contents) // 2], contents[len(contents) // 2 :]
 
         for index, part in enumerate(contents_parts):
@@ -134,57 +186,71 @@ class TestFiles:
             content_range = f"{begin}-{end}"
             content_total = sys.getsizeof(contents)
 
-            data = {
-                "file_name": filename,
-                "file": (
-                    BytesIO(part),
-                    filename,
-                ),
-            }
-
             # Act
+            # ..create file
             response = client.post(
                 "/files/create",
                 buffered=True,
                 headers={"Content-Range": f"bytes {content_range}/{content_total}"},
                 content_type="multipart/form-data",
-                data=data,
+                data={
+                    "file_name": filename,
+                    "file": (
+                        BytesIO(part),
+                        filename,
+                    ),
+                },
             )
 
             # Assert
-            assert response.status_code < 400  # No error
+            # ..no error
+            assert response.status_code < 400
 
             # ..temporariliy override the equality comparator
             FileStorage.__eq__ = lambda self, obj: self.filename == obj.filename
 
-            mock_files_repo.put.assert_called_with(
-                files_service_url + "/files/create",
-                headers={
-                    "Content-Range": f"bytes {content_range}/{content_total}",
-                    "file_id": str(file_id),
-                },
-                data=FileStorage(
-                    BytesIO(contents), filename=filename, content_type="text/plain"
-                ),
+            # ..disk storage service "put" is called
+            call = mock_files_repo.put.call_args
+
+            kwargs = {k: v for k, v in call.kwargs.items() if k not in ["data"]}
+            req = make_request(*call.args, **kwargs)
+
+            assert req.url == upload_url
+            assert req.headers == {
+                "Authorization": auth_token,
+                "Content-Range": f"bytes {content_range}/{content_total}",
+            }
+            assert call.kwargs["data"] == FileStorage(
+                BytesIO(contents), filename=filename, content_type="text/plain"
             )
 
-        mock_files_repo.post.assert_called_once_with(
-            files_service_url + "/files/create",
-            json={
+        # ..files service "create" is called
+        calls = mock_files_repo.post.call_args_list
+        for call in calls:
+            req = make_request(*call.args, **call.kwargs)
+
+            assert req.url == files_service_url + "/files/create"
+            assert req.headers == {
+                "Authorization": auth_token,
+                "Content-Length": "89",
+                "Content-Type": "application/json",
+            }
+            assert call.kwargs["json"] == {
                 "file_name": filename,
                 "user_id": 2,
                 "file_path": filename,
                 "content_total": str(content_total),
-            },
-        )
+            }
 
     def test_read_file(
         self,
         client,
         auth,
+        auth_token,
         mock_files_repo: MagicMock,
         mocker: MagicMock,
         files_service_url,
+        make_request,
     ):
         """ Existing file can be read. """
         # Arrange
@@ -215,17 +281,27 @@ class TestFiles:
         # Assert
         assert response.status_code == 200
         assert b"test.txt" in response.data
-        assert b"test content" in response.data
+        # assert b"test content" in response.data
 
-        mock_files_repo.get.assert_any_call(
-            files_service_url + "/files/1",
-        )
-        mock_files_repo.get.assert_any_call(
-            files_service_url + "/files/content/1",
-        )
+        # ..get calls made to mock requests
+        calls = mock_files_repo.get.call_args_list
+        for call in calls:
+            req = make_request(*call.args, **call.kwargs)
+
+            assert req.url == files_service_url + "/files/1"
+            assert req.headers == {
+                "Authorization": auth_token,
+            }
 
     def test_delete_file(
-        self, client, app, auth, mock_files_repo: MagicMock, files_service_url
+        self,
+        client,
+        app,
+        auth,
+        auth_token,
+        mock_files_repo: MagicMock,
+        files_service_url,
+        make_request,
     ):
         """ Existing file can be deleted. """
         # Arrange
@@ -237,6 +313,11 @@ class TestFiles:
         # Assert
         assert response.status_code in [200, 302]
 
-        mock_files_repo.post.assert_called_once_with(
-            files_service_url + "/files/delete/1",
-        )
+        calls = mock_files_repo.post.call_args_list
+        for call in calls:
+            req = make_request(*call.args, **call.kwargs)
+
+            assert req.url == files_service_url + "/files/delete/1"
+            assert req.headers == {
+                "Authorization": auth_token,
+            }
