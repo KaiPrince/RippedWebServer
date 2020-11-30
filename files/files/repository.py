@@ -8,6 +8,9 @@
 
 import requests
 from flask import current_app
+from authlib.jose import jwt
+from datetime import timedelta
+from time import time
 
 
 def _base_url():
@@ -55,9 +58,24 @@ def download_file(file_path):
 
 def delete_file(file_path):
     """ Delete a file at the given file path. """
+
+    # TODO Delete this and use the auth service!
+    # or better yet install a pub/sub message broker
+    header = {"alg": "HS256"}
+
+    payload = {
+        "permissions": ["write: disk_storage"],
+        "iat": int(time()),
+        "exp": int(time()) + timedelta(hours=1).total_seconds(),
+    }
+
+    key = current_app.config["JWT_KEY"]
+    token = jwt.encode(header, payload, key).decode("utf-8")
+
     response = requests.post(
         _base_url() + "/storage/delete",
         headers={
+            "Authorization": token,
             "file_path": file_path,
         },
     )
