@@ -38,8 +38,8 @@ def permission_required(required_perm):
         def wrapped_view(**kwargs):
             if "Authorization" in request.headers:
                 auth_token = request.headers.get("Authorization")
-            elif "token" in request.query_string:
-                auth_token = request.query_string["token"]
+            elif "token" in request.args:
+                auth_token = request.args["token"]
             else:
                 auth_token = None
 
