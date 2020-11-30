@@ -1,6 +1,6 @@
 import functools
 
-from flask import g, redirect, session, url_for, request
+from flask import g, redirect, session, url_for, request, current_app, flash
 from requests.auth import AuthBase
 
 from .views import bp
@@ -25,6 +25,10 @@ def refresh_auth_token():
     token_data = session.get("auth_token_data")
 
     if token_data is not None and is_token_expired(token_data):
+        session.clear()
+        flash("Session expired. Please log in again.")
+
+        current_app.logger.debug("Auth token expired " + str(token_data))
         return redirect(url_for("auth.login"))
 
 

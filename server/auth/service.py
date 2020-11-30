@@ -44,6 +44,6 @@ def is_token_expired(token) -> bool:
     if "exp" in token:
         expiry = token["exp"]
         now = int(time())
-        return now < expiry
+        return now > expiry
     else:
         return False
