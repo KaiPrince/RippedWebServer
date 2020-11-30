@@ -4,10 +4,20 @@ import common
 
 # from werkzeug.exceptions import abort
 import storage.service as service
-from flask import Blueprint, current_app, request, send_from_directory, url_for, abort
+from flask import (
+    Blueprint,
+    current_app,
+    request,
+    send_from_directory,
+    url_for,
+    abort,
+    safe_join,
+    render_template,
+)
 from flask.helpers import BadRequest, NotFound
 
 from auth.middleware import permission_required
+from storage.sockets import socket_io
 
 # from http import HTTPStatus
 
@@ -15,7 +25,7 @@ from auth.middleware import permission_required
 # from .utils import allowed_file
 
 
-bp = Blueprint("storage", __name__, url_prefix="/storage")
+bp = Blueprint("storage", __name__, url_prefix="/storage", template_folder="templates")
 
 
 @bp.route("/")
@@ -75,8 +85,8 @@ def write(file_path):
     return {"file_size": file_size}
 
 
-@bp.route("/download/<path:file_name>")
-@permission_required("read: disk_storage")
+@bp.route("/download-small/<path:file_name>")
+# @permission_required("read: disk_storage")
 def download(file_name):
     """ View for downloading a file. """
 
@@ -98,3 +108,24 @@ def delete(file_name):
         return NotFound(f"File {file_name} was not found.")
 
     return f"File {file_name} was deleted."
+
+
+@bp.route("/download/<path:file_name>")
+# @permission_required("read: disk_storage")
+def download_stream(file_name):
+    """ View for downloading a file. """
+
+    # if db_file is None or "file_path" not in db_file.keys():
+    #     abort(404)
+
+    file_dir = current_app.config["UPLOAD_FOLDER"]
+
+    file_path = safe_join(file_dir, file_name)
+
+    @socket_io.on("connect")
+    def connect():
+        content = service.get_file(file_path)
+        socket_io.emit("data", content)
+        socket_io.emit("done")
+
+    return render_template("download.html", file_path=file_path, file_name=file_name)

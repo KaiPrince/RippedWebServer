@@ -3,3 +3,5 @@ wfastcgi
 gunicorn
 python-dotenv
 authlib
+flask-socketio
+eventlet

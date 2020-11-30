@@ -12,7 +12,6 @@ class Config(object):
 
     # Import config from environment
     SECRET_KEY = os.getenv("SECRET_KEY")
-    DATABASE = os.getenv("DATABASE")
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
     JWT_KEY = os.getenv("JWT_KEY")
 
@@ -20,10 +19,6 @@ class Config(object):
 
         if self.SECRET_KEY is None:
             logging.warning("SECRET_KEY environment variable not set.")
-
-        if self.DATABASE is None:
-            logging.warning("DATABASE environment variable not set.")
-            self.DATABASE = os.path.join(app.instance_path, "web_server.sqlite")
 
         if self.UPLOAD_FOLDER is None:
             logging.warning("UPLOAD_FOLDER environment variable not set.")

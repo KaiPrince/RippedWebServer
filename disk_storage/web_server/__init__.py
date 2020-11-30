@@ -11,6 +11,7 @@ import os
 import storage.views
 from config import TestingConfig, getConfig
 from flask import Flask
+from storage import sockets
 
 
 def create_app(test_config=None):
@@ -34,6 +35,7 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    sockets.init_app(app)
     storage.init_app(app)
     app.register_blueprint(storage.views.bp)
 
