@@ -21,7 +21,6 @@ services:
       UPLOAD_FOLDER: /upload
       FLASK_ENV: "development" # TEMP
       SECRET_KEY: "dev" # TEMP
-      AUTH_SERVICE_URL: http://rippedwebserver_auth_1:5000
     ports:
       - 5002:5000
     volumes:
