@@ -11,7 +11,8 @@ from flask import (
 )
 import auth.service as service
 from authlib.jose import jwt
-from datetime import datetime, timedelta
+from datetime import timedelta
+from time import time
 
 bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder="templates")
 
@@ -66,8 +67,8 @@ def login():
             "sub": user["id"],
             "name": user["username"],
             "permissions": service.get_user_permissions(user["id"]),
-            "iat": datetime.now(),
-            "exp": datetime.now() + timedelta(hours=1),
+            "iat": int(time()),
+            "exp": int(time()) + timedelta(hours=1).total_seconds(),
         }
 
         key = current_app.config["JWT_KEY"]
