@@ -172,7 +172,13 @@ def download(id):
     """ View for downloading a file. """
 
     download_url = service.get_download_url(id)
-    return redirect(download_url)
+
+    # TODO add expiry!
+    auth_token = g.auth_token
+
+    full_url = f"{download_url}?token={auth_token}"
+
+    return redirect(full_url)
 
 
 @bp.route("/delete/<int:id>", methods=["GET", "POST"])
