@@ -124,8 +124,10 @@ def download_stream(file_name):
 
     @socket_io.on("connect")
     def connect():
-        content = service.get_file(file_path)
-        socket_io.emit("data", content)
+        service.pass_in_chunks(
+            file_path, lambda content: socket_io.emit("data", content)
+        )
+
         socket_io.emit("done")
 
     return render_template("download.html", file_path=file_path, file_name=file_name)

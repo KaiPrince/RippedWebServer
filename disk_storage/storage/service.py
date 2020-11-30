@@ -22,6 +22,21 @@ def get_file(file_name):
     return content
 
 
+def pass_in_chunks(file_name: str, func):
+    with open(file_name, "rb") as f:
+        for chunk in read_in_chunks(f):
+            func(chunk)
+
+
+def read_in_chunks(file_object, chunk_size=1024):
+    """ Consumes an open file handle and generatively produces binary data. """
+    while True:
+        data = file_object.read(chunk_size)
+        if not data:
+            break
+        yield data
+
+
 def create_file(file_name, file_size):
 
     filename = secure_filename(file_name)
