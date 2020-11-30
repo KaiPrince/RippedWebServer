@@ -9,6 +9,7 @@
 import requests
 from flask import current_app
 from authlib.jose import jwt
+from time import time
 
 
 def _base_url():
@@ -37,3 +38,12 @@ def get_user_data_from_auth_token(token) -> dict:
     body = jwt.decode(token, current_app.secret_key)
 
     return body
+
+
+def is_token_expired(token) -> bool:
+    if "exp" in token:
+        expiry = token["exp"]
+        now = int(time())
+        return now < expiry
+    else:
+        return False

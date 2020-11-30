@@ -1,9 +1,10 @@
 import functools
 
-from flask import g, redirect, session, url_for
+from flask import g, redirect, session, url_for, request
 from requests.auth import AuthBase
 
 from .views import bp
+from .service import is_token_expired
 
 
 @bp.before_app_request
@@ -16,6 +17,9 @@ def load_logged_in_user():
 @bp.before_app_request
 def load_auth_token():
     auth_token = session.get("auth_token")
+
+    if is_token_expired(auth_token):
+        return redirect(url_for("auth.login"))
 
     g.auth_token = auth_token
 
