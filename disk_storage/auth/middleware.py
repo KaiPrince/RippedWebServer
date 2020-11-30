@@ -85,7 +85,7 @@ def permission_required(required_perm):
                     return abort(403)
             except RuntimeError:
                 current_app.logger.info(
-                    "Auth token could not be decoded. "
+                    "Auth token invalid. "
                     + str(
                         {
                             "route": request.path,

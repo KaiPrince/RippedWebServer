@@ -13,6 +13,9 @@ from flask import current_app
 
 def decode_auth_token(token: str) -> dict:
     try:
-        return jwt.decode(token, current_app.config["JWT_KEY"])
+        claim = jwt.decode(token, current_app.config["JWT_KEY"])
+        claim.validate()
+
+        return claim
     except AuthlibBaseError:
         raise RuntimeError()
