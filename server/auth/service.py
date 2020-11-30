@@ -34,8 +34,8 @@ def get_auth_token(username, password) -> dict:
     return token
 
 
-def get_user_data_from_auth_token(token) -> dict:
-    body = jwt.decode(token, current_app.secret_key)
+def get_payload_from_auth_token(token) -> dict:
+    body = jwt.decode(token, current_app.config["JWT_KEY"])
 
     return body
 

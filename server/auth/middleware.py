@@ -16,12 +16,16 @@ def load_logged_in_user():
 
 @bp.before_app_request
 def load_auth_token():
-    auth_token = session.get("auth_token")
+    g.auth_token = session.get("auth_token")
+    g.auth_token_data = session.get("auth_token_data")
 
-    if is_token_expired(auth_token):
+
+@bp.before_app_request
+def refresh_auth_token():
+    token_data = session.get("auth_token_data")
+
+    if token_data is not None and is_token_expired(token_data):
         return redirect(url_for("auth.login"))
-
-    g.auth_token = auth_token
 
 
 def login_required(view):

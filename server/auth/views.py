@@ -43,19 +43,20 @@ def login():
 
         try:
             auth_token = service.get_auth_token(username, password)
-            user = service.get_user_data_from_auth_token(auth_token)
+            payload = service.get_payload_from_auth_token(auth_token)
 
             session.clear()
 
-            session["user"] = {"username": user["name"], "id": user["sub"]}
+            session["user"] = {"username": payload["name"], "id": payload["sub"]}
             session["auth_token"] = auth_token
+            session["auth_token_data"] = payload
 
             current_app.logger.debug(
                 "Log in successful. "
                 + str(
                     {
-                        "username": user["name"],
-                        "id": user["sub"],
+                        "username": payload["name"],
+                        "id": payload["sub"],
                         "auth_token": auth_token,
                     }
                 )
