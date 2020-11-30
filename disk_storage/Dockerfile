@@ -13,3 +13,5 @@ COPY . .
 ENTRYPOINT [ "gunicorn" ]
 
 CMD [ "app:create_app()", "--bind", "0.0.0.0:5000" ]
+
+# CMD [ "app.create_app()", "--worker-class", "eventlet", "-w", "1"]
