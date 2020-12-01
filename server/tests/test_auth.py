@@ -1,7 +1,8 @@
-import pytest
-from flask import session
 from unittest.mock import MagicMock
+
+import pytest
 from authlib.jose import jwt
+from flask import session
 
 
 @pytest.mark.skip

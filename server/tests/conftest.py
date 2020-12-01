@@ -2,14 +2,13 @@ import os
 from unittest.mock import MagicMock
 
 import pytest
+import requests
+from authlib.jose import jwt
+from flask import Flask
 from pytest_mock import MockerFixture
-from web_server import create_app
 
 from files.utils import copyfile
-from flask import Flask
-from authlib.jose import jwt
-import requests
-
+from web_server import create_app
 
 UPLOAD_FOLDER = os.path.join(".", "tests", "uploads")
 

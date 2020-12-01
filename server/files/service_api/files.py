@@ -6,9 +6,11 @@
  * Description: This file contains functions that call the files service API.
 """
 
-import requests
-from auth.middleware import get_auth_middleware
 from abc import ABC, abstractmethod
+
+import requests
+
+from auth.middleware import get_auth_middleware
 
 
 class IFilesRepository(ABC):

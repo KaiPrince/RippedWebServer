@@ -8,9 +8,9 @@
 
 import os
 
-import auth.views
 from flask import Flask
 
+import auth.views
 import files.views
 
 from .config import getConfig

@@ -1,10 +1,10 @@
 import functools
 
-from flask import g, redirect, session, url_for, request, current_app, flash
+from flask import current_app, flash, g, redirect, request, session, url_for
 from requests.auth import AuthBase
 
-from .views import bp
 from .service import is_token_expired
+from .views import bp
 
 
 @bp.before_app_request

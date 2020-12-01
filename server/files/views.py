@@ -1,28 +1,16 @@
 import sys
-
-import common
-from auth.middleware import login_required
-from flask import (
-    Blueprint,
-    current_app,
-    flash,
-    g,
-    redirect,
-    render_template,
-    request,
-    session,
-    url_for,
-    send_file,
-    Response,
-)
 from io import BytesIO
 
+from flask import (Blueprint, Response, current_app, flash, g, redirect,
+                   render_template, request, send_file, session, url_for)
 from flask.helpers import NotFound
 from requests import HTTPError
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 
+import common
 import files.service as service
+from auth.middleware import login_required
 
 # from .utils import allowed_file
 
