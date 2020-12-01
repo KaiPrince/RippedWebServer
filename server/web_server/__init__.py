@@ -12,6 +12,7 @@ from flask import Flask
 
 import auth.views
 import files.views
+import logging_service
 
 from .config import getConfig
 
@@ -40,10 +41,13 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    # initialize apps
+    logging_service.init_app(app, "RippedWebServer")
     files.init_app(app)
+
+    # register routes
     app.register_blueprint(auth.views.bp)
     app.register_blueprint(files.views.bp)
-
     app.add_url_rule("/", endpoint="index", view_func=files.views.index)
 
     return app

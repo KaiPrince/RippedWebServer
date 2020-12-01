@@ -11,6 +11,7 @@ import os
 from flask import Flask
 
 import storage.views
+import logging_service
 from config import TestingConfig, getConfig
 
 
@@ -35,6 +36,7 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    logging_service.init_app(app, "RippedDiskStorageService")
     storage.init_app(app)
     app.register_blueprint(storage.views.bp)
 

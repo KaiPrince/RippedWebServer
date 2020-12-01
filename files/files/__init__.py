@@ -5,6 +5,7 @@ from flask import Flask
 import auth
 import db
 import files.views
+import logging_service
 
 from .config import getConfig
 
@@ -32,6 +33,7 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    logging_service.init_app(app, "RippedFilesService")
     db.init_app(app)
     auth.init_app(app)
     app.register_blueprint(files.views.bp)

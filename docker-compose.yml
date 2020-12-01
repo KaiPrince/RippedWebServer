@@ -8,6 +8,7 @@ services:
       FILES_SERVICE_URL: http://rippedwebserver_files_1:5000
       DISK_STORAGE_SERVICE_URL: http://rippedwebserver_disk_storage_1:5000
       AUTH_SERVICE_URL: http://rippedwebserver_auth_1:5000
+      LOGGING_SERVICE_URL: http://localhost:5005/logger/log
     ports:
       - 5000:5000
 

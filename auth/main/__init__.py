@@ -13,6 +13,7 @@ import db
 from flask import Flask
 
 import auth
+import logging_service
 
 from .config import getConfig
 
@@ -41,6 +42,7 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    logging_service.init_app(app, "RippedAuthService")
     auth.init_app(app)
     db.init_app(app)
     app.register_blueprint(auth.views.bp)
