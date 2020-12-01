@@ -20,22 +20,22 @@ class Config(object):
     def __init__(self, app: Flask):
 
         if self.SECRET_KEY is None:
-            logging.warning("SECRET_KEY environment variable not set.")
+            app.logger.warning("SECRET_KEY environment variable not set.")
 
         if self.UPLOAD_FOLDER is None:
-            logging.warning("UPLOAD_FOLDER environment variable not set.")
+            app.logger.warning("UPLOAD_FOLDER environment variable not set.")
             self.UPLOAD_FOLDER = os.path.join(app.instance_path, "uploads")
 
         if self.JWT_KEY is None:
-            logging.warning("JWT_KEY environment variable not set.")
+            app.logger.warning("JWT_KEY environment variable not set.")
             self.JWT_KEY = "dev"
 
         if self.LOGGING_SERVICE_URL is None:
-            logging.warning("LOGGING_SERVICE_URL environment variable not set.")
+            app.logger.warning("LOGGING_SERVICE_URL environment variable not set.")
             self.LOGGING_SERVICE_URL = "http://localhost:5005/logger/log"
 
         if self.LOGGING_AUTH_TOKEN is None:
-            logging.warning("LOGGING_AUTH_TOKEN environment variable not set.")
+            app.logger.warning("LOGGING_AUTH_TOKEN environment variable not set.")
             self.LOGGING_AUTH_TOKEN = "dev"
 
 
@@ -89,7 +89,7 @@ def getConfig(app: Flask):
     elif mode == "TESTING":
         return TestingConfig(app)
     else:
-        logging.warning(
+        app.logger.warning(
             "FLASK_ENV environment variable not set. Defaulting to DEVELOPMENT mode."
         )
         return DevelopmentConfig(app)
