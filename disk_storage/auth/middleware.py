@@ -8,7 +8,8 @@
 
 from functools import wraps
 
-from flask import g, redirect, session, url_for, request, abort, current_app
+from flask import abort, current_app, g, redirect, request, session, url_for
+
 import auth.service as service
 
 # from files.views import bp
