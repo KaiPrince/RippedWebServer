@@ -70,13 +70,13 @@ def create():
             content_total = file_size
 
         try:
-            return service.create_file(
+            return service.upload_file(
                 file_name, filename, content_range, content_total, file
             )
 
-        except HTTPError as e:
+        except (HTTPError, ConnectionError) as e:
             current_app.logger.warn(
-                "PUT file to files service has failed. "
+                "POST or PUT to files service has failed. "
                 + str(
                     {
                         "status_code": e.response.status_code,
@@ -84,6 +84,7 @@ def create():
                     }
                 )
             )
+
             flash("File upload failed.")
             session.pop("file_id", None)
             current_app.logger.debug(
