@@ -38,7 +38,7 @@ def index():
 @login_required
 def create():
     def cleanup_session():
-        session.pop("file_id")
+        session.pop("file_id", None)
         current_app.logger.debug(
             "Removed File Id from session. " + str({"session": session})
         )
@@ -120,10 +120,7 @@ def create():
             + str({"file_id": session["file_id"], "session": session}),
         )
 
-        session.pop("file_id", None)
-        current_app.logger.debug(
-            "Removed File Id from session. " + str({"session": session})
-        )
+        cleanup_session()
 
     return render_template("files/create.html")
 
