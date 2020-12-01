@@ -37,6 +37,12 @@ def index():
 @bp.route("/create", methods=["GET", "POST"])
 @login_required
 def create():
+    def cleanup_session():
+        session.pop("file_id")
+        current_app.logger.debug(
+            "Removed File Id from session. " + str({"session": session})
+        )
+
     if request.method == "POST":
         file_name = request.form["file_name"]
         file = request.files["file"]
@@ -75,38 +81,38 @@ def create():
                 file_name, filename, content_range, content_total, file
             )
 
-        except (
-            HTTPError,
-            ConnectionError,
-            ConnectionAbortedError,
-            r_ConnectionError,
-        ) as e:
-            current_app.logger.warn(
+        except (HTTPError) as e:
+            current_app.logger.error(
                 "POST or PUT to files service has failed. "
                 + str(
                     {
                         "status_code": e.response.status_code,
                         "response": e.response.content,
                     }
-                    if isinstance(e, HTTPError)
-                    else ""
                 )
             )
 
-            flash("File upload failed.")
-            session.pop("file_id", None)
-            current_app.logger.debug(
-                "Removed File Id from session. " + str({"session": session})
+            flash("File upload failed.", category="error")
+            cleanup_session()
+            return redirect(url_for("files.index"))
+        except (
+            ConnectionError,
+            ConnectionAbortedError,
+            r_ConnectionError,
+        ) as e:
+            current_app.logger.error(
+                "POST or PUT to files service has failed. " + str(e)
             )
 
+            flash("The files service is unavailable.", category="error")
+            cleanup_session()
             return redirect(url_for("files.index"))
         except Exception as e:
-            current_app.logger.warn("Exception raised: " + str(e))
-            session.pop("file_id", None)
-            current_app.logger.debug(
-                "Removed File Id from session. " + str({"session": session})
-            )
-            raise e
+            current_app.logger.error("Exception raised: " + str(e))
+
+            flash("An unknown error has occured.", category="error")
+            cleanup_session()
+            return redirect(url_for("files.index"))
 
     if "file_id" in session:
         current_app.logger.debug(
