@@ -14,6 +14,8 @@ class Config(object):
     SECRET_KEY = os.getenv("SECRET_KEY")
     DATABASE = os.getenv("DATABASE")
     JWT_KEY = os.getenv("JWT_KEY")
+    LOGGING_SERVICE_URL = os.getenv("LOGGING_SERVICE_URL")
+    LOGGING_AUTH_TOKEN = os.getenv("LOGGING_AUTH_TOKEN")
 
     def __init__(self, app: Flask):
 
@@ -27,6 +29,14 @@ class Config(object):
         if self.JWT_KEY is None:
             logging.warning("JWT_KEY environment variable not set.")
             self.JWT_KEY = "dev"
+
+        if self.LOGGING_SERVICE_URL is None:
+            logging.warning("LOGGING_SERVICE_URL environment variable not set.")
+            self.LOGGING_SERVICE_URL = "http://localhost:5005/logger/log"
+
+        if self.LOGGING_AUTH_TOKEN is None:
+            logging.warning("LOGGING_AUTH_TOKEN environment variable not set.")
+            self.LOGGING_AUTH_TOKEN = "dev"
 
 
 # class Config(object):

@@ -17,6 +17,8 @@ class Config(object):
     DISK_STORAGE_SERVICE_URL = os.getenv("DISK_STORAGE_SERVICE_URL")
     JWT_KEY = os.getenv("JWT_KEY")
     PUBLIC_DISK_STORAGE_SERVICE_URL = os.getenv("PUBLIC_DISK_STORAGE_SERVICE_URL")
+    LOGGING_SERVICE_URL = os.getenv("LOGGING_SERVICE_URL")
+    LOGGING_AUTH_TOKEN = os.getenv("LOGGING_AUTH_TOKEN")
 
     def __init__(self, app: Flask):
 
@@ -44,6 +46,14 @@ class Config(object):
                 "PUBLIC_DISK_STORAGE_SERVICE_URL environment variable not set."
             )
             self.PUBLIC_DISK_STORAGE_SERVICE_URL = "http://localhost:5002"
+
+        if self.LOGGING_SERVICE_URL is None:
+            logging.warning("LOGGING_SERVICE_URL environment variable not set.")
+            self.LOGGING_SERVICE_URL = "http://localhost:5005/logger/log"
+
+        if self.LOGGING_AUTH_TOKEN is None:
+            logging.warning("LOGGING_AUTH_TOKEN environment variable not set.")
+            self.LOGGING_AUTH_TOKEN = "dev"
 
 
 # class Config(object):
