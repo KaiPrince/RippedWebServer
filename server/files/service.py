@@ -88,6 +88,8 @@ def upload_file(file_name, file_path, content_range, content_total, file):
 
             return redirect(url_for("files.index"))
 
+    return {"files": [{"name": file_name}]}
+
 
 def create_file(file_name, user_id, file_path, content_total):
     """ Consumes file details and produces a file id. """

@@ -169,8 +169,34 @@ def delete(id):
         abort(404)
 
     if request.method == "POST":
+        try:
+            service.delete_file(id)
 
-        service.delete_file(id)
+        except (HTTPError) as e:
+            current_app.logger.error(
+                "DELETE to files service has failed. "
+                + str(
+                    {
+                        "status_code": e.response.status_code,
+                        "response": e.response.content,
+                    }
+                )
+            )
 
-        return redirect(url_for("files.index"))
+            flash(f"Delete has failed. ({e.response.status_code})", category="error")
+        except (
+            ConnectionError,
+            ConnectionAbortedError,
+            r_ConnectionError,
+        ) as e:
+            current_app.logger.error("DELETE to files service has failed. " + str(e))
+
+            flash("The files service could not be reached.", category="error")
+        except Exception as e:
+            current_app.logger.error("Exception raised: " + str(e))
+
+            flash("An unknown error has occured.", category="error")
+        finally:
+            return redirect(url_for("files.index"))
+
     return render_template("files/delete.html", file=file)
