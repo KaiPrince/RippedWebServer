@@ -47,7 +47,7 @@ def create():
         return abort(507)
 
     return {
-        "file_name": file_name_on_disk,
+        "file_path": file_name_on_disk,
         "upload_url": url_for("storage.write", file_path=file_path),
     }
 

@@ -12,7 +12,7 @@ class TestAuth:
         # Arrange
         # Act
         response = client.get(
-            "/files/",
+            "/files/1",
         )
 
         # Assert
@@ -22,18 +22,18 @@ class TestAuth:
         # Arrange
         # Act
         response = client.get(
-            "/files/", headers={"Authorization": "thisisafakeauthtoken"}
+            "/files/1", headers={"Authorization": "thisisafakeauthtoken"}
         )
 
         # Assert
         assert response.status_code == 401
 
     def test_index(self, client, auth_token):
-        """ Index page displays a file name. """
+        """ Detail page displays a file name. """
         # Arrange
         # Act
         response = client.get(
-            "/files/",
+            "/files/1",
             headers={
                 "Authorization": auth_token,
             },

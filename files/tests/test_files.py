@@ -4,14 +4,14 @@ from io import BytesIO
 from unittest.mock import MagicMock
 
 from flask import Flask
+from werkzeug.datastructures import FileStorage
 
 # import pytest
 from db.service import get_db
-from werkzeug.datastructures import FileStorage
 
 
 class TestFiles:
-    def test_index(self, client, auth_token, disk_storage_service_url):
+    def test_index(self, client, auth_token, public_disk_storage_service_url):
         """ Index page displays a file name. """
         # Arrange
 
@@ -24,8 +24,10 @@ class TestFiles:
         )
 
         # Assert
-        upload_url = disk_storage_service_url + "/storage/create/" + "test.txt"
-        download_url = disk_storage_service_url + "/storage/download/" + "test.txt"
+        upload_url = public_disk_storage_service_url + "/storage/create/" + "test.txt"
+        download_url = (
+            public_disk_storage_service_url + "/storage/download/" + "test.txt"
+        )
 
         assert response.status_code == 200
         assert b"test.txt" in response.data
@@ -43,25 +45,28 @@ class TestFiles:
         client,
         app: Flask,
         auth_token,
-        mock_files_repo: MagicMock,
+        mock_disk_repo: MagicMock,
         mocker: MagicMock,
         disk_storage_service_url,
+        public_disk_storage_service_url,
+        make_request,
+        disk_auth_token,
     ):
         """ File can be uploaded to web server. """
         # Arrange
         filename = "test2.txt"
         contents = b"my file contents"
-        content_size = sys.getsizeof(contents) - 1
+        content_size = sys.getsizeof(contents)
         file_path = filename
         user_id = 2
         file_id = 2
 
-        upload_url = disk_storage_service_url + "/storage/create/" + file_path
+        upload_url = public_disk_storage_service_url + "/storage/create/" + file_path
 
         _get_response = mocker.MagicMock()
         _get_response.json.return_value = {"upload_url": upload_url}
 
-        mock_files_repo.post.return_value = _get_response
+        mock_disk_repo.post.return_value = _get_response
 
         json = {
             "file_name": filename,
@@ -83,13 +88,20 @@ class TestFiles:
         # Assert
 
         # ..repo is called
-        mock_files_repo.post.assert_called_once_with(
-            disk_storage_service_url + "/storage/create",
-            json={
+        calls = mock_disk_repo.post.call_args_list
+        for call in calls:
+            req = make_request(*call.args, **call.kwargs)
+
+            assert req.url == disk_storage_service_url + "/storage/create"
+            assert req.headers == {
+                "Content-Length": str(content_size),
+                "Content-Type": "application/json",
+                "Authorization": disk_auth_token,
+            }
+            assert call.kwargs["json"] == {
                 "file_path": file_path,
                 "content_total": str(content_size),
-            },
-        )
+            }
 
         # ..No error
         assert response.status_code < 400
@@ -119,9 +131,9 @@ class TestFiles:
         app: Flask,
         client,
         auth_token,
-        mock_files_repo: MagicMock,
+        mock_disk_repo: MagicMock,
         mocker: MagicMock,
-        disk_storage_service_url,
+        public_disk_storage_service_url,
     ):
         """ Existing file can be read. """
         # Arrange
@@ -139,12 +151,14 @@ class TestFiles:
                 str(file_id),
             ).fetchone()[0]
 
-        download_url = disk_storage_service_url + "/storage/download/" + file_path
+        download_url = (
+            public_disk_storage_service_url + "/storage/download/" + file_path
+        )
 
         _get_response = mocker.MagicMock()
         _get_response.json.return_value = {"download_url": download_url}
 
-        mock_files_repo.get.return_value = _get_response
+        mock_disk_repo.get.return_value = _get_response
 
         # Act
         # ..get file details
@@ -183,8 +197,10 @@ class TestFiles:
         client,
         app: Flask,
         auth_token,
-        mock_files_repo: MagicMock,
+        mock_disk_repo: MagicMock,
         disk_storage_service_url,
+        make_request,
+        disk_auth_token,
     ):
         """ Existing file can be deleted. """
         # Arrange
@@ -208,9 +224,12 @@ class TestFiles:
             ).fetchone()[0]
             assert count == 0
 
-        mock_files_repo.post.assert_called_with(
-            disk_storage_service_url + "/storage/delete",
-            headers={
-                "file_path": file_path,
-            },
-        )
+        # ..repo is called
+        calls = mock_disk_repo.post.call_args_list
+        for call in calls:
+            req = make_request(*call.args, **call.kwargs)
+
+            assert req.url == disk_storage_service_url + "/storage/delete/" + file_path
+            assert req.headers == {
+                "Authorization": disk_auth_token,
+            }

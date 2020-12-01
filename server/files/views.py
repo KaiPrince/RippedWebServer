@@ -173,7 +173,6 @@ def download(id):
 
     download_url = service.get_download_url(id)
 
-    # TODO add expiry!
     auth_token = g.auth_token
 
     full_url = f"{download_url}?token={auth_token}"
