@@ -92,7 +92,9 @@ def create():
                 )
             )
 
-            flash("File upload failed.", category="error")
+            flash(
+                f"File upload has failed. ({e.response.status_code})", category="error"
+            )
             cleanup_session()
             return redirect(url_for("files.index"))
         except (
@@ -104,7 +106,7 @@ def create():
                 "POST or PUT to files service has failed. " + str(e)
             )
 
-            flash("The files service is unavailable.", category="error")
+            flash("The files service could not be reached.", category="error")
             cleanup_session()
             return redirect(url_for("files.index"))
         except Exception as e:
