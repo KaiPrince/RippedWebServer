@@ -1,13 +1,12 @@
 import logging
 import os
 
-from flask import current_app, flash, g
+from flask import current_app, flash, g, session, redirect, url_for
 from requests import ConnectionError, HTTPError
 from werkzeug.exceptions import abort
 
 from files.service_api.disk_storage import IDiskStorageRepository
-from files.service_api.disk_storage import \
-    make_repository as make_disk_repository
+from files.service_api.disk_storage import make_repository as make_disk_repository
 from files.service_api.files import IFilesRepository
 from files.service_api.files import make_repository as make_files_repository
 
@@ -51,6 +50,43 @@ def get_file(id):
 
 def get_download_url(id):
     return get_file(id)["download_url"]
+
+
+def upload_file(file_name, file_path, content_range, content_total, file):
+    """ Consumes file data and produces a Response. """
+
+    if "file_id" not in session:
+        current_app.logger.debug(
+            "File Id not found on session. This must be the first packet."
+        )
+        # ..Send create request on first packet.
+        # TODO pass total size and check free disk space
+        file_id = create_file(file_name, g.user["id"], file_path, content_total)
+
+        if not file_id:
+            flash("Couldn't create new file.", category="error")
+            return abort(500)
+
+        session["file_id"] = file_id
+    else:
+        current_app.logger.debug(
+            "File Id found on session. "
+            + str({"file_id": session["file_id"], "session": session}),
+        )
+        file_id = session["file_id"]
+
+        put_file(file_id, content_range, content_total, file)
+
+        # Clean session
+        content_range_end = int(content_range.split("-")[-1])
+        if content_range_end >= int(content_total) - 1:
+            current_app.logger.debug("Final packet recieved.")
+            session.pop("file_id", None)
+            current_app.logger.debug(
+                "Removed File Id from session. " + str({"session": session})
+            )
+
+            return redirect(url_for("files.index"))
 
 
 def create_file(file_name, user_id, file_path, content_total):
