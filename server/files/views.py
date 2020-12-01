@@ -13,6 +13,7 @@ from flask import (
 )
 from flask.helpers import NotFound
 from requests import HTTPError
+from requests.exceptions import ConnectionError as r_ConnectionError
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 
@@ -74,7 +75,12 @@ def create():
                 file_name, filename, content_range, content_total, file
             )
 
-        except (HTTPError, ConnectionError) as e:
+        except (
+            HTTPError,
+            ConnectionError,
+            ConnectionAbortedError,
+            r_ConnectionError,
+        ) as e:
             current_app.logger.warn(
                 "POST or PUT to files service has failed. "
                 + str(
@@ -82,6 +88,8 @@ def create():
                         "status_code": e.response.status_code,
                         "response": e.response.content,
                     }
+                    if isinstance(e, HTTPError)
+                    else ""
                 )
             )
 
@@ -93,6 +101,7 @@ def create():
 
             return redirect(url_for("files.index"))
         except Exception as e:
+            current_app.logger.warn("Exception raised: " + str(e))
             session.pop("file_id", None)
             current_app.logger.debug(
                 "Removed File Id from session. " + str({"session": session})
