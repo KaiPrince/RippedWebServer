@@ -3,36 +3,27 @@ import tempfile
 from unittest.mock import MagicMock
 
 import pytest
-from db.service import get_db, init_db
+from flask import Flask
 from pytest_mock import MockerFixture
 
+from db.service import get_db, init_db
 from files import create_app
-from files.utils import copyfile
-from flask import Flask
+from authlib.jose import jwt
+import requests
+
 
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
     _data_sql = f.read().decode("utf8")
 
-UPLOAD_FOLDER = os.path.join(".", "tests", "uploads")
-
 
 @pytest.fixture
-def app(tmp_path, mock_files_repo) -> Flask:
+def app(mock_disk_repo) -> Flask:
     db_fd, db_path = tempfile.mkstemp()
-
-    temp_uploads_folder = tmp_path
-    # Copy files in test uploads folder to temp directory
-    filesToCopy = os.listdir(UPLOAD_FOLDER)
-    for f in filesToCopy:
-        with open(os.path.join(UPLOAD_FOLDER, f), "rb") as src:
-            dest_file = temp_uploads_folder / f
-            copyfile(src, dest_file)
 
     app = create_app(
         {
             "TESTING": True,
             "DATABASE": db_path,
-            "UPLOAD_FOLDER": temp_uploads_folder,
         }
     )
 
@@ -57,8 +48,8 @@ def runner(app: Flask):
 
 
 @pytest.fixture
-def mock_files_repo(mocker: MockerFixture) -> MagicMock:
-    mock_func = mocker.patch("files.repository.requests")
+def mock_disk_repo(mocker: MockerFixture) -> MagicMock:
+    mock_func = mocker.patch("service_api.disk_storage.requests")
 
     return mock_func
 
@@ -69,19 +60,59 @@ def disk_storage_service_url(app: Flask) -> str:
 
 
 @pytest.fixture
-def auth_token() -> str:
+def public_disk_storage_service_url(app: Flask) -> str:
+    return app.config["PUBLIC_DISK_STORAGE_SERVICE_URL"]
+
+
+@pytest.fixture
+def disk_auth_token(mocker: MockerFixture) -> str:
+    token = "testauthtoken"
+    mock_func = mocker.patch("files.service.create_auth_token")
+    mock_func.return_value = token
+
+    yield token
+
+    mock_func.clear()
+
+
+@pytest.fixture
+def auth_token(app) -> str:
     """
     {
         "sub": "1",
-        "name": "admin",
+        "name": "test",
         "permissions": ["read: files", "write: files"],
         "iat": 1516239022
     }
     """
-    return (
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
-        "eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicGVybWlzc"
-        "2lvbnMiOlsicmVhZDogZmlsZXMiLCJ3cml0ZTogZmlsZXM"
-        "iXSwiaWF0IjoxNTE2MjM5MDIyfQ."
-        "mSqI0DqmeJfOewzvfgm9pUxQtEnV8EYGaoESpqLWais"
-    )
+
+    username = "test"
+    permissions = [
+        "read: files",
+        "write: files",
+        "read: disk_storage",
+        "write: disk_storage",
+    ]
+
+    token = jwt.encode(
+        {"alg": "HS256"},
+        {"sub": 2, "name": username, "permissions": permissions},
+        app.config["JWT_KEY"],
+    ).decode("utf-8")
+
+    return token
+
+
+@pytest.fixture
+def make_request() -> requests.PreparedRequest:
+    """ Consumes any arguments and returns a prepared request. """
+
+    def func(*args, **kwargs):
+
+        req: requests.PreparedRequest = requests.Request(
+            "GET", *args, **kwargs
+        ).prepare()
+
+        return req
+
+    return func

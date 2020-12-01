@@ -8,9 +8,10 @@
 
 import os
 
+from flask import Flask
+
 import storage.views
 from config import TestingConfig, getConfig
-from flask import Flask
 
 
 def create_app(test_config=None):

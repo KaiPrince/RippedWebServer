@@ -6,12 +6,14 @@
  * Description: This file contains functions that call the files service API.
 """
 
-import requests
-from auth.middleware import get_auth_middleware
 from abc import ABC, abstractmethod
 
+import requests
 
-class IRepository(ABC):
+from auth.middleware import get_auth_middleware
+
+
+class IFilesRepository(ABC):
     """
     * Class Name: IRepository
     * Purpose: This purpose of this class is to provide an interface for all
@@ -43,20 +45,11 @@ class IRepository(ABC):
         pass
 
     @abstractmethod
-    def write(self, file_id, content_range, content_total, content) -> int:
-        """ Consumes a file id, content, and content data, and produces a file size. """
-        pass
-
-    @abstractmethod
-    def get_download_url(self, file_id):
-        pass
-
-    @abstractmethod
     def delete(self, file_id) -> None:
         pass
 
 
-class FilesServiceRepository(IRepository):
+class FilesAPIRepository(IFilesRepository):
     """
     * Class Name: FilesServiceRepository
     * Purpose: This purpose of this class is to make requests to the files service.
@@ -108,44 +101,6 @@ class FilesServiceRepository(IRepository):
     def edit(self, file_id, file_name, user_id, file_path, content_total):
         raise NotImplementedError
 
-    def write(self, file_id, content_range, content_total, content):
-        upload_url = self.get_upload_url(file_id)
-
-        return requests.put(
-            upload_url,
-            headers={
-                "Content-Range": f"bytes {content_range}/{content_total}",
-            },
-            data=content,
-            auth=self.auth_middleware,
-        )
-
-    def get_upload_url(self, id):
-        file = self.get_by_id(id)
-
-        upload_url = file["upload_url"]
-
-        return upload_url
-
-    def get_download_url(self, id):
-        response = requests.get(
-            f"{self.base_url}/files/download/{id}", auth=self.auth_middleware
-        )
-
-        response.raise_for_status()
-
-        download_url = response.json()["download_url"]
-
-        return download_url
-
-    def download_file(self, id):
-        """ Consumes a file id and returns an Http Response. """
-        return requests.get(
-            f"{self.base_url}/files/download/{id}",
-            stream=True,
-            auth=self.auth_middleware,
-        )
-
     def delete(self, id):
         """ Delete a file with the matching id. """
         response = requests.post(
@@ -155,10 +110,10 @@ class FilesServiceRepository(IRepository):
         return response
 
 
-def get_repository(base_url: str, auth_token: str) -> IRepository:
+def make_repository(base_url: str, auth_token: str) -> IFilesRepository:
 
     if auth_token:
         auth_middleware = get_auth_middleware(auth_token)
     else:
         auth_middleware = None
-    return FilesServiceRepository(base_url, auth_middleware)
+    return FilesAPIRepository(base_url, auth_middleware)

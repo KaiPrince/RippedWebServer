@@ -1,6 +1,7 @@
 import os
 
 import pytest
+
 from storage.utils import copyfile
 from web_server import create_app
 

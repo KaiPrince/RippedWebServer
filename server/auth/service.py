@@ -6,10 +6,11 @@
  * Description: This file contains service functions for the auth app.
 """
 
-import requests
-from flask import current_app
-from authlib.jose import jwt
 from time import time
+
+import requests
+from authlib.jose import jwt
+from flask import current_app
 
 
 def _base_url():

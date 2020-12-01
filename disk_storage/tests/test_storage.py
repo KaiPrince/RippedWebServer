@@ -2,6 +2,8 @@ import os
 import sys
 from io import BytesIO
 
+import pytest
+
 
 class TestStorage:
     # @pytest.mark.parametrize([])
@@ -15,7 +17,8 @@ class TestStorage:
         assert response.status_code == 200
         assert b"test.txt" in response.data
 
-    def test_upload(self, client, app, auth_token):
+    @pytest.mark.parametrize("chunk", [True, False])
+    def test_upload(self, client, app, auth_token, chunk):
         """ File can be uploaded to web server. """
 
         # Arrange
@@ -37,61 +40,17 @@ class TestStorage:
             },
         )
         assert response.status_code in [200, 201]
-        assert file_path in response.json["file_name"]
-        assert response.json["upload_url"] == "/storage/create/" + file_path
-
-        with app.app_context():
-            assert file_path in os.listdir(app.config["UPLOAD_FOLDER"])
-
-        response = client.put(
-            "/storage/create/" + file_path,
-            buffered=True,
-            headers={
-                "Authorization": auth_token,
-                "Content-Range": f"bytes {content_range}/{content_total}",
-                # "file_path": file_path,
-            },
-            data=BytesIO(contents),
-        )
-        assert response.status_code == 200
-
-        # Assert
-
-        with app.app_context():
-            assert file_path in os.listdir(app.config["UPLOAD_FOLDER"])
-            with open(os.path.join(app.config["UPLOAD_FOLDER"], file_path), "rb") as f:
-                assert contents in f.read()
-
-    def test_upload_parts(self, client, app, auth_token):
-        """ File can be uploaded to web server. """
-
-        # Arrange
-        file_path = "test2.txt"
-        contents = b"my file contents"
-        content_size = sys.getsizeof(contents) - 1
-
-        content_range = f"0-{content_size}"
-        content_total = content_size
-
-        # Act
-
-        response = client.post(
-            "/storage/create/",
-            headers={"Authorization": auth_token},
-            json={
-                "file_path": file_path,
-                "content_total": str(content_size),
-            },
-        )
-        assert response.status_code in [200, 201]
-        assert file_path in response.json["file_name"]
+        assert file_path in response.json["file_path"]
         assert response.json["upload_url"] == "/storage/create/" + file_path
 
         with app.app_context():
             assert file_path in os.listdir(app.config["UPLOAD_FOLDER"])
 
         # ..splitting string into equal halves
-        contents_parts = contents[: len(contents) // 2], contents[len(contents) // 2 :]
+        contents_parts = (
+            contents[: len(contents) // 2],
+            contents[len(contents) // 2 :] if chunk else contents,
+        )
 
         for index, part in enumerate(contents_parts):
             begin = sys.getsizeof(part) * index

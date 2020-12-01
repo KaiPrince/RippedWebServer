@@ -2,20 +2,19 @@ import os
 from unittest.mock import MagicMock
 
 import pytest
+import requests
+from authlib.jose import jwt
+from flask import Flask
 from pytest_mock import MockerFixture
-from web_server import create_app
 
 from files.utils import copyfile
-from flask import Flask
-from authlib.jose import jwt
-import requests
-
+from web_server import create_app
 
 UPLOAD_FOLDER = os.path.join(".", "tests", "uploads")
 
 
 @pytest.fixture
-def app(tmp_path, mock_files_repo) -> Flask:
+def app(tmp_path, mock_files_repo, mock_disk_storage_repo) -> Flask:
 
     temp_uploads_folder = tmp_path
     # Copy files in test uploads folder to temp directory
@@ -80,7 +79,14 @@ def auth(client, auth_token, mock_auth_repo, mocker):
 
 @pytest.fixture
 def mock_files_repo(mocker: MockerFixture) -> MagicMock:
-    mock_func = mocker.patch("files.repository.requests")
+    mock_func = mocker.patch("files.service_api.files.requests")
+
+    return mock_func
+
+
+@pytest.fixture
+def mock_disk_storage_repo(mocker: MockerFixture) -> MagicMock:
+    mock_func = mocker.patch("files.service_api.disk_storage.requests")
 
     return mock_func
 

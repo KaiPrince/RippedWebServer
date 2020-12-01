@@ -1,10 +1,10 @@
 import os
 
-import db
 from flask import Flask
 
-import files.views
 import auth
+import db
+import files.views
 
 from .config import getConfig
 

@@ -1,12 +1,12 @@
 import os
 
+from flask import Blueprint, abort, current_app, request, send_from_directory, url_for
+from flask.helpers import BadRequest, NotFound
+
 import common
 
 # from werkzeug.exceptions import abort
 import storage.service as service
-from flask import Blueprint, current_app, request, send_from_directory, url_for, abort
-from flask.helpers import BadRequest, NotFound
-
 from auth.middleware import permission_required
 
 # from http import HTTPStatus
@@ -27,7 +27,7 @@ def index():
     return {"files": files}
 
 
-@bp.route("/create/", methods=["POST"])
+@bp.route("/create", methods=["POST"])
 @permission_required("write: disk_storage")
 def create():
     # Get params
@@ -47,7 +47,7 @@ def create():
         return abort(507)
 
     return {
-        "file_name": file_name_on_disk,
+        "file_path": file_name_on_disk,
         "upload_url": url_for("storage.write", file_path=file_path),
     }
 

@@ -1,18 +1,28 @@
 import logging
 import os
 
-from flask import current_app, flash, session
-
-from files.repository import get_repository as _get_repository, IRepository
+from flask import current_app, flash, g, session, redirect, url_for
+from requests import ConnectionError, HTTPError
 from werkzeug.exceptions import abort
-from requests import HTTPError, ConnectionError
+
+from files.service_api.disk_storage import IDiskStorageRepository
+from files.service_api.disk_storage import make_repository as make_disk_repository
+from files.service_api.files import IFilesRepository
+from files.service_api.files import make_repository as make_files_repository
 
 
-def get_repository() -> IRepository:
+def get_repository() -> IFilesRepository:
     base_url = current_app.config["FILES_SERVICE_URL"]
-    auth_token = session.get("auth_token")
+    auth_token = g.auth_token
 
-    return _get_repository(base_url, auth_token)
+    return make_files_repository(base_url, auth_token)
+
+
+def get_disk_repository() -> IDiskStorageRepository:
+    base_url = current_app.config["DISK_STORAGE_SERVICE_URL"]
+    auth_token = g.auth_token
+
+    return make_disk_repository(base_url, auth_token)
 
 
 def get_index():
@@ -37,31 +47,48 @@ def get_file(id):
 
     return repository.get_by_id(id)
 
+
 def get_download_url(id):
-    repository = get_repository()
+    return get_file(id)["download_url"]
 
-    return repository.get_download_url(id)
 
-def download_file(id):
-    """ Consumes an ID and produces binary data and meta data. """
+def upload_file(file_name, file_path, content_range, content_total, file):
+    """ Consumes file data and produces a Response. """
 
-    repository = get_repository()
+    if "file_id" not in session:
+        current_app.logger.debug(
+            "File Id not found on session. This must be the first packet."
+        )
+        # ..Send create request on first packet.
+        # TODO pass total size and check free disk space
+        file_id = create_file(file_name, g.user["id"], file_path, content_total)
 
-    file_path = repository.get_by_id(id)["file_path"]
-    result = repository.download_file(id)
+        if not file_id:
+            flash("Couldn't create new file.", category="error")
+            return abort(500)
 
-    result.raise_for_status()
+        session["file_id"] = file_id
+    else:
+        current_app.logger.debug(
+            "File Id found on session. "
+            + str({"file_id": session["file_id"], "session": session}),
+        )
+        file_id = session["file_id"]
 
-    raw = result.raw
+    put_file(file_id, content_range, content_total, file)
 
-    headers = dict(raw.headers)
+    # Clean session
+    content_range_end = int(content_range.split("-")[-1])
+    if content_range_end >= int(content_total) - 1:
+        current_app.logger.debug("Final packet recieved.")
+        session.pop("file_id", None)
+        current_app.logger.debug(
+            "Removed File Id from session. " + str({"session": session})
+        )
 
-    def generate():
-        for chunk in raw.stream(decode_content=False):
-            yield chunk
+        return redirect(url_for("files.index"))
 
-    # return (result.content, result.headers["Content-Type"], file_path)
-    return (generate(), headers, file_path)
+    return {"files": [{"name": file_name}]}
 
 
 def create_file(file_name, user_id, file_path, content_total):
@@ -73,12 +100,24 @@ def create_file(file_name, user_id, file_path, content_total):
 
     repository = get_repository()
 
-    return repository.create(file_name, user_id, file_path, content_total)
+    file_id = repository.create(file_name, user_id, file_path, content_total)
+
+    return file_id
 
 
 def put_file(file_id, content_range, content_total, content):
     """Consumes a file id, file content and content-range,
     and produces a file size."""
+
+    files_repo = get_repository()
+    file_path = files_repo.get_by_id(file_id)["file_path"]
+
+    if file_path is None:
+        return 0
+
+    repository = get_disk_repository()
+    file_size = repository.write(file_path, content_range, content_total, content)
+
     current_app.logger.debug(
         "put_file "
         + str(
@@ -86,17 +125,11 @@ def put_file(file_id, content_range, content_total, content):
                 "file_id": file_id,
                 "content_range": content_range,
                 "content_total": content_total,
-                "content": content,
+                "current size": file_size,
             }
         ),
     )
-    repository = get_repository()
-
-    response = repository.write(file_id, content_range, content_total, content)
-
-    response.raise_for_status()
-
-    return response.json()["file_size"]
+    return file_size
 
 
 def delete_file(id):

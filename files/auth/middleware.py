@@ -8,7 +8,9 @@
 
 from functools import wraps
 
-from flask import g, redirect, session, url_for, request, abort, current_app
+from flask import abort, current_app, g, redirect, request, session, url_for
+from requests.auth import AuthBase
+
 import auth.service as service
 
 # from files.views import bp
@@ -93,3 +95,24 @@ def permission_required(required_perm):
         return wrapped_view
 
     return decorator
+
+
+class JWTAuth(AuthBase):
+    """
+    * Class Name: JWTAuth
+    * Purpose: This purpose of this class is to inject an auth token into request
+    *   headers.
+    """
+
+    def __init__(self, auth_token):
+        # setup any auth-related data here
+        self._auth_token = auth_token
+
+    def __call__(self, r):
+        # modify and return the request
+        r.headers["Authorization"] = self._auth_token
+        return r
+
+
+def get_auth_middleware(auth_token: str) -> AuthBase:
+    return JWTAuth(auth_token)

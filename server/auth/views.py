@@ -1,15 +1,8 @@
-from flask import (
-    Blueprint,
-    flash,
-    redirect,
-    render_template,
-    request,
-    session,
-    url_for,
-    current_app,
-)
-import auth.service as service
+from flask import (Blueprint, current_app, flash, redirect, render_template,
+                   request, session, url_for)
 from requests.exceptions import HTTPError
+
+import auth.service as service
 
 bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder="templates")
 

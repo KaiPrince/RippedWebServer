@@ -1,7 +1,5 @@
 import sys
 
-import common
-from auth.middleware import login_required
 from flask import (
     Blueprint,
     current_app,
@@ -12,17 +10,16 @@ from flask import (
     request,
     session,
     url_for,
-    send_file,
-    Response,
 )
-from io import BytesIO
-
 from flask.helpers import NotFound
 from requests import HTTPError
+from requests.exceptions import ConnectionError as r_ConnectionError
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 
+import common
 import files.service as service
+from auth.middleware import login_required
 
 # from .utils import allowed_file
 
@@ -40,6 +37,12 @@ def index():
 @bp.route("/create", methods=["GET", "POST"])
 @login_required
 def create():
+    def cleanup_session():
+        session.pop("file_id", None)
+        current_app.logger.debug(
+            "Removed File Id from session. " + str({"session": session})
+        )
+
     if request.method == "POST":
         file_name = request.form["file_name"]
         file = request.files["file"]
@@ -57,81 +60,61 @@ def create():
         if file.filename == "":
             error = "No selected file"
 
+        # if allowed_file(file.filename):
         if error is not None:
             flash(error)
-        elif file:  # and allowed_file(file.filename):
+            return render_template("files/create.html")
 
-            filename = secure_filename(file.filename)
+        filename = secure_filename(file.filename)
 
-            if "Content-Range" in request.headers:
-                content_range, content_total = common.get_content_metadata(
-                    request.headers["Content-Range"]
+        if "Content-Range" in request.headers:
+            content_range, content_total = common.get_content_metadata(
+                request.headers["Content-Range"]
+            )
+        else:
+            file_size = sys.getsizeof(file)
+            content_range = f"0-{file_size}"
+            content_total = file_size
+
+        try:
+            return service.upload_file(
+                file_name, filename, content_range, content_total, file
+            )
+
+        except (HTTPError) as e:
+            current_app.logger.error(
+                "POST or PUT to files service has failed. "
+                + str(
+                    {
+                        "status_code": e.response.status_code,
+                        "response": e.response.content,
+                    }
                 )
-            else:
-                file_size = sys.getsizeof(file)
-                content_range = f"0-{file_size}"
-                content_total = file_size
+            )
 
-            if "file_id" not in session:
-                current_app.logger.debug(
-                    "File Id not found on session. This must be the first packet."
-                )
-                # ..Send create request on first packet.
-                # TODO pass total size and check free disk space
-                file_id = service.create_file(
-                    file_name, g.user["id"], filename, content_total
-                )
+            flash(
+                f"File upload has failed. ({e.response.status_code})", category="error"
+            )
+            cleanup_session()
+            return redirect(url_for("files.index"))
+        except (
+            ConnectionError,
+            ConnectionAbortedError,
+            r_ConnectionError,
+        ) as e:
+            current_app.logger.error(
+                "POST or PUT to files service has failed. " + str(e)
+            )
 
-                if not file_id:
-                    abort(500, "Couldn't create new file.")
+            flash("The files service could not be reached.", category="error")
+            cleanup_session()
+            return redirect(url_for("files.index"))
+        except Exception as e:
+            current_app.logger.error("Exception raised: " + str(e))
 
-                session["file_id"] = file_id
-            else:
-                current_app.logger.debug(
-                    "File Id found on session. "
-                    + str({"file_id": session["file_id"], "session": session}),
-                )
-                file_id = session["file_id"]
-
-            try:
-                service.put_file(file_id, content_range, content_total, file)
-
-                # Clean session
-                content_range_end = int(content_range.split("-")[-1])
-                if content_range_end >= int(content_total) - 1:
-                    current_app.logger.debug("Final packet recieved.")
-                    session.pop("file_id", None)
-                    current_app.logger.debug(
-                        "Removed File Id from session. " + str({"session": session})
-                    )
-
-                    return redirect(url_for("files.index"))
-
-            except HTTPError as e:
-                current_app.logger.warn(
-                    "PUT file to files service has failed. "
-                    + str(
-                        {
-                            "status_code": e.response.status_code,
-                            "response": e.response.content,
-                        }
-                    )
-                )
-                flash("File upload failed.")
-                session.pop("file_id", None)
-                current_app.logger.debug(
-                    "Removed File Id from session. " + str({"session": session})
-                )
-
-                return redirect(url_for("files.index"))
-            except Exception as e:
-                session.pop("file_id", None)
-                current_app.logger.debug(
-                    "Removed File Id from session. " + str({"session": session})
-                )
-                raise e
-
-            return {"files": [{"name": file_name}]}
+            flash("An unknown error has occured.", category="error")
+            cleanup_session()
+            return redirect(url_for("files.index"))
 
     if "file_id" in session:
         current_app.logger.debug(
@@ -139,10 +122,7 @@ def create():
             + str({"file_id": session["file_id"], "session": session}),
         )
 
-        session.pop("file_id", None)
-        current_app.logger.debug(
-            "Removed File Id from session. " + str({"session": session})
-        )
+        cleanup_session()
 
     return render_template("files/create.html")
 
@@ -173,7 +153,6 @@ def download(id):
 
     download_url = service.get_download_url(id)
 
-    # TODO add expiry!
     auth_token = g.auth_token
 
     full_url = f"{download_url}?token={auth_token}"
@@ -190,8 +169,34 @@ def delete(id):
         abort(404)
 
     if request.method == "POST":
+        try:
+            service.delete_file(id)
 
-        service.delete_file(id)
+        except (HTTPError) as e:
+            current_app.logger.error(
+                "DELETE to files service has failed. "
+                + str(
+                    {
+                        "status_code": e.response.status_code,
+                        "response": e.response.content,
+                    }
+                )
+            )
 
-        return redirect(url_for("files.index"))
+            flash(f"Delete has failed. ({e.response.status_code})", category="error")
+        except (
+            ConnectionError,
+            ConnectionAbortedError,
+            r_ConnectionError,
+        ) as e:
+            current_app.logger.error("DELETE to files service has failed. " + str(e))
+
+            flash("The files service could not be reached.", category="error")
+        except Exception as e:
+            current_app.logger.error("Exception raised: " + str(e))
+
+            flash("An unknown error has occured.", category="error")
+        finally:
+            return redirect(url_for("files.index"))
+
     return render_template("files/delete.html", file=file)

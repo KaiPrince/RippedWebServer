@@ -1,7 +1,8 @@
 import sqlite3
 
-import db.command
 import pytest
+
+import db.command
 from db.service import get_db
 
 

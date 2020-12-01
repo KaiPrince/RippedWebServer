@@ -6,8 +6,8 @@
  * Description: This file contains service functions for the auth module.
 """
 
-from authlib.jose.errors import AuthlibBaseError
 from authlib.jose import jwt
+from authlib.jose.errors import AuthlibBaseError
 from flask import current_app
 
 
