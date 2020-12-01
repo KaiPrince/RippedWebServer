@@ -75,18 +75,18 @@ def upload_file(file_name, file_path, content_range, content_total, file):
         )
         file_id = session["file_id"]
 
-        put_file(file_id, content_range, content_total, file)
+    put_file(file_id, content_range, content_total, file)
 
-        # Clean session
-        content_range_end = int(content_range.split("-")[-1])
-        if content_range_end >= int(content_total) - 1:
-            current_app.logger.debug("Final packet recieved.")
-            session.pop("file_id", None)
-            current_app.logger.debug(
-                "Removed File Id from session. " + str({"session": session})
-            )
+    # Clean session
+    content_range_end = int(content_range.split("-")[-1])
+    if content_range_end >= int(content_total) - 1:
+        current_app.logger.debug("Final packet recieved.")
+        session.pop("file_id", None)
+        current_app.logger.debug(
+            "Removed File Id from session. " + str({"session": session})
+        )
 
-            return redirect(url_for("files.index"))
+        return redirect(url_for("files.index"))
 
     return {"files": [{"name": file_name}]}
 
