@@ -80,8 +80,11 @@ flask run
 - [x] Split docker-compose across microservices
 - [ ] Convert files app to Eve
 - [ ] Add exception handling and remove file from db if creation fails
-- [ ] Register logging service
+- [x] Register logging service
 - [ ] Handle filename overlap by altering filename (filename_2)
 - [ ] Fix CI
 - [ ] Move repo urls to config and get from env.
 - [ ] Add file size
+- [ ] only refresh auth token on protected routes
+- [ ] only display refresh message on recently stale token
+- [ ] create clipboard microservice
