@@ -73,6 +73,9 @@ def file_info(id):
     if not file_info:
         return NotFound(f"File Id {id} does not exist.")
 
+    file_info["download_url"] = service.build_download_url(file_info["file_path"])
+    file_info["upload_url"] = service.build_upload_url(file_info["file_path"])
+
     return file_info
 
 
