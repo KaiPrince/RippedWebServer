@@ -151,7 +151,13 @@ def detail(id):
 def download(id):
     """ View for downloading a file. """
 
-    download_url = service.get_download_url(id)
+    try:
+        download_url = service.get_download_url(id)
+
+    except Exception:
+        flash("Failed to retrieve download url.")
+
+        return redirect(url_for("files.index"))
 
     auth_token = g.auth_token
 
