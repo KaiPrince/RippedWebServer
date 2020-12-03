@@ -157,7 +157,7 @@ def download(id):
     except Exception:
         flash("Failed to retrieve download url.")
 
-        return redirect("files.index")
+        return redirect(url_for("files.index"))
 
     auth_token = g.auth_token
 
