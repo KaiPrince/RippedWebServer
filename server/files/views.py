@@ -19,7 +19,7 @@ from werkzeug.utils import secure_filename
 
 import common
 import files.service as service
-from auth.middleware import login_required
+from auth.route_decorators import login_required
 
 # from .utils import allowed_file
 
