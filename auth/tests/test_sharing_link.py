@@ -40,7 +40,6 @@ def test_generate_public_token(client, app, auth_token, mocker: MockerFixture):
         },
     )
 
-    print(response)
     token = response.json["token"]
 
     # Assert

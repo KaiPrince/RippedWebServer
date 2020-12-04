@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+import files.middleware
 
 
 def init_app(app: Flask):

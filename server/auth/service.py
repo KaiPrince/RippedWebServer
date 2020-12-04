@@ -48,3 +48,35 @@ def is_token_expired(token) -> bool:
         return now > expiry
     else:
         return False
+
+
+def request_share_token(
+    own_token: str,
+    shared_resource: str,
+    duration: int,
+    requested_permissions: list,
+):
+    """Consumes an auth token, a resource to provide access to
+    such as a file path, the requested duration (in seconds), and the requested
+    permissions.
+    """
+
+    # TODO inject this instead
+    base_url = current_app.config["AUTH_SERVICE_URL"]
+
+    response = requests.post(
+        base_url + "/auth/request_share_token",
+        headers={"Authorization": own_token},
+        json={
+            "requester": "1",
+            "file_path": "test.txt",
+            "duration": str(60 * 60 * 60),
+            "permissions": ["read: disk_storage"],
+        },
+    )
+
+    response.raise_for_status()
+
+    share_token = response.json()["token"]
+
+    return share_token
