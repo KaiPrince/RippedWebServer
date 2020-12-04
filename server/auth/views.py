@@ -25,7 +25,7 @@ def register():
         error = None
 
         # TEMP disable adding new users TODO: Remove.
-        # error = "User registration is disabled."
+        error = "User registration is disabled."
 
         # TODO
 
