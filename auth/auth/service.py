@@ -44,37 +44,48 @@ def validate_share_token_request(
 ):
     """Consumes a token payload, a requester id, and a list of permissions,
     and produces a boolean."""
-    # breakpoint()
 
-    requester_used_own_token = (
-        str(requester_token_payload["sub"]).upper() == str(requester).upper()
-    )
+    token_subject = str(requester_token_payload["sub"]).casefold()
+    requester = str(requester).casefold()
+    token_permissions = [
+        str(x).casefold() for x in requester_token_payload["permissions"]
+    ]
+
+    # Validate
+    requester_used_own_token = token_subject == requester
     requester_has_requested_permissions = all(
-        x in requester_token_payload["permissions"] for x in requested_permissions
+        x in token_permissions for x in requested_permissions
     )
 
-    if requester_used_own_token and requester_has_requested_permissions:
-        return True
-    else:
-        return False
+    is_valid = requester_used_own_token and requester_has_requested_permissions
+
+    return is_valid
 
 
 def generate_resource_token(requester, file_path, duration: int, requested_permissions):
-    audience = "public"
     duration = int(duration)
+
+    subject = file_path
+    issuer = requester
+    audience = "public"
+    permissions = requested_permissions
+    issued_at = int(time())
+    expires_at = issued_at + timedelta(seconds=duration).total_seconds()
+    token_id = str(uuid4())
+    secret = current_app.config["JWT_KEY"]
 
     token = jwt.encode(
         {"alg": "HS256", "typ": "JWT"},
         {
-            "sub": file_path,
-            "iss": requester,
+            "sub": subject,
+            "iss": issuer,
             "aud": audience,
-            "permissions": requested_permissions,
-            "iat": int(time()),
-            "exp": int(time()) + timedelta(seconds=duration).total_seconds(),
-            "jti": str(uuid4()),
+            "permissions": permissions,
+            "iat": issued_at,
+            "exp": expires_at,
+            "jti": token_id,
         },
-        current_app.config["JWT_KEY"],
+        secret,
     ).decode("utf-8")
 
     return token
