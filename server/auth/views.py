@@ -1,8 +1,18 @@
-from flask import (Blueprint, current_app, flash, redirect, render_template,
-                   request, session, url_for)
+from flask import (
+    Blueprint,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+    g,
+)
 from requests.exceptions import HTTPError
 
 import auth.service as service
+import files.service as files_service
 
 bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder="templates")
 
@@ -15,7 +25,7 @@ def register():
         error = None
 
         # TEMP disable adding new users TODO: Remove.
-        # error = "User registration is disabled."
+        error = "User registration is disabled."
 
         # TODO
 
@@ -69,3 +79,25 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for("index"))
+
+
+@bp.route("/generate_sharing_link")
+def generate_sharing_link():
+    duration = request.args.get("duration")
+    file_id = request.args.get("file_id")
+
+    file_path = files_service.get_file(file_id)["file_path"]
+
+    permissions_needed = ["read: disk_storage"]
+    share_token = service.request_share_token(
+        g.auth_token,
+        file_path,
+        duration,
+        permissions_needed,
+    )
+
+    download_url = files_service.get_download_url(file_id)
+
+    share_link = download_url + "?token=" + share_token
+
+    return {"link": share_link}

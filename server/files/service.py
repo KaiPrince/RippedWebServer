@@ -1,6 +1,3 @@
-import logging
-import os
-
 from flask import current_app, flash, g, session, redirect, url_for
 from requests import ConnectionError, HTTPError
 from werkzeug.exceptions import abort

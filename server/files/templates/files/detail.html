@@ -13,28 +13,23 @@
 <div class="row mt-4">
   <div class="col">
     <div id="detail-container">
-      <p>
-        File Name: {{ file['name'] }}
-      </p>
-      <p>
-        {{ content | replace('\n', '<br/>') | replace('\r', '') }}
-      </p>
-      <p>
-
-        File path: {{ file['file_path'] }}
-      </p>
-      <p>
-        Uploaded by: {{ file['username'] }}
-      </p>
-      <p>
-        Uploaded at: {{ file['uploaded'] }}
-      </p>
+      <p>File Name: {{ file['name'] }}</p>
+      <p>{{ content | replace('\n', '<br />') | replace('\r', '') }}</p>
+      <p>File path: {{ file['file_path'] }}</p>
+      <p>Uploaded by: {{ file['username'] }}</p>
+      <p>Uploaded at: {{ file['uploaded'] }}</p>
     </div>
     <a
       href="{{ url_for('files.download', id=file['id']) }}"
       class="btn btn-primary"
     >
       Download
+    </a>
+    <a
+      href="{{ url_for('auth.generate_sharing_link', duration='216000', file_id=file['id']) }}"
+      class="btn btn-secondary"
+    >
+      Get Sharing Link
     </a>
     <a
       href="{{ url_for('files.delete', id=file['id']) }}"
@@ -44,5 +39,4 @@
     </a>
   </div>
 </div>
-{% endblock %} {% block js %}
-{% endblock %}
+{% endblock %} {% block js %} {% endblock %}

@@ -112,13 +112,14 @@ def auth_service_url(app: Flask) -> str:
 def auth_token(app) -> str:
     """
     {
-        "sub": "1",
+        "sub": "2",
         "name": "test",
         "permissions": ["read: files", "write: files"],
         "iat": 1516239022
     }
     """
 
+    user_id = 2
     username = "test"
     permissions = [
         "read: files",
@@ -129,11 +130,22 @@ def auth_token(app) -> str:
 
     token = jwt.encode(
         {"alg": "HS256"},
-        {"sub": 2, "name": username, "permissions": permissions},
+        {"sub": user_id, "name": username, "permissions": permissions},
         app.config["JWT_KEY"],
     ).decode("utf-8")
 
     return token
+
+
+@pytest.fixture
+def get_mock_request_call(make_request):
+    def requets_from_mock(mock_func: MagicMock):
+        call = mock_func.call_args
+        req = make_request(*call.args, **call.kwargs)
+
+        return req
+
+    return requets_from_mock
 
 
 @pytest.fixture

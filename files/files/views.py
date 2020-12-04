@@ -7,6 +7,7 @@ from werkzeug.exceptions import abort
 import files.service as service
 from auth.middleware import permission_required
 from db.files import make_files_sql_repo as get_files_repo
+from operator import itemgetter
 
 # from .utils import allowed_file
 
@@ -40,10 +41,14 @@ def create():
         current_app.logger.debug(error_message)
         return make_response({"message": error_message}, 400)
 
-    user_id = json["user_id"]
-    file_name = json["file_name"]
-    file_path = secure_filename(json["file_path"])
-    content_total = json["content_total"]
+    user_id, file_name, file_path, content_total = itemgetter(
+        "user_id",
+        "file_name",
+        "file_path",
+        "content_total",
+    )(json)
+
+    file_path = secure_filename(file_path)
 
     # Notify disk service
     repo = service.get_disk_repo()

@@ -88,3 +88,5 @@ flask run
 - [ ] only refresh auth token on protected routes
 - [ ] only display refresh message on recently stale token
 - [ ] create clipboard microservice
+- [ ] one-time password for protected files "HKDTA"
+- [ ] hash file path in sharing token and compare to request url
