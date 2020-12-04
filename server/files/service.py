@@ -46,7 +46,10 @@ def get_file(id):
 
 
 def get_download_url(id):
-    return get_file(id)["download_url"]
+    file = get_file(id)
+    current_app.logger.debug("Download URL got file " + str(file))
+
+    return file["download_url"]
 
 
 def upload_file(file_name, file_path, content_range, content_total, file):
