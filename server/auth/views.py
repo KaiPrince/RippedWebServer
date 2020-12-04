@@ -96,7 +96,7 @@ def generate_sharing_link():
         permissions_needed,
     )
 
-    download_url = files_service.get_download_url(id)
+    download_url = files_service.get_download_url(file_id)
 
     share_link = download_url + "?token=" + share_token
 
