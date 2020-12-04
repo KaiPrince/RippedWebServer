@@ -2,14 +2,30 @@ from flask import current_app, flash, g, session, redirect, url_for
 from requests import ConnectionError, HTTPError
 from werkzeug.exceptions import abort
 
-# from files.service_api.files import IFilesRepository
-# from files.service_api.disk_storage import IDiskStorageRepository
+from files.service_api.disk_storage import IDiskStorageRepository
+from files.service_api.disk_storage import make_repository as make_disk_repository
+from files.service_api.files import IFilesRepository
+from files.service_api.files import make_repository as make_files_repository
+
+
+def get_repository() -> IFilesRepository:
+    base_url = current_app.config["FILES_SERVICE_URL"]
+    auth_token = g.auth_token
+
+    return make_files_repository(base_url, auth_token)
+
+
+def get_disk_repository() -> IDiskStorageRepository:
+    base_url = current_app.config["DISK_STORAGE_SERVICE_URL"]
+    auth_token = g.auth_token
+
+    return make_disk_repository(base_url, auth_token)
 
 
 def get_index():
     """ Consumes nothing and produces a list of files. """
 
-    repository = g.files_repo
+    repository = get_repository()
 
     try:
         files = repository.index()
@@ -21,10 +37,10 @@ def get_index():
     return files
 
 
-def get_file(id) -> dict:
-    """ Consumes an ID and produces file details. """
+def get_file(id):
+    """ Consumes an ID and produces a file name. """
 
-    repository = g.files_repo
+    repository = get_repository()
 
     return repository.get_by_id(id)
 
@@ -79,7 +95,7 @@ def create_file(file_name, user_id, file_path, content_total):
         + str({"file_name": file_name, "user_id": user_id, "file_path": file_path}),
     )
 
-    repository = g.files_repo
+    repository = get_repository()
 
     file_id = repository.create(file_name, user_id, file_path, content_total)
 
@@ -90,13 +106,13 @@ def put_file(file_id, content_range, content_total, content):
     """Consumes a file id, file content and content-range,
     and produces a file size."""
 
-    files_repo = g.files_repo
+    files_repo = get_repository()
     file_path = files_repo.get_by_id(file_id)["file_path"]
 
     if file_path is None:
         return 0
 
-    repository = g.disk_repo
+    repository = get_disk_repository()
     file_size = repository.write(file_path, content_range, content_total, content)
 
     current_app.logger.debug(
@@ -115,6 +131,6 @@ def put_file(file_id, content_range, content_total, content):
 
 def delete_file(id):
     """ Deletes a file from storage. """
-    repository = g.files_repo
+    repository = get_repository()
 
     return repository.delete(id)
