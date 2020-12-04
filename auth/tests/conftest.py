@@ -7,6 +7,7 @@ from main import create_app
 
 from flask import Flask
 from flask.testing import FlaskClient
+from authlib.jose import jwt
 
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
     _data_sql = f.read().decode("utf8")
@@ -59,3 +60,62 @@ class AuthActions(object):
 @pytest.fixture
 def auth(client):
     return AuthActions(client)
+
+
+@pytest.fixture
+def auth_token(app) -> str:
+    """
+    {
+        "sub": "1",
+        "name": "test",
+        "permissions": ["read: files", "write: files"],
+        "iat": 1516239022
+    }
+    """
+
+    username = "test"
+    permissions = [
+        "read: files",
+        "write: files",
+        "read: disk_storage",
+        "write: disk_storage",
+    ]
+
+    token = jwt.encode(
+        {"alg": "HS256"},
+        {"sub": 2, "name": username, "permissions": permissions},
+        app.config["JWT_KEY"],
+    ).decode("utf-8")
+
+    return token
+
+
+@pytest.fixture
+def make_auth_token(app, make_token):
+    def make_payload(user_id, username, permissions):
+        return {"sub": user_id, "name": username, "permissions": permissions}
+
+    def make(user_id, username, permissions=[]):
+        payload = make_payload(user_id, username, permissions)
+        token = make_token(payload)
+
+        return token
+
+    return make
+
+
+@pytest.fixture
+def make_token(app):
+    """ Sign a JWT. """
+
+    def sign(payload):
+
+        token = jwt.encode(
+            {"alg": "HS256"},
+            payload,
+            app.config["JWT_KEY"],
+        ).decode("utf-8")
+
+        return token
+
+    return sign
