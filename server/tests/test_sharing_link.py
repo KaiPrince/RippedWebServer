@@ -55,7 +55,10 @@ def test_sharing_link(
     sharing_link = response.json["link"]
 
     # Assert
-    assert sharing_link == download_url + "?token=" + sharing_token
+    assert (
+        sharing_link
+        == "files.kaiprince.xyz/files/details/" + file_id + "?token=" + sharing_token
+    )
 
     auth_repo_request = get_mock_request_call(mock_auth_repo.post)
     call = mock_auth_repo.post.call_args
@@ -69,3 +72,24 @@ def test_sharing_link(
         "duration": str(60 * 60 * 60),
         "permissions": ["read: disk_storage"],
     }
+
+
+def test_file_details(client):
+    """File details view will allow the user anonymous access if they
+    provide a sharing token."""
+
+    # Arrange
+    token = (
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+        "eyJzdWIiOiJ0ZXN0LnR4dCIsImlzcyI6IjEiLCJhdWQiOi"
+        "JwdWJsaWMiLCJwZXJtaXNzaW9ucyI6WyJyZWFkOiBmaWxlc"
+        "yIsInJlYWQ6ZGlza19zdG9yYWdlIl19."
+        "kMiBO47oHuMibmau5gBr8BjSvO16B-ZYQXmrGxO3F-U"
+    )
+
+    # Act
+    response = client.get("/files/detail/1", query_string={"token": token})
+
+    # Assert
+    assert response.status_code == 200
+    assert b"You are being granted temporary access" in response.data
