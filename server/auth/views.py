@@ -128,8 +128,6 @@ def generate_sharing_link():
     download_url = files_service.get_download_url(file_id)
 
     # share_link = download_url + "?token=" + share_token
-    share_link = (
-        "files.kaiprince.xyz/files/details/" + file_id + "?token=" + share_token
-    )
+    share_link = "files.kaiprince.xyz/files/detail/" + file_id + "?token=" + share_token
 
     return {"link": share_link}

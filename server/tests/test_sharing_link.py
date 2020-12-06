@@ -57,7 +57,7 @@ def test_sharing_link(
     # Assert
     assert (
         sharing_link
-        == "files.kaiprince.xyz/files/details/" + file_id + "?token=" + sharing_token
+        == "files.kaiprince.xyz/files/detail/" + file_id + "?token=" + sharing_token
     )
 
     auth_repo_request = get_mock_request_call(mock_auth_repo.post)
@@ -70,7 +70,7 @@ def test_sharing_link(
         "requester": "1",
         "file_path": "test.txt",
         "duration": str(60 * 60 * 60),
-        "permissions": ["read: disk_storage"],
+        "permissions": ["read: files", "read: disk_storage"],
     }
 
 

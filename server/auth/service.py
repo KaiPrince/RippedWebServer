@@ -71,7 +71,7 @@ def request_share_token(
             "requester": "1",
             "file_path": "test.txt",
             "duration": str(60 * 60 * 60),
-            "permissions": ["read: disk_storage"],
+            "permissions": requested_permissions,
         },
     )
 

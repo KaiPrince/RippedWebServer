@@ -1,7 +1,7 @@
 from flask import current_app, flash, g, redirect, session, url_for
 
-from .service import is_token_expired
 from .views import bp
+from .service import is_token_expired
 
 
 @bp.before_app_request
