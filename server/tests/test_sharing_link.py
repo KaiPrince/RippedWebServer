@@ -57,7 +57,11 @@ def test_sharing_link(
     # Assert
     assert (
         sharing_link
-        == "files.kaiprince.xyz/files/detail/" + file_id + "?token=" + sharing_token
+        == app.config["PUBLIC_FILES_SERVICE_URL"]
+        + "/files/detail/"
+        + file_id
+        + "?token="
+        + sharing_token
     )
 
     auth_repo_request = get_mock_request_call(mock_auth_repo.post)

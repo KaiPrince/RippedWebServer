@@ -125,9 +125,7 @@ def generate_sharing_link():
         permissions_needed,
     )
 
-    download_url = files_service.get_download_url(file_id)
-
-    # share_link = download_url + "?token=" + share_token
-    share_link = "files.kaiprince.xyz/files/detail/" + file_id + "?token=" + share_token
+    public_url = current_app.config["PUBLIC_FILES_SERVICE_URL"]
+    share_link = public_url + url_for("files.detail", id=file_id, token=share_token)
 
     return {"link": share_link}
