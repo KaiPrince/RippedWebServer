@@ -32,7 +32,7 @@ class TestStorage:
         # Act
 
         response = client.post(
-            "/storage/create/",
+            "/storage/create",
             headers={"Authorization": auth_token},
             json={
                 "file_path": file_path,
