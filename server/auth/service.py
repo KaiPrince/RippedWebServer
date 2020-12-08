@@ -70,7 +70,7 @@ def request_share_token(
         json={
             "requester": "1",
             "file_path": "test.txt",
-            "duration": str(60 * 60 * 60),
+            "duration": duration,
             "permissions": requested_permissions,
         },
     )
