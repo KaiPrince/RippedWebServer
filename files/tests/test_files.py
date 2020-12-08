@@ -176,6 +176,10 @@ class TestFiles:
             "name": filename,
             "file_path": file_path,
             "uploaded": file_uploaded.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+            "download_url": app.config["PUBLIC_DISK_STORAGE_SERVICE_URL"]
+            + f"/storage/download/{file_path}",
+            "upload_url": app.config["PUBLIC_DISK_STORAGE_SERVICE_URL"]
+            + f"/storage/create/{file_path}",
         }
         assert response.status_code == 200
 

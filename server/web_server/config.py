@@ -15,6 +15,7 @@ class Config(object):
     DATABASE = os.getenv("DATABASE")
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
     FILES_SERVICE_URL = os.getenv("FILES_SERVICE_URL")
+    PUBLIC_FILES_SERVICE_URL = os.getenv("PUBLIC_FILES_SERVICE_URL")
     AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL")
     DISK_STORAGE_SERVICE_URL = os.getenv("DISK_STORAGE_SERVICE_URL")
     JWT_KEY = os.getenv("JWT_KEY")
@@ -35,6 +36,10 @@ class Config(object):
         if self.FILES_SERVICE_URL is None:
             logging.warning("FILES_SERVICE_URL environment variable not set.")
             self.FILES_SERVICE_URL = "http://rippedwebserver_files_1:5000"
+
+        if self.PUBLIC_FILES_SERVICE_URL is None:
+            logging.warning("PUBLIC_FILES_SERVICE_URL environment variable not set.")
+            self.PUBLIC_FILES_SERVICE_URL = "http://files.kaiprince.xyz"
 
         if self.AUTH_SERVICE_URL is None:
             logging.warning("AUTH_SERVICE_URL environment variable not set.")

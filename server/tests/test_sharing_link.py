@@ -6,6 +6,12 @@
  * Description: This file contains tests for creating links to share files.
 """
 
+from bs4 import BeautifulSoup
+import re
+import pytest
+from time import time
+from datetime import timedelta
+
 
 def test_sharing_link(
     client,
@@ -55,7 +61,14 @@ def test_sharing_link(
     sharing_link = response.json["link"]
 
     # Assert
-    assert sharing_link == download_url + "?token=" + sharing_token
+    assert (
+        sharing_link
+        == app.config["PUBLIC_FILES_SERVICE_URL"]
+        + "/files/detail/"
+        + file_id
+        + "?token="
+        + sharing_token
+    )
 
     auth_repo_request = get_mock_request_call(mock_auth_repo.post)
     call = mock_auth_repo.post.call_args
@@ -67,5 +80,197 @@ def test_sharing_link(
         "requester": "1",
         "file_path": "test.txt",
         "duration": str(60 * 60 * 60),
-        "permissions": ["read: disk_storage"],
+        "permissions": ["read: files", "read: disk_storage"],
     }
+
+
+def test_file_details(client, make_token):
+    """File details view will allow the user anonymous access if they
+    provide a sharing token."""
+
+    # Arrange
+    token = make_token(
+        {
+            "sub": "test.txt",
+            "iss": "1",
+            "aud": "public",
+            "permissions": ["read: files", "read:disk_storage"],
+        }
+    )
+
+    # Act
+    response = client.get("/files/detail/1", query_string={"token": token})
+
+    # Assert
+    assert response.status_code == 200
+    assert b"You are being granted temporary access" in response.data
+
+
+@pytest.mark.parametrize(
+    ("permissions", "disabled"),
+    [
+        (["read: files", "read:disk_storage"], True),
+        (
+            ["read: files", "read:disk_storage", "write: files", "write: disk_storage"],
+            False,
+        ),
+    ],
+)
+def test_file_details_share_link_disable_delete_button(
+    client,
+    make_token,
+    mock_files_repo,
+    mocker,
+    permissions,
+    disabled,
+):
+    """File details view will disable the delete button
+    if the sharing token does not have correct permissions.
+    """
+
+    # Arrange
+    file_id = 1
+    file_path = "test.txt"
+
+    token = make_token(
+        {
+            "sub": file_path,
+            "iss": "1",
+            "aud": "public",
+            "permissions": permissions,
+        }
+    )
+    # ..mock info response from files service
+    _get_response = mocker.MagicMock()
+    _get_response.json.return_value = {
+        "id": str(file_id),
+        "file_path": file_path,
+    }
+    mock_files_repo.get.return_value = _get_response
+
+    # Act
+    response = client.get(
+        "/files/detail/" + str(file_id), query_string={"token": token}
+    )
+
+    # Assert
+    assert response.status_code == 200
+
+    # ..parse html
+    soup = BeautifulSoup(response.data, "html.parser")
+
+    # ..delete button
+    delete_buttons = soup.find_all(["a", "button"], string=re.compile("Delete"))
+    assert len(delete_buttons) == 1
+    assert delete_buttons[0].has_attr("disabled") == disabled
+
+
+def test_file_details_share_link_disable_share_button(client, make_token):
+    """File details view will disable the delete and get sharing link button
+    if the sharing token does not have correct permissions.
+    """
+
+    # Arrange
+    token = make_token(
+        {
+            "sub": "test.txt",
+            "iss": "1",
+            "aud": "public",
+            "permissions": ["read: files", "read:disk_storage"],
+        }
+    )
+
+    # Act
+    response = client.get("/files/detail/1", query_string={"token": token})
+
+    # Assert
+    assert response.status_code == 200
+
+    # ..parse html
+    soup = BeautifulSoup(response.data, "html.parser")
+
+    # ..delete button
+    delete_buttons = soup.find_all(["a", "button"], string=re.compile("Delete"))
+    assert len(delete_buttons) == 1
+    assert delete_buttons[0].has_attr("disabled")
+
+    # ..share button
+    share_buttons = soup.find_all(
+        ["a", "button"], string=re.compile("Get Sharing Link")
+    )
+    assert len(share_buttons) == 1
+    assert share_buttons[0].has_attr("disabled")
+
+
+def test_file_details_owner_enable_buttons(client, auth_token):
+    """File details view will enable the get sharing link button
+    if the sharing token does not have correct permissions.
+    """
+
+    # Arrange
+    token = auth_token
+
+    # Act
+    response = client.get("/files/detail/1", query_string={"token": token})
+
+    # Assert
+    assert response.status_code == 200
+
+    # ..parse html
+    soup = BeautifulSoup(response.data, "html.parser")
+
+    # ..delete button
+    delete_buttons = soup.find_all(["a", "button"], string=re.compile("Delete"))
+    assert len(delete_buttons) == 1
+    assert not delete_buttons[0].has_attr("disabled")
+
+    # ..share button
+    share_buttons = soup.find_all(
+        ["a", "button"], string=re.compile("Get Sharing Link")
+    )
+    assert len(share_buttons) == 1
+    assert not share_buttons[0].has_attr("disabled")
+
+
+def test_sharing_link_expiry_time(client, make_token):
+    # Arrange
+    file_id = 1
+    remaining_time = timedelta(days=2, hours=23, minutes=30)
+    remaining_time_str = "2 days, 23 hours"
+    token = make_token(
+        {
+            "sub": "test.txt",
+            "permissions": ["read: files"],
+            "exp": int(time()) + remaining_time.total_seconds(),
+        }
+    )
+
+    # Act
+    response = client.get(
+        "/files/detail/" + str(file_id), query_string={"token": token}
+    )
+
+    # Assert
+    assert bytes(remaining_time_str, "utf-8") in response.data
+
+
+def test_sharing_link_expiry_message(client, make_token):
+    # Arrange
+    file_id = 1
+    token = make_token(
+        {
+            "sub": "test.txt",
+            "permissions": ["read: files"],
+            "exp": int(time()) - timedelta(minutes=30).total_seconds(),
+        }
+    )
+
+    # Act
+    response = client.get(
+        "/files/detail/" + str(file_id),
+        query_string={"token": token},
+        follow_redirects=True,
+    )
+
+    # Assert
+    assert bytes("This token has expired", "utf-8") in response.data

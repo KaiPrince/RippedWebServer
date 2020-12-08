@@ -94,3 +94,5 @@ flask run
 - [ ] Prevent overwrite of duplicated file
 - [ ] Add share token for viewing file details
 - [ ] Show "you are being granted temporary access" message when using share token
+- [ ] convert file id to hash of file path, use in disk_storage db
+- [ ] Add auth audit trail
