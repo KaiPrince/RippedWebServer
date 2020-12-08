@@ -19,48 +19,51 @@
       <p>Uploaded by: {{ file['username'] }}</p>
       <p>Uploaded at: {{ file['uploaded'] }}</p>
     </div>
-    <a
-      href="{{ url_for('files.download', id=file['id']) }}"
-      class="btn btn-primary"
-    >
-      Download
-    </a>
-    {% if may_share %}
-    <div class="dropdown">
-      <button
-        class="btn btn-secondary dropdown-toggle"
-        type="button"
-        id="dropdownMenuButton"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
+    <div class="row mt-3">
+      <a
+        href="{{ url_for('files.download', id=file['id']) }}"
+        class="btn btn-primary"
       >
-        Get Sharing Link
-      </button>
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        {% for label, duration in [("1 hour", "3600"), ("3 days", "259200")] %}
-        <li>
-          <a
-            href="{{ url_for('auth.generate_sharing_link', duration=duration, file_id=file['id']) }}"
-            class="dropdown-item"
-          >
-            {{ label }}
-          </a>
-        </li>
-        {% endfor %}
-      </ul>
+        Download
+      </a>
+      {% if may_share %}
+      <div class="dropdown">
+        <button
+          class="btn btn-secondary dropdown-toggle"
+          type="button"
+          id="dropdownMenuButton"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          Get Sharing Link
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          {% for label, duration in [("1 hour", "3600"), ("3 days", "259200")]
+          %}
+          <li>
+            <a
+              href="{{ url_for('auth.generate_sharing_link', duration=duration, file_id=file['id']) }}"
+              class="dropdown-item"
+            >
+              {{ label }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% else %}
+      <button class="btn btn-secondary" disabled>Get Sharing Link</button>
+      {% endif %} {% if may_delete %}
+      <a
+        href="{{ url_for('files.delete', id=file['id']) }}"
+        class="btn btn-danger"
+      >
+        Delete
+      </a>
+      {% else %}
+      <button class="btn btn-danger" disabled>Delete</button>
+      {% endif %}
     </div>
-    {% else %}
-    <button class="btn btn-secondary" disabled>Get Sharing Link</button>
-    {% endif %} {% if may_delete %}
-    <a
-      href="{{ url_for('files.delete', id=file['id']) }}"
-      class="btn btn-danger"
-    >
-      Delete
-    </a>
-    {% else %}
-    <button class="btn btn-danger" disabled>Delete</button>
-    {% endif %}
   </div>
 </div>
 {% endblock %} {% block js %} {% endblock %}
