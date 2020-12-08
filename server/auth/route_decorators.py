@@ -26,7 +26,7 @@ def login_required(view):
                 distance = expiry_time - datetime.now()
                 days = distance.days
                 hours = round(distance.seconds / 60 / 60)
-                minutes = round(distance.seconds / 60)
+                minutes = round(distance.seconds / 60) - (hours * 60)
 
                 message += " which will expire in "
                 message += f"{days} days, {hours} hours, {minutes} minutes"
