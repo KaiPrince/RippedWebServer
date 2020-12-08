@@ -28,7 +28,7 @@ def login_required(view):
                 hours = round(distance.seconds / 60 / 60)
                 minutes = round(distance.seconds / 60)
 
-                message = " which will expire in "
+                message += " which will expire in "
                 message += f"{days} days, {hours} hours, {minutes} minutes"
 
             message += "."
