@@ -6,6 +6,10 @@
  * Description: This file contains tests for creating links to share files.
 """
 
+from bs4 import BeautifulSoup
+import re
+import pytest
+
 
 def test_sharing_link(
     client,
@@ -78,17 +82,18 @@ def test_sharing_link(
     }
 
 
-def test_file_details(client):
+def test_file_details(client, make_token):
     """File details view will allow the user anonymous access if they
     provide a sharing token."""
 
     # Arrange
-    token = (
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
-        "eyJzdWIiOiJ0ZXN0LnR4dCIsImlzcyI6IjEiLCJhdWQiOi"
-        "JwdWJsaWMiLCJwZXJtaXNzaW9ucyI6WyJyZWFkOiBmaWxlc"
-        "yIsInJlYWQ6ZGlza19zdG9yYWdlIl19."
-        "kMiBO47oHuMibmau5gBr8BjSvO16B-ZYQXmrGxO3F-U"
+    token = make_token(
+        {
+            "sub": "test.txt",
+            "iss": "1",
+            "aud": "public",
+            "permissions": ["read: files", "read:disk_storage"],
+        }
     )
 
     # Act
@@ -97,3 +102,129 @@ def test_file_details(client):
     # Assert
     assert response.status_code == 200
     assert b"You are being granted temporary access" in response.data
+
+
+@pytest.mark.parametrize(
+    ("permissions", "disabled"),
+    [
+        (["read: files", "read:disk_storage"], "True"),
+        (
+            ["read: files", "read:disk_storage", "write: files", "write: disk_storage"],
+            "False",
+        ),
+    ],
+)
+def test_file_details_share_link_disable_delete_button(
+    client,
+    make_token,
+    mock_files_repo,
+    mocker,
+    permissions,
+    disabled,
+):
+    """File details view will disable the delete button
+    if the sharing token does not have correct permissions.
+    """
+
+    # Arrange
+    file_id = 1
+    file_path = "test.txt"
+
+    token = make_token(
+        {
+            "sub": file_path,
+            "iss": "1",
+            "aud": "public",
+            "permissions": permissions,
+        }
+    )
+    # ..mock info response from files service
+    _get_response = mocker.MagicMock()
+    _get_response.json.return_value = {
+        "id": str(file_id),
+        "file_path": file_path,
+    }
+    mock_files_repo.get.return_value = _get_response
+
+    # Act
+    response = client.get(
+        "/files/detail/" + str(file_id), query_string={"token": token}
+    )
+
+    # Assert
+    assert response.status_code == 200
+
+    # ..parse html
+    soup = BeautifulSoup(response.data, "html.parser")
+
+    # ..delete button
+    delete_buttons = soup.find_all(["a", "button"], string=re.compile("Delete"))
+    assert len(delete_buttons) == 1
+    assert delete_buttons[0].attrs.get("disabled") == disabled
+
+
+def test_file_details_share_link_disable_share_button(client, make_token):
+    """File details view will disable the delete and get sharing link button
+    if the sharing token does not have correct permissions.
+    """
+
+    # Arrange
+    token = make_token(
+        {
+            "sub": "test.txt",
+            "iss": "1",
+            "aud": "public",
+            "permissions": ["read: files", "read:disk_storage"],
+        }
+    )
+
+    # Act
+    response = client.get("/files/detail/1", query_string={"token": token})
+
+    # Assert
+    assert response.status_code == 200
+
+    # ..parse html
+    soup = BeautifulSoup(response.data, "html.parser")
+
+    # ..delete button
+    delete_buttons = soup.find_all(["a", "button"], string=re.compile("Delete"))
+    assert len(delete_buttons) == 1
+    assert delete_buttons[0].attrs.get("disabled") == "True"
+
+    # ..share button
+    share_buttons = soup.find_all(
+        ["a", "button"], string=re.compile("Get Sharing Link")
+    )
+    assert len(share_buttons) == 1
+    assert share_buttons[0].attrs.get("disabled") == "True"
+
+
+def test_file_details_owner_enable_buttons(client, auth_token):
+    """File details view will enable the get sharing link button
+    if the sharing token does not have correct permissions.
+    """
+
+    # Arrange
+    token = auth_token
+
+    # Act
+    response = client.get("/files/detail/1", query_string={"token": token})
+
+    # Assert
+    assert response.status_code == 200
+
+    # ..parse html
+    soup = BeautifulSoup(response.data, "html.parser")
+
+    # ..delete button
+    delete_buttons = soup.find_all(["a", "button"], string=re.compile("Delete"))
+    assert len(delete_buttons) == 1
+    assert delete_buttons[0].attrs.get("disabled") == "False"
+
+    # ..share button
+    share_buttons = soup.find_all(
+        ["a", "button"], string=re.compile("Get Sharing Link")
+    )
+    assert len(share_buttons) == 1
+    assert share_buttons[0].attrs.get("disabled") == "False"

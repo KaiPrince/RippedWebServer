@@ -20,6 +20,7 @@ from werkzeug.utils import secure_filename
 import common
 import files.service as service
 from auth.route_decorators import login_required
+from auth.permissions import make_jwt_permissions_reader
 
 # from .utils import allowed_file
 
@@ -135,7 +136,11 @@ def detail(id):
         file = service.get_file(id)
     except HTTPError as e:
         message = e.response.reason
-        return NotFound(message)
+        flash(
+            f"The files service was unable to serve this request. {message}",
+            category="error",
+        )
+        return redirect("files.index")
 
     # file_path = file["file_path"]
     # if file_path.endswith("txt"):
@@ -143,7 +148,22 @@ def detail(id):
     # else:
     #     content = ""
 
-    return render_template("files/detail.html", file=file, content="")
+    # NOTE: Until file_id as Hash becomes universal, we will use the file path
+    #   as the id for auth.
+    # TODO: Replace with hash file_id
+    file_id = file["file_path"]
+
+    permission_reader = make_jwt_permissions_reader(g.auth_token_data)
+    may_delete = permission_reader.may_delete(file_id)
+    may_share = permission_reader.may_share(file_id)
+
+    return render_template(
+        "files/detail.html",
+        file=file,
+        content="",
+        may_delete=may_delete,
+        may_share=may_share,
+    )
 
 
 @bp.route("/download/<int:id>")

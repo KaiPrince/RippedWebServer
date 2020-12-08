@@ -28,12 +28,14 @@
     <a
       href="{{ url_for('auth.generate_sharing_link', duration='3600', file_id=file['id']) }}"
       class="btn btn-secondary"
+      disabled="{{ not may_share }}"
     >
       Get Sharing Link
     </a>
     <a
       href="{{ url_for('files.delete', id=file['id']) }}"
       class="btn btn-danger"
+      disabled="{{ not may_delete }}"
     >
       Delete
     </a>

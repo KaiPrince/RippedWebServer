@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 from authlib.jose import jwt
 from flask import session
+from auth.permissions import make_jwt_permissions_reader
 
 
 @pytest.mark.skip
@@ -83,3 +84,181 @@ def test_logout(client, auth):
     with client:
         auth.logout()
         assert "user_id" not in session
+
+
+class TestPermissionsReader:
+    """
+    * Class Name: TestPermissions
+    * Purpose: This purpose of this class is to test the PermissionsReader
+    *  classes.
+    """
+
+    @pytest.mark.parametrize(
+        ("payload", "resource", "expected"),
+        [
+            (
+                {
+                    "sub": "test.txt",
+                    "iss": "1",
+                    "aud": "public",
+                    "permissions": ["read: files", "read:disk_storage"],
+                },
+                "test.txt",
+                False,
+            ),
+            (
+                {
+                    "sub": "test.txt",
+                    "iss": "1",
+                    "aud": "public",
+                    "permissions": ["write: files", "write:disk_storage"],
+                },
+                "test.txt",
+                True,
+            ),
+            (
+                {
+                    "sub": "test.txt",
+                    "iss": "1",
+                    "aud": "public",
+                    "permissions": ["write: files", "write:disk_storage"],
+                },
+                "otherfile.txt",
+                False,
+            ),
+            (
+                {
+                    "sub": "2",
+                    "name": "test",
+                    "permissions": ["write: files", "write: disk_storage"],
+                    "iat": 1516239022,
+                },
+                "otherfile.txt",
+                True,
+            ),
+            (
+                {
+                    "sub": "test.txt",
+                    "iss": "1",
+                    "aud": "public",
+                    "permissions": ["write: files"],
+                },
+                "test.txt",
+                False,
+            ),
+            (
+                {
+                    "sub": "test.txt",
+                    "iss": "1",
+                    "aud": "public",
+                    "permissions": ["write: disk_storage"],
+                },
+                "test.txt",
+                False,
+            ),
+        ],
+    )
+    def test_may_delete(self, payload, resource, expected):
+        # Arrange
+        auth_token = payload
+
+        # Act
+        may_delete = make_jwt_permissions_reader(auth_token).may_delete(resource)
+
+        # Assert
+        assert may_delete is expected
+
+    @pytest.mark.parametrize(
+        ("payload", "resource", "expected"),
+        [
+            (
+                {
+                    "sub": "test.txt",
+                    "iss": "1",
+                    "aud": "public",
+                    "permissions": ["read: files", "read:disk_storage"],
+                },
+                "test.txt",
+                False,
+            ),
+            (
+                {
+                    "sub": "test.txt",
+                    "iss": "1",
+                    "aud": "public",
+                    "permissions": ["write: files", "write:disk_storage"],
+                },
+                "test.txt",
+                False,
+            ),
+            (
+                {
+                    "sub": "test.txt",
+                    "iss": "1",
+                    "aud": "public",
+                    "permissions": ["write: files", "write:disk_storage"],
+                },
+                "otherfile.txt",
+                False,
+            ),
+            (
+                {
+                    "sub": "2",
+                    "name": "test",
+                    "permissions": ["read: files", "read: disk_storage"],
+                    "iat": 1516239022,
+                },
+                "otherfile.txt",
+                True,
+            ),
+            (
+                {
+                    "sub": "2",
+                    "name": "test",
+                    "permissions": ["read: files"],
+                    "iat": 1516239022,
+                },
+                "otherfile.txt",
+                True,
+            ),
+            (
+                {
+                    "sub": "2",
+                    "name": "test",
+                    "permissions": ["write: files", "write: disk_storage"],
+                    "iat": 1516239022,
+                },
+                "otherfile.txt",
+                False,
+            ),
+            (
+                {
+                    "sub": "test.txt",
+                    "iss": "1",
+                    "aud": "public",
+                    "permissions": ["write: files"],
+                },
+                "test.txt",
+                False,
+            ),
+            (
+                {
+                    "sub": "test.txt",
+                    "iss": "1",
+                    "aud": "public",
+                    "permissions": ["write: disk_storage"],
+                },
+                "test.txt",
+                False,
+            ),
+        ],
+    )
+    def test_may_share(self, payload, resource, expected):
+        # Arrange
+        auth_token = payload
+
+        # Act
+        may_share = make_jwt_permissions_reader(auth_token).may_share(resource)
+
+        # Assert
+        assert may_share is expected

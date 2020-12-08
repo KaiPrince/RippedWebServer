@@ -138,6 +138,37 @@ def auth_token(app) -> str:
 
 
 @pytest.fixture
+def make_auth_token(app, make_token):
+    def make_payload(user_id, username, permissions):
+        return {"sub": user_id, "name": username, "permissions": permissions}
+
+    def make(user_id, username, permissions=[]):
+        payload = make_payload(user_id, username, permissions)
+        token = make_token(payload)
+
+        return token
+
+    return make
+
+
+@pytest.fixture
+def make_token(app):
+    """ Sign a JWT. """
+
+    def sign(payload):
+
+        token = jwt.encode(
+            {"alg": "HS256"},
+            payload,
+            app.config["JWT_KEY"],
+        ).decode("utf-8")
+
+        return token
+
+    return sign
+
+
+@pytest.fixture
 def get_mock_request_call(make_request):
     def requets_from_mock(mock_func: MagicMock):
         call = mock_func.call_args
