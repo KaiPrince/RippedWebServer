@@ -37,7 +37,7 @@
         Get Sharing Link
       </button>
       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        {% for label, duration in [("1 hour", "3600"), ("3 days", "259200")]}
+        {% for label, duration in [("1 hour", "3600"), ("3 days", "259200")] %}
         <li>
           <a
             href="{{ url_for('auth.generate_sharing_link', duration=duration, file_id=file['id']) }}"
