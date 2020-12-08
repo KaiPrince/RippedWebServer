@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 import re
 import pytest
 from time import time
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 
 def test_sharing_link(
