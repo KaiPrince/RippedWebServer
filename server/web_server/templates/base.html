@@ -62,12 +62,15 @@
 
     <section class="content">
       <div class="container">
-        <header>
-          {% block header %}{% endblock %}
-        </header>
-        {% for message in get_flashed_messages() %}
+        <header>{% block header %}{% endblock %}</header>
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %} {% if category ==
+        "message" %}
         <div class="alert alert-primary" role="alert">{{ message }}</div>
-        {% endfor %} {% block content %}{% endblock %}
+        {% else %}
+        <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+        {% endif %} {% endfor %} {% endif %} {% endwith %} {% block content %}{%
+        endblock %}
       </div>
     </section>
 
