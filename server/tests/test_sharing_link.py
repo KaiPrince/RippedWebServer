@@ -107,10 +107,10 @@ def test_file_details(client, make_token):
 @pytest.mark.parametrize(
     ("permissions", "disabled"),
     [
-        (["read: files", "read:disk_storage"], "True"),
+        (["read: files", "read:disk_storage"], True),
         (
             ["read: files", "read:disk_storage", "write: files", "write: disk_storage"],
-            "False",
+            False,
         ),
     ],
 )
@@ -160,7 +160,7 @@ def test_file_details_share_link_disable_delete_button(
     # ..delete button
     delete_buttons = soup.find_all(["a", "button"], string=re.compile("Delete"))
     assert len(delete_buttons) == 1
-    assert delete_buttons[0].attrs.get("disabled") == disabled
+    assert delete_buttons[0].has_attr("disabled") == disabled
 
 
 def test_file_details_share_link_disable_share_button(client, make_token):
@@ -190,14 +190,14 @@ def test_file_details_share_link_disable_share_button(client, make_token):
     # ..delete button
     delete_buttons = soup.find_all(["a", "button"], string=re.compile("Delete"))
     assert len(delete_buttons) == 1
-    assert delete_buttons[0].attrs.get("disabled") == "True"
+    assert delete_buttons[0].has_attr("disabled")
 
     # ..share button
     share_buttons = soup.find_all(
         ["a", "button"], string=re.compile("Get Sharing Link")
     )
     assert len(share_buttons) == 1
-    assert share_buttons[0].attrs.get("disabled") == "True"
+    assert share_buttons[0].has_attr("disabled")
 
 
 def test_file_details_owner_enable_buttons(client, auth_token):
@@ -220,11 +220,11 @@ def test_file_details_owner_enable_buttons(client, auth_token):
     # ..delete button
     delete_buttons = soup.find_all(["a", "button"], string=re.compile("Delete"))
     assert len(delete_buttons) == 1
-    assert delete_buttons[0].attrs.get("disabled") == "False"
+    assert not delete_buttons[0].has_attr("disabled")
 
     # ..share button
     share_buttons = soup.find_all(
         ["a", "button"], string=re.compile("Get Sharing Link")
     )
     assert len(share_buttons) == 1
-    assert share_buttons[0].attrs.get("disabled") == "False"
+    assert not share_buttons[0].has_attr("disabled")
