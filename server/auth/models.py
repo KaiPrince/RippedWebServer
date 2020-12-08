@@ -8,7 +8,6 @@
 
 from datetime import datetime
 from typing import Literal, List
-from operator import itemgetter
 
 
 class Permission:

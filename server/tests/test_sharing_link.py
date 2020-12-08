@@ -9,6 +9,8 @@
 from bs4 import BeautifulSoup
 import re
 import pytest
+from time import time
+from datetime import datetime, timedelta
 
 
 def test_sharing_link(
@@ -228,3 +230,47 @@ def test_file_details_owner_enable_buttons(client, auth_token):
     )
     assert len(share_buttons) == 1
     assert not share_buttons[0].has_attr("disabled")
+
+
+def test_sharing_link_expiry_time(client, make_token):
+    # Arrange
+    file_id = 1
+    remaining_time = timedelta(days=2, hours=23, minutes=30)
+    remaining_time_str = "2 days, 23 hours"
+    token = make_token(
+        {
+            "sub": "test.txt",
+            "permissions": ["read: files"],
+            "exp": int(time()) + remaining_time.total_seconds(),
+        }
+    )
+
+    # Act
+    response = client.get(
+        "/files/detail/" + str(file_id), query_string={"token": token}
+    )
+
+    # Assert
+    assert bytes(remaining_time_str, "utf-8") in response.data
+
+
+def test_sharing_link_expiry_message(client, make_token):
+    # Arrange
+    file_id = 1
+    token = make_token(
+        {
+            "sub": "test.txt",
+            "permissions": ["read: files"],
+            "exp": int(time()) - timedelta(minutes=30).total_seconds(),
+        }
+    )
+
+    # Act
+    response = client.get(
+        "/files/detail/" + str(file_id),
+        query_string={"token": token},
+        follow_redirects=True,
+    )
+
+    # Assert
+    assert bytes("This token has expired", "utf-8") in response.data
