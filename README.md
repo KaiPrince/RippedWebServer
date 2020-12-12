@@ -92,7 +92,7 @@ flask run
 - [ ] hash file path in sharing token and compare to request url
 - [ ] Fix confusion of file_name and filename in server create view
 - [ ] Prevent overwrite of duplicated file
-- [ ] Add share token for viewing file details
-- [ ] Show "you are being granted temporary access" message when using share token
+- [x] Add share token for viewing file details
+- [x] Show "you are being granted temporary access" message when using share token
 - [ ] convert file id to hash of file path, use in disk_storage db
 - [ ] Add auth audit trail
