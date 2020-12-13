@@ -51,8 +51,9 @@ const runUploadSpeedTest = (updateCallback) => {
   speedtest.Timeout = 15; // Times out after 15 seconds
 
   // "http://httpbin.org/post";
-  // "http://rippedtoastserver.ddns.net/speedtest";
-  const baseURL = "http://localhost:5003";
+  // "http://localhost:5003"
+  // "http://rippedtoastserver.ddns.net";
+  const baseURL = "http://rippedtoastserver.ddns.net";
   const speedTestURL = baseURL + "/storage/speedtest";
 
   // 1MB should be enough for a good sample.
@@ -73,8 +74,9 @@ const runDownloadSpeedTest = (updateCallback) => {
   speedtest.Timeout = 15; // Times out after 15 seconds
 
   // "http://httpbin.org/post";
-  // "http://rippedtoastserver.ddns.net/speedtest";
-  const baseURL = "http://localhost:5003";
+  // "http://localhost:5003"
+  // "http://rippedtoastserver.ddns.net";
+  const baseURL = "http://rippedtoastserver.ddns.net";
   const speedTestURL = baseURL + "/storage/speedtest";
 
   speedtest.Download(speedTestURL, function (Mbps, data, done) {
