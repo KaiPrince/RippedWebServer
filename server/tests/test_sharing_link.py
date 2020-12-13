@@ -161,8 +161,9 @@ def test_file_details_share_link_disable_delete_button(
 
     # ..delete button
     delete_buttons = soup.find_all(["a", "button"], string=re.compile("Delete"))
-    assert len(delete_buttons) == 1
-    assert delete_buttons[0].has_attr("disabled") == disabled
+    if len(delete_buttons) > 0:
+        assert len(delete_buttons) == 1
+        assert delete_buttons[0].has_attr("disabled") == disabled
 
 
 def test_file_details_share_link_disable_share_button(client, make_token):
@@ -191,15 +192,15 @@ def test_file_details_share_link_disable_share_button(client, make_token):
 
     # ..delete button
     delete_buttons = soup.find_all(["a", "button"], string=re.compile("Delete"))
-    assert len(delete_buttons) == 1
-    assert delete_buttons[0].has_attr("disabled")
+    if len(delete_buttons) > 0:
+        assert len(delete_buttons) == 1
+        assert delete_buttons[0].has_attr("disabled")
 
     # ..share button
-    share_buttons = soup.find_all(
-        ["a", "button"], string=re.compile("Get Sharing Link")
-    )
-    assert len(share_buttons) == 1
-    assert share_buttons[0].has_attr("disabled")
+    share_buttons = soup.find_all(["a", "button"], string=re.compile("Share"))
+    if len(share_buttons) > 0:
+        assert len(share_buttons) == 1
+        assert share_buttons[0].has_attr("disabled")
 
 
 def test_file_details_owner_enable_buttons(client, auth_token):
@@ -225,9 +226,7 @@ def test_file_details_owner_enable_buttons(client, auth_token):
     assert not delete_buttons[0].has_attr("disabled")
 
     # ..share button
-    share_buttons = soup.find_all(
-        ["a", "button"], string=re.compile("Get Sharing Link")
-    )
+    share_buttons = soup.find_all(["a", "button"], string=re.compile("Share"))
     assert len(share_buttons) == 1
     assert not share_buttons[0].has_attr("disabled")
 
