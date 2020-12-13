@@ -3,3 +3,4 @@ wfastcgi
 gunicorn
 python-dotenv
 authlib
+flask-cors

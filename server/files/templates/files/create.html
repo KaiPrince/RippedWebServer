@@ -1,5 +1,4 @@
-{% extends 'base.html' %}
-{% block head %} 
+{% extends 'base.html' %} {% block head %}
 <style>
   progress {
     width: 100%;
@@ -7,83 +6,200 @@
     margin-bottom: 2rem;
   }
 </style>
-{% endblock %}
-{% block header %}
-<div class="row">
+{% endblock %} {% block header %}
+<div class="row mt-2">
+  <div class="col">
+    <a href="{{ url_for('files.index') }}">Back to index</a>
+  </div>
+</div>
+<div class="row mt-4">
   <div class="col">
     <h1>{% block title %}Upload File{% endblock %}</h1>
   </div>
 </div>
-<div class="row">
-  <div class="col">
-    <a href="{{ url_for('files.index') }}">Back</a>
-  </div>
-</div>
 {% endblock %} {% block content %}
 <div class="row mt-4">
-  <div class="col">
+  <div class="col col-md-8">
     <div id="create-container">
       <div class="row">
         <div class="col">
-          <progress id="progress" class="progress" max="100" value="0" hidden>
-          </progress>
+          <progress
+            id="progress"
+            class="progress"
+            max="100"
+            value="0"
+            hidden
+          ></progress>
         </div>
       </div>
       <form method="POST" enctype="multipart/form-data">
         <div class="form-group row">
-          <label for="file_name" class="col-sm-2 col-form-label">File Name</label>
+          <label for="file_name" class="col-sm-2 col-form-label form-control-md"
+            >Title</label
+          >
           <div class="col-sm-10">
-            <input name="file_name" id="file_name" class="form-control" value="{{ request.form['file_name'] }}" required />
+            <input
+              name="file_name"
+              id="file_name"
+              class="form-control form-control-md"
+              value="{{ request.form['file_name'] }}"
+              required
+            />
           </div>
         </div>
-        <div class="form-group row">
-          <label for="file" class="col-sm-2 col-form-label">File</label>
+        <div class="form-group row mt-3">
+          <label for="file" class="col-sm-2 col-form-label form-control-md"
+            >File</label
+          >
           <div class="col-sm-10">
-            <input name="file" id="file" type=file required>
+            <input
+              name="file"
+              id="file"
+              type="file"
+              class="form-control form-control-md"
+              required
+            />
           </div>
         </div>
-        <button id="submit-btn" type="submit" class="btn btn-primary" disabled>Submit</button>
+        <div class="row mt-4">
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <p id="file-details-placeholder" class="text-muted">
+                  File details will appear here...
+                </p>
+                <div id="file-details" class="d-none">
+                  <p>File Size: <span id="file-details-size"></span></p>
+                  <p>
+                    Upload time:
+                    <span id="file-details-time"></span>
+                    <button id="speed-test-btn" class="btn btn-secondary btn-sm">
+                      Test speed
+                    </button>
+                    <div id="speed-test-spinner" 
+                    class="spinner-border spinner-border-sm ms-2 d-none" 
+                    role="status"
+                    >
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </p>
+                  <p class="text-muted">Speedtest will transfer 1MB of data.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="d-grid gap-2 d-md-block mt-4">
+          <button
+            id="submit-btn"
+            type="submit"
+            class="btn btn-primary"
+            disabled
+          >
+            Submit
+          </button>
+          <a
+            class="btn btn-outline-secondary"
+            href="{{ url_for('files.index') }}"
+          >
+            Cancel
+          </a>
+        </div>
       </form>
     </div>
   </div>
 </div>
-{% endblock %}
-{% block js %} 
+{% endblock %} {% block js %}
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="{{ url_for('static', filename='js/vendor/jquery.ui.widget.js') }}"></script>
 <script src="{{ url_for('static', filename='js/jquery.iframe-transport.js') }}"></script>
 <script src="{{ url_for('static', filename='js/jquery.fileupload.js') }}"></script>
+<script src="{{ url_for('static', filename='js/speedtest.js') }}"></script>
+<script src="{{ url_for('static', filename='js/library.js') }}"></script>
 <script>
+  
+
+  const displayUploadTime = (data) => {
+    const fileSizeInBytes = data.files[0].size;
+
+    const showSpinner = () => $("#speed-test-spinner").removeClass("d-none")
+    const hideSpinner = () => $("#speed-test-spinner").addClass("d-none")
+
+    const updateTimeElement = (Mbps, done) => {
+      try {
+        const fileSizeInMb = fileSizeInBytes / 1000 / 1000;
+        const uploadTimeInSeconds = fileSizeInMb / Mbps;
+
+        $("#file-details-time").html(
+          humanizeTime(uploadTimeInSeconds) + " at " + Mbps.toFixed(2) + " MB/s"
+        );
+
+        if (done) hideSpinner();
+      } catch {
+        $("#file-details-time").html("ERROR");
+        hideSpinner();
+      }
+    };
+
+    try {
+      showSpinner()
+      runUploadSpeedTest(updateTimeElement);
+    } catch {
+      $("#file-details-time").html("ERROR");
+      hideSpinner();
+    }
+  };
+
+  const enableFormSubmissions = function (onSubmit) {
+    $("#create-container").on("submit", function (e) {
+      e.preventDefault();
+      onSubmit();
+    });
+
+    $("#submit-btn").removeAttr("disabled");
+  };
+
+  const displayFileDetails = (data) => {
+    const fileSizeInBytes = data.files[0].size;
+    $("#file-details-size").html(humanizeSize(fileSizeInBytes));
+
+    $("#speed-test-btn").text("Test Speed");
+    $("#speed-test-btn").on("click", (e) => {
+      displayUploadTime(data);
+      $(e.target).text("Test again");
+    });
+
+    $("#file-details-placeholder").addClass("d-none");
+    $("#file-details").removeClass("d-none");
+  };
+
   $(function () {
-    $('#create-container').fileupload({
-      dataType: 'json',
+    $("#create-container").fileupload({
+      dataType: "json",
       maxChunkSize: 10000000, // 10 MB
       // multipart: false,
       autoUpload: false,
       replaceFileInput: false,
       add: function (e, data) {
-        $('#create-container').on('submit', function (e) {
-          e.preventDefault()
-          data.submit()
-        })
+        enableFormSubmissions(() => data.submit());
 
-        $('#submit-btn').removeAttr('disabled')
+        displayFileDetails(data);
       },
       progressall: function (e, data) {
-        var progress = parseInt(data.loaded / data.total * 100, 10);
+        var progress = parseInt((data.loaded / data.total) * 100, 10);
 
-        $('#progress').val(progress)
-        $('#progress').text(`${progress}%`)
-        $('#progress').removeAttr("hidden")
+        $("#progress").val(progress);
+        $("#progress").text(`${progress}%`);
+        $("#progress").removeAttr("hidden");
       },
       always: function (e, data) {
-        const { jqXHR } = data
-        const contentType = jqXHR.getResponseHeader("Content-Type")
+        const { jqXHR } = data;
+        const contentType = jqXHR.getResponseHeader("Content-Type");
 
-        // If the server sends back an html page, abort the 
+        // If the server sends back an html page, abort the
         //  transfer and load the page.
         if (contentType.includes("text/html")) {
-          jqXHR.abort()
+          jqXHR.abort();
 
           var newDoc = document.open("text/html", "replace");
           newDoc.write(jqXHR.responseText);
