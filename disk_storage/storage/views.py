@@ -1,7 +1,16 @@
 import os
 
-from flask import Blueprint, abort, current_app, request, send_from_directory, url_for
+from flask import (
+    Blueprint,
+    abort,
+    current_app,
+    request,
+    send_from_directory,
+    url_for,
+    Response,
+)
 from flask.helpers import BadRequest, NotFound
+from flask_cors import cross_origin
 
 import common
 
@@ -98,3 +107,19 @@ def delete(file_name):
         return NotFound(f"File {file_name} was not found.")
 
     return f"File {file_name} was deleted."
+
+
+@bp.route("/speedtest")
+@cross_origin()
+def speedtest():
+    """ This view handler streams random data to the requester. """
+
+    # TODO rate limit
+
+    def generate():
+        size_in_bytes = 1 * 1000 * 1000  # 1MB
+        chunk_size = 200
+        for x in range(0, size_in_bytes, chunk_size):
+            yield os.urandom(chunk_size)
+
+    return Response(generate())

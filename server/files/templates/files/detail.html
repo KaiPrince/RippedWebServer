@@ -1,73 +1,359 @@
 {% extends 'base.html' %} {% block header %}
-<div class="row">
+<div class="row mt-2">
   <div class="col">
-    <h1>{% block title %}File Details{% endblock %}</h1>
+    <a href="{{ url_for('files.index') }}">Back to index</a>
   </div>
 </div>
-<div class="row">
+<div class="row mt-4">
   <div class="col">
-    <a href="{{ url_for('files.index') }}">Back</a>
+    <h1>{% block title %}{{ file['name'] }}{% endblock %}</h1>
   </div>
+  {% if may_delete %}
+  <div class="col-2">
+    <div class="dropdown d-inline-block">
+      <button
+        class="btn btn-outline-secondary dropdown-toggle"
+        type="button"
+        id="dropdownMenuButton"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        Options
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <li>
+          <a href="#" class="dropdown-item">Make this file private</a>
+        </li>
+        <li>
+          <a href="#" class="dropdown-item">Transfer ownership</a>
+        </li>
+        <li>
+          <a href="#" class="dropdown-item">Revoke share tokens</a>
+        </li>
+        <li>
+          {% if may_delete %}
+          <a
+            href="{{ url_for('files.delete', id=file['id']) }}"
+            class="dropdown-item text-danger"
+          >
+            Delete this file
+          </a>
+          {% else %}
+          <a
+            class="dropdown-item disabled"
+            href="#"
+            tabindex="-1"
+            aria-disabled="true"
+            disabled
+          >
+            Delete this file
+          </a>
+          {% endif %}
+        </li>
+      </ul>
+    </div>
+  </div>
+  {% endif %}
 </div>
 {% endblock %} {% block content %}
 <div class="row mt-4">
-  <div class="col">
+  <div class="col col-md-8">
     <div id="detail-container">
-      <p>File Name: {{ file['name'] }}</p>
-      <p>{{ content | replace('\n', '<br />') | replace('\r', '') }}</p>
-      <p>File path: {{ file['file_path'] }}</p>
-      <p>Uploaded by: {{ file['username'] }}</p>
-      <p>Uploaded at: {{ file['uploaded'] }}</p>
-    </div>
-    <div class="row mt-3">
-      <div class="col">
-        <div class="d-flex">
-          <a
-            href="{{ url_for('files.download', id=file['id']) }}"
-            class="btn btn-primary"
-          >
-            Download
-          </a>
-          {% if may_share %}
-          <div class="dropdown">
-            <button
-              class="btn btn-secondary dropdown-toggle"
-              type="button"
-              id="dropdownMenuButton"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Get Sharing Link
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              {% for label, duration in [("1 hour", "3600"), ("3 days",
-              "259200")] %}
-              <li>
-                <a
-                  href="{{ url_for('auth.generate_sharing_link', duration=duration, file_id=file['id']) }}"
-                  class="dropdown-item"
-                >
-                  {{ label }}
-                </a>
-              </li>
-              {% endfor %}
-            </ul>
-          </div>
-          {% else %}
-          <button class="btn btn-secondary" disabled>Get Sharing Link</button>
-          {% endif %} {% if may_delete %}
-          <a
-            href="{{ url_for('files.delete', id=file['id']) }}"
-            class="btn btn-danger"
-          >
-            Delete
-          </a>
-          {% else %}
-          <button class="btn btn-danger" disabled>Delete</button>
-          {% endif %}
+      <div class="row">
+        <div class="col col-sm-2">
+          <p><strong>File Size</strong></p>
+        </div>
+        <div class="col col-sm-10">
+          <p>{{ file['file_size'] }}</p>
         </div>
       </div>
+      <div class="row">
+        <div class="col col-sm-2">
+          <p><strong>File Name</strong></p>
+        </div>
+        <div class="col col-sm-10">
+          <p>{{ file['file_path'] }}</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col col-sm-2">
+          <p><strong>Uploaded By</strong></p>
+        </div>
+        <div class="col col-sm-10">
+          <p>{{ file['username'] }}</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col col-sm-2">
+          <p><strong>Uploaded At</strong></p>
+        </div>
+        <div class="col col-sm-10">
+          <p>{{ file['uploaded'] }}</p>
+        </div>
+      </div>
+      <p>{{ content | replace('\n', '<br />') | replace('\r', '') }}</p>
+    </div>
+
+    <button id="start-download-time" class="btn btn-link text-secondary">
+      Test Speed
+    </button>
+    <p class="text-muted ps-2">Speedtest will transfer 1MB of data.</p>
+    <div
+      id="speed-test-spinner"
+      class="spinner-border spinner-border-sm ms-2 d-none"
+      role="status"
+    >
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <div id="download-time"></div>
+
+    <div class="d-grid gap-2 d-md-block">
+      <a
+        href="{{ url_for('files.download', id=file['id']) }}"
+        class="btn btn-primary"
+      >
+        Download
+      </a>
+      {% if may_share %}
+      <button
+        class="btn btn-secondary"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#shareModal"
+      >
+        Share
+      </button>
+      {% else %}
+      <button class="btn btn-secondary" disabled>Share</button>
+      {% endif %}
     </div>
   </div>
 </div>
-{% endblock %} {% block js %} {% endblock %}
+<div
+  class="modal fade"
+  id="shareModal"
+  tabindex="-1"
+  aria-labelledby="shareModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="shareModalLabel">Generate Share Link</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col">
+              <p class="text-center">Share this file for</p>
+              <div class="form-group row justify-content-center">
+                {% for label, duration in [("1 hour", "3600"), ("1 day",
+                "86400"), ("3 days", "259200")] %}
+                <div class="col-sm-3">
+                  {% if duration=="3600" %}
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="duration"
+                    id="duration{{loop.index}}"
+                    autocomplete="off"
+                    value="{{duration}}"
+                    checked
+                  />
+                  {% else %}
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="duration"
+                    id="duration{{loop.index}}"
+                    autocomplete="off"
+                    value="{{duration}}"
+                  />
+                  {% endif %}
+                  <label
+                    class="btn btn-outline-secondary"
+                    for="duration{{loop.index}}"
+                  >
+                    {{ label }}
+                  </label>
+                </div>
+                {% endfor %}
+              </div>
+
+              <div class="form-group row mt-4">
+                <div class="col-sm-1">
+                  <label
+                    for="share_link"
+                    class="col-form-label form-control-md"
+                  >
+                    Link
+                  </label>
+                </div>
+                <div class="col">
+                  <input
+                    name="share_link"
+                    id="share_link"
+                    class="form-control form-control-md"
+                    value="{{ request.form['file_name'] }}"
+                    readonly
+                  />
+                </div>
+                <div class="col-sm-3">
+                  <button id="copy-link-btn" class="btn btn-light">Copy</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div> -->
+    </div>
+  </div>
+</div>
+{% endblock %} {% block js %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="{{ url_for('static', filename='js/speedtest.js') }}"></script>
+<script src="{{ url_for('static', filename='js/library.js') }}"></script>
+
+<script>
+  const _doFetchShareLink = async () => {
+    const url =
+      "{{ url_for('auth.generate_sharing_link', file_id=file['id']) }}";
+    const duration = document.querySelector('input[name="duration"]:checked')
+      .value;
+
+    const response = await fetch(url + "&duration=" + duration.toString());
+    const json = await response.json();
+
+    const { link } = json;
+
+    return link;
+  };
+
+  const preFetch = () => {
+    const shareLinkEl = document.getElementById("share_link");
+    const copyButton = document.getElementById("copy-link-btn");
+
+    shareLinkEl.value = "Loading...";
+    shareLinkEl.blur();
+    copyButton.setAttribute("disabled", "true");
+  };
+
+  const postFetch = () => {
+    const copyButton = document.getElementById("copy-link-btn");
+
+    copyButton.removeAttribute("disabled");
+    // copyButton.focus();
+
+    /* Select the text field */
+    const shareLinkEl = document.getElementById("share_link");
+    // shareLinkEl.focus();
+    shareLinkEl.select();
+    shareLinkEl.setSelectionRange(0, 99999); /*For mobile devices*/
+  };
+
+  const setLinkValue = (link) => {
+    const shareLinkEl = document.getElementById("share_link");
+    shareLinkEl.value = link;
+  };
+
+  const fetchShareLink = async () => {
+    preFetch();
+
+    try {
+      const link = await _doFetchShareLink();
+      setLinkValue(link);
+      postFetch();
+    } catch {
+      setLinkValue("Failed.");
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+
+    // // Create hidden text field
+    // hiddenField = document.createElement("span")
+
+    // /* Select the text field */
+    // element.select();
+    // element.setSelectionRange(0, 99999); /*For mobile devices*/
+
+    // /* Copy the text inside the text field */
+    // document.execCommand("copy");
+  };
+
+  const shareModal = document.getElementById("shareModal");
+  shareModal.addEventListener("shown.bs.modal", function (event) {
+    fetchShareLink();
+  });
+
+  const allRadioButtons = document.getElementsByName("duration");
+  allRadioButtons.forEach((btn) =>
+    btn.addEventListener("click", (e) => {
+      fetchShareLink();
+    })
+  );
+
+  const copyButton = document.getElementById("copy-link-btn");
+  copyButton.addEventListener("click", (e) => {
+    const shareLinkEl = document.getElementById("share_link");
+
+    copyToClipboard(shareLinkEl.value);
+  });
+</script>
+<script>
+  const displayTimeEstimate = () => {
+    const fileSizeInBytes = Number("{{ file['file_size'] }}");
+
+    const showSpinner = () => $("#speed-test-spinner").removeClass("d-none");
+    const hideSpinner = () => $("#speed-test-spinner").addClass("d-none");
+
+    const updateTimeElement = (Mbps, done) => {
+      try {
+        const fileSizeInMb = fileSizeInBytes / 1000 / 1000;
+        const timeEstimateInSeconds = fileSizeInMb / Mbps;
+
+        $("#download-time").html(
+          humanizeTime(timeEstimateInSeconds) +
+            " at " +
+            Mbps.toFixed(2) +
+            " MB/s"
+        );
+
+        if (done) hideSpinner();
+      } catch (e) {
+        console.log(e);
+        $("#download-time").html("ERROR");
+        hideSpinner();
+      }
+    };
+
+    try {
+      showSpinner();
+      runDownloadSpeedTest(updateTimeElement);
+    } catch (e) {
+      console.log(e);
+      $("#download-time").html("ERROR");
+      hideSpinner();
+    }
+  };
+
+  const startSpeedTestBtn = document.getElementById("start-download-time");
+  startSpeedTestBtn.addEventListener("click", (e) => {
+    displayTimeEstimate();
+    $(e.target).text("Test again");
+  });
+</script>
+{% endblock %}
