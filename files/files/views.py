@@ -66,7 +66,7 @@ def create():
     return {"file_id": file_id, "upload_url": upload_url}
 
 
-@bp.route("/<int:id>")
+@bp.route("/<string:id>")
 @permission_required("read: files")
 def file_info(id):
     """ Returns the file info given a file id. """
@@ -84,7 +84,7 @@ def file_info(id):
     return file_info
 
 
-@bp.route("/download/<int:id>")
+@bp.route("/download/<string:id>")
 @permission_required("read: files")
 def download(id):
     """ View for downloading a file. """
@@ -97,7 +97,7 @@ def download(id):
     return {"download_url": download_url}
 
 
-@bp.route("/delete/<int:id>", methods=["POST"])
+@bp.route("/delete/<string:id>", methods=["POST"])
 @permission_required("write: files")
 def delete(id):
     repo = get_db()

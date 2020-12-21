@@ -128,7 +128,7 @@ def create():
     return render_template("files/create.html")
 
 
-@bp.route("/detail/<int:id>")
+@bp.route("/detail/<string:id>")
 @login_required
 def detail(id):
 
@@ -166,7 +166,7 @@ def detail(id):
     )
 
 
-@bp.route("/download/<int:id>")
+@bp.route("/download/<string:id>")
 @login_required
 def download(id):
     """ View for downloading a file. """
@@ -186,7 +186,7 @@ def download(id):
     return redirect(full_url)
 
 
-@bp.route("/delete/<int:id>", methods=["GET", "POST"])
+@bp.route("/delete/<string:id>", methods=["GET", "POST"])
 @login_required
 def delete(id):
     file = service.get_file(id)
