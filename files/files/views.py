@@ -6,7 +6,7 @@ from werkzeug.exceptions import abort
 
 import files.service as service
 from auth.middleware import permission_required
-from db.repositories.factories import make_files_sql_repo as get_files_repo
+from db.service import get_db
 from operator import itemgetter
 
 # from .utils import allowed_file
@@ -18,7 +18,7 @@ bp = Blueprint("files", __name__, url_prefix="/files", template_folder="template
 @bp.route("/")
 # @permission_required("list: files")
 def index():
-    repo = get_files_repo()
+    repo = get_db()
 
     files: list = repo.index()
 
@@ -55,7 +55,7 @@ def create():
     repo.create(file_name, content_total)
 
     # Save to database
-    repo = get_files_repo()
+    repo = get_db()
     file_id = repo.create(file_name, user_id, file_path)
 
     upload_url = service.build_upload_url(file_path)
@@ -71,7 +71,7 @@ def create():
 def file_info(id):
     """ Returns the file info given a file id. """
 
-    repo = get_files_repo()
+    repo = get_db()
 
     file_info = repo.get_by_id(id)
 
@@ -100,7 +100,7 @@ def download(id):
 @bp.route("/delete/<int:id>", methods=["POST"])
 @permission_required("write: files")
 def delete(id):
-    repo = get_files_repo()
+    repo = get_db()
     db_file = repo.get_by_id(id)
 
     if not db_file:

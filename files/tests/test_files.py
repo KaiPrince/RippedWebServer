@@ -7,7 +7,7 @@ from flask import Flask
 from werkzeug.datastructures import FileStorage
 
 # import pytest
-from db.service import get_db
+from db.repositories.factories import get_sql_db as get_db
 
 
 class TestFiles:

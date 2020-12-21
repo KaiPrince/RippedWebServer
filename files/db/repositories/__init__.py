@@ -21,15 +21,15 @@ class IFilesRepository(ABC):
         pass
 
     @abstractmethod
-    def index(self):
+    def index(self) -> list:
         pass
 
     @abstractmethod
-    def get_by_id(self, id: int):
+    def get_by_id(self, id: int) -> dict:
         pass
 
     @abstractmethod
-    def search(self, predicate: callable([..., bool])):
+    def search(self, predicate: callable([..., bool])) -> list:
         pass
 
     @abstractmethod

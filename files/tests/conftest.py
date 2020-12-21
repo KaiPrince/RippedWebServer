@@ -6,7 +6,8 @@ import pytest
 from flask import Flask
 from pytest_mock import MockerFixture
 
-from db.service import get_db, init_db
+from db.service import init_db
+from db.repositories.factories import get_sql_db
 from files import create_app
 from authlib.jose import jwt
 import requests
@@ -29,7 +30,7 @@ def app(mock_disk_repo) -> Flask:
 
     with app.app_context():
         init_db()
-        get_db().executescript(_data_sql)
+        get_sql_db().executescript(_data_sql)
 
     yield app
 
