@@ -140,7 +140,7 @@ def detail(id):
             f"The files service was unable to serve this request. {message}",
             category="error",
         )
-        return redirect("files.index")
+        return redirect(url_for("files.index"))
 
     # file_path = file["file_path"]
     # if file_path.endswith("txt"):
