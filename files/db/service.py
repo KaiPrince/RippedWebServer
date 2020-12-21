@@ -22,6 +22,10 @@ def get_db() -> IFilesRepository:
 
 def close_db(e=None):
     g.pop("db", None)
+
+    # TODO This is useless because it's a new instance
+    # This is only needed in testing, so it should be
+    # moved to the conftest.py file.
     db = get_sql_db()
 
     if db is not None:
