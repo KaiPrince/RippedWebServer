@@ -1,18 +1,12 @@
 import os
-import sqlite3
 
 from flask import current_app, g
+from repositories.factories import get_sql_db
 
 
 def get_db():
     if "db" not in g:
-        # client = pymongo.MongoClient("mongodb+srv://dbAdmin:<password>@cluster0.o29to.mongodb.net/<dbname>?retryWrites=true&w=majority")
-        # db = client.test
-
-        g.db = sqlite3.connect(
-            current_app.config["DATABASE"], detect_types=sqlite3.PARSE_DECLTYPES
-        )
-        g.db.row_factory = sqlite3.Row
+        g.db = get_sql_db()
 
     return g.db
 

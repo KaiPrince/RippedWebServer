@@ -67,7 +67,7 @@ flask run
 - [ ] Accessibility pass
 - [x] Styling with <s>Tailwind</s> Bootstrap
 - [ ] Theming
-- [ ] File previews
+- [ ] File previews, videos, pictures
 - [ ] Authentication & link tokens (expirable)
 - [x] Full Elm integration
 - [x] Upload progress bar

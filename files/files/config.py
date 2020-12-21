@@ -17,6 +17,9 @@ class Config(object):
     DISK_STORAGE_SERVICE_URL = os.getenv("DISK_STORAGE_SERVICE_URL")
     JWT_KEY = os.getenv("JWT_KEY")
     PUBLIC_DISK_STORAGE_SERVICE_URL = os.getenv("PUBLIC_DISK_STORAGE_SERVICE_URL")
+    MONGO_USERNAME = os.getenv("MONGO_USERNAME")
+    MONGO_PASSWORD = os.getenv("MONGO_PASSWORD")
+    MONGO_DBNAME = os.getenv("MONGO_DBNAME")
 
     def __init__(self, app: Flask):
 
@@ -44,6 +47,17 @@ class Config(object):
                 "PUBLIC_DISK_STORAGE_SERVICE_URL environment variable not set."
             )
             self.PUBLIC_DISK_STORAGE_SERVICE_URL = "http://localhost:5002"
+
+        if self.MONGO_USERNAME is None:
+            logging.warning("MONGO_USERNAME environment variable not set.")
+            self.MONGO_USERNAME = "dbAdmin"
+
+        if self.MONGO_PASSWORD is None:
+            logging.warning("MONGO_PASSWORD environment variable not set.")
+
+        if self.MONGO_DBNAME is None:
+            logging.warning("MONGO_DBNAME environment variable not set.")
+            self.MONGO_DBNAME = "files"
 
 
 # class Config(object):
