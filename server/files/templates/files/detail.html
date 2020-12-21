@@ -33,7 +33,7 @@
         <li>
           {% if may_delete %}
           <a
-            href="{{ url_for('files.delete', id=file['id']) }}"
+            href="{{ url_for('files.delete', id=file['file_id']) }}"
             class="dropdown-item text-danger"
           >
             Delete this file
