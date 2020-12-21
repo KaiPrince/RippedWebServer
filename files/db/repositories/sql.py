@@ -7,6 +7,7 @@
 """
 
 from . import IFilesRepository
+from operator import itemgetter
 
 
 class FilesSqlRepository(IFilesRepository):
@@ -22,7 +23,7 @@ class FilesSqlRepository(IFilesRepository):
             " ORDER BY uploaded DESC"
         ).fetchall()
 
-        files_array = list(dict(x) for x in files)
+        files_array = list(self._db_file_to_dict(x) for x in files)
         return files_array
 
     def get_by_id(self, id):
@@ -30,7 +31,7 @@ class FilesSqlRepository(IFilesRepository):
         db = self.db
 
         db_file = db.execute(
-            "SELECT f.id, file_name as name, uploaded, user_id, file_path"
+            "SELECT f.id, file_name, uploaded, user_id, file_path"
             " FROM user_file f"
             " WHERE f.id = ?"
             " ORDER BY uploaded DESC",
@@ -40,7 +41,15 @@ class FilesSqlRepository(IFilesRepository):
         if not db_file:
             return None
 
-        return dict(db_file)
+        file_details = {
+            "id": db_file[0],
+            "name": db_file[1],
+            "uploaded": db_file[2],
+            "user_id": db_file[3],
+            "file_path": db_file[4],
+        }
+
+        return file_details
 
     def search(self, predicate):
         raise NotImplementedError
@@ -63,6 +72,17 @@ class FilesSqlRepository(IFilesRepository):
         db = self.db
         db.execute("DELETE from user_file" " WHERE id = ?", [str(file_id)])
         db.commit()
+
+    def _db_file_to_dict(self, db_file):
+        file_details = {
+            "id": db_file[0],
+            "file_name": db_file[1],
+            "uploaded": db_file[2],
+            "user_id": db_file[3],
+            "file_path": db_file[4],
+        }
+
+        return file_details
 
 
 def make_files_sql_repo(db):

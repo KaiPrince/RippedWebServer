@@ -6,7 +6,7 @@ from werkzeug.exceptions import abort
 
 import files.service as service
 from auth.middleware import permission_required
-from db.files import make_files_sql_repo as get_files_repo
+from db.repositories.factories import make_files_sql_repo as get_files_repo
 from operator import itemgetter
 
 # from .utils import allowed_file

@@ -66,7 +66,7 @@ class FilesMongoRepository(IFilesRepository):
 
         return result
 
-    def _add_file_id_field(record):
+    def _add_file_id_field(self, record):
         result = {**record, "file_id": record["_id"]} if record is not None else record
 
         return result

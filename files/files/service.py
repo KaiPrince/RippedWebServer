@@ -1,7 +1,7 @@
 from flask import Response, current_app
 
 from auth.service import create_auth_token
-from db.files import make_files_sql_repo as get_files_repo
+from db.repositories.factories import make_files_sql_repo as get_files_repo
 from db.service import get_db
 from service_api.disk_storage import make_repository
 

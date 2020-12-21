@@ -1,7 +1,7 @@
 import os
 
 from flask import current_app, g
-from repositories.factories import get_sql_db
+from db.repositories.factories import get_sql_db
 
 
 def get_db():
