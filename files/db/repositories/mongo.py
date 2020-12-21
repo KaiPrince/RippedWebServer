@@ -20,12 +20,17 @@ class FilesMongoRepository(IFilesRepository):
         self.collection = self.db.get_collection(self.collection_name)
 
     def index(self):
-        all_items = self.collection.find()
-        return all_items
+        records = self.collection.find()
+        results = [self._add_file_id_field(x) for x in records]
+
+        return results
 
     def get_by_id(self, obj_id):
         """ Consumes an ID and produces file details. """
-        return self.collection.find_one({"_id": obj_id})
+        record = self.collection.find_one({"_id": obj_id})
+        record = self._add_file_id_field(record)
+
+        return record
 
     def search(self, predicate):
         all_items = self.index()
@@ -46,7 +51,7 @@ class FilesMongoRepository(IFilesRepository):
 
     def edit(self, file_id, file_name, user_id, file_path):
         result = self.collection.update_one(
-            {"file_id": file_id},
+            {"_id": file_id},
             {
                 "file_name": file_name,
                 "user_id": user_id,
@@ -57,6 +62,11 @@ class FilesMongoRepository(IFilesRepository):
         return result
 
     def delete(self, file_id):
-        result = self.collection.delete_one({"file_id": file_id})
+        result = self.collection.delete_one({"_id": file_id})
+
+        return result
+
+    def _add_file_id_field(record):
+        result = {**record, "file_id": record["_id"]} if record is not None else record
 
         return result
