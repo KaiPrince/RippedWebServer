@@ -10,3 +10,4 @@ requests
 eve
 authlib
 pymongo
+dnspython
