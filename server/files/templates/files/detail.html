@@ -109,7 +109,7 @@
 
     <div class="d-grid gap-2 d-md-block">
       <a
-        href="{{ url_for('files.download', id=file['id']) }}"
+        href="{{ url_for('files.download', id=file['file_id']) }}"
         class="btn btn-primary"
       >
         Download
@@ -229,7 +229,7 @@
 <script>
   const _doFetchShareLink = async () => {
     const url =
-      "{{ url_for('auth.generate_sharing_link', file_id=file['id']) }}";
+      "{{ url_for('auth.generate_sharing_link', file_id=file['file_id']) }}";
     const duration = document.querySelector('input[name="duration"]:checked')
       .value;
 
