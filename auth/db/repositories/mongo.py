@@ -13,7 +13,7 @@ from db.repositories import IUsersRepository
 
 
 class UsersMongoRepository(IUsersRepository):
-    db_name = "users"
+    db_name = "auth"
     collection_name = "users"
 
     def __init__(self, db: MongoClient):
