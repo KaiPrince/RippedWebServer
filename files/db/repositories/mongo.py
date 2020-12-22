@@ -41,7 +41,6 @@ class FilesMongoRepository(IFilesRepository):
 
     def search(self, predicate):
         all_items = self.index()
-        all_items = [self._conform(x) for x in all_items]
         search_results = [x for x in all_items if predicate(x)]
 
         return search_results
@@ -56,7 +55,7 @@ class FilesMongoRepository(IFilesRepository):
             }
         )
 
-        return result.inserted_id
+        return str(result.inserted_id)
 
     def edit(self, file_id, file_name, user_id, file_path) -> None:
         self.collection.update_one(
