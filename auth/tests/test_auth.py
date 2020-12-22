@@ -26,7 +26,7 @@ def test_register(client, app):
         [
             "test",
             "test",
-            2,
+            1,
             [
                 "read: files",
                 "write: files",
@@ -37,7 +37,7 @@ def test_register(client, app):
         [
             "other",
             "othertest",
-            3,
+            2,
             [
                 "read: files",
                 "read: disk_storage",

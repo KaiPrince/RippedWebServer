@@ -1,22 +1,20 @@
 """
  * Project Name: RippedWebServer
- * File Name: db.py
+ * user Name: db.py
  * Programmer: Kai Prince
- * Date: Mon, Nov 30, 2020
- * Description: This file contains DB service functions for the files app.
+ * Date: Mon, Dec 12, 2020
+ * Description: This user contains DB service functions for the auth app.
 """
-
-from datetime import datetime
 
 from bson.objectid import ObjectId
 from pymongo import MongoClient
 
-from db.repositories import IFilesRepository
+from db.repositories import IUsersRepository
 
 
-class FilesMongoRepository(IFilesRepository):
-    db_name = "files"
-    collection_name = "files"
+class UsersMongoRepository(IUsersRepository):
+    db_name = "auth"
+    collection_name = "users"
 
     def __init__(self, db: MongoClient):
         self.db_instance: MongoClient = db
@@ -33,7 +31,7 @@ class FilesMongoRepository(IFilesRepository):
         return results
 
     def get_by_id(self, obj_id):
-        """ Consumes an ID and produces file details. """
+        """ Consumes an ID and produces user details. """
         record = self.collection.find_one({"_id": ObjectId(obj_id)})
         record = self._conform(record)
 
@@ -45,30 +43,31 @@ class FilesMongoRepository(IFilesRepository):
 
         return search_results
 
-    def create(self, file_name, user_id, file_path) -> str:
+    def create(self, username, password, permissions):
+        # TODO validate permissions
         result = self.collection.insert_one(
-            {
-                "file_name": file_name,
-                "user_id": user_id,
-                "file_path": file_path,
-                "uploaded": datetime.now(),
-            }
+            {"username": username, "password": password, "permissions": permissions}
         )
 
-        return str(result.inserted_id)
+        return result
 
-    def edit(self, file_id, file_name, user_id, file_path) -> None:
-        self.collection.update_one(
-            {"_id": ObjectId(file_id)},
+    def edit(self, user_id, username, password, permissions):
+        # TODO validate permissions
+        result = self.collection.update_one(
+            {"_id": ObjectId(user_id)},
             {
-                "file_name": file_name,
-                "user_id": user_id,
-                "file_path": file_path,
+                "username": username,
+                "password": password,
+                "permissions": permissions,
             },
         )
 
-    def delete(self, file_id) -> None:
-        self.collection.delete_one({"_id": ObjectId(file_id)})
+        return result
+
+    def delete(self, user_id):
+        result = self.collection.delete_one({"_id": ObjectId(user_id)})
+
+        return result
 
     def _conform(self, record):
         """
@@ -78,12 +77,12 @@ class FilesMongoRepository(IFilesRepository):
         * Parameters:
             MongoDb record {"_id": ObjectId("")}
         * Returns:
-            dict {"file_id": int}
+            dict {"user_id": int}
         """
         if record is None:
             return record
 
-        result = {**record, "file_id": str(record["_id"])}
+        result = {**record, "id": str(record["_id"])}
         result.pop("_id", None)
 
         return result

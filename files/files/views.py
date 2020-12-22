@@ -53,7 +53,7 @@ def create():
 
     # Notify disk service
     repo = service.get_disk_repo()
-    repo.create(file_name, content_total)
+    repo.create(file_path, content_total)
 
     # Save to database
     repo = get_db()

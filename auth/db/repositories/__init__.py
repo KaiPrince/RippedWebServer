@@ -9,11 +9,11 @@
 from abc import ABC, abstractmethod
 
 
-class IFilesRepository(ABC):
+class IUsersRepository(ABC):
     """
-    * Class Name: IRepository
+    * Class Name: IUsersRepository
     * Purpose: This purpose of this class is to provide an interface for all
-    *   repositories.
+    *   User repositories.
     """
 
     @abstractmethod
@@ -33,13 +33,13 @@ class IFilesRepository(ABC):
         pass
 
     @abstractmethod
-    def create(self, file_name, user_id, file_path) -> str:
+    def create(self, username, password, permissions) -> int:
         pass
 
     @abstractmethod
-    def edit(self, file_id, file_name, user_id, file_path) -> None:
+    def edit(self, user_id, password, permissions) -> None:
         pass
 
     @abstractmethod
-    def delete(self, file_id) -> None:
+    def delete(self, user_id) -> None:
         pass
