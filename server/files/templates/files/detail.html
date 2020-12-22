@@ -6,7 +6,7 @@
 </div>
 <div class="row mt-4">
   <div class="col">
-    <h1>{% block title %}{{ file['name'] }}{% endblock %}</h1>
+    <h1>{% block title %}{{ file['file_name'] }}{% endblock %}</h1>
   </div>
   {% if may_delete %}
   <div class="col-2">
@@ -33,7 +33,7 @@
         <li>
           {% if may_delete %}
           <a
-            href="{{ url_for('files.delete', id=file['id']) }}"
+            href="{{ url_for('files.delete', id=file['file_id']) }}"
             class="dropdown-item text-danger"
           >
             Delete this file
@@ -109,7 +109,7 @@
 
     <div class="d-grid gap-2 d-md-block">
       <a
-        href="{{ url_for('files.download', id=file['id']) }}"
+        href="{{ url_for('files.download', id=file['file_id']) }}"
         class="btn btn-primary"
       >
         Download
@@ -229,7 +229,7 @@
 <script>
   const _doFetchShareLink = async () => {
     const url =
-      "{{ url_for('auth.generate_sharing_link', file_id=file['id']) }}";
+      "{{ url_for('auth.generate_sharing_link', file_id=file['file_id']) }}";
     const duration = document.querySelector('input[name="duration"]:checked')
       .value;
 

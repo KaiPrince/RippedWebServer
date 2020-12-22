@@ -1,13 +1,14 @@
+from operator import itemgetter
+
 from flask import Blueprint, current_app, make_response, request
 from flask.helpers import NotFound
 from requests import HTTPError
-from werkzeug.utils import secure_filename
 from werkzeug.exceptions import abort
+from werkzeug.utils import secure_filename
 
 import files.service as service
 from auth.middleware import permission_required
-from db.files import make_files_sql_repo as get_files_repo
-from operator import itemgetter
+from db.service import get_db
 
 # from .utils import allowed_file
 
@@ -18,7 +19,7 @@ bp = Blueprint("files", __name__, url_prefix="/files", template_folder="template
 @bp.route("/")
 # @permission_required("list: files")
 def index():
-    repo = get_files_repo()
+    repo = get_db()
 
     files: list = repo.index()
 
@@ -55,7 +56,7 @@ def create():
     repo.create(file_name, content_total)
 
     # Save to database
-    repo = get_files_repo()
+    repo = get_db()
     file_id = repo.create(file_name, user_id, file_path)
 
     upload_url = service.build_upload_url(file_path)
@@ -66,12 +67,12 @@ def create():
     return {"file_id": file_id, "upload_url": upload_url}
 
 
-@bp.route("/<int:id>")
+@bp.route("/<string:id>")
 @permission_required("read: files")
 def file_info(id):
     """ Returns the file info given a file id. """
 
-    repo = get_files_repo()
+    repo = get_db()
 
     file_info = repo.get_by_id(id)
 
@@ -84,7 +85,7 @@ def file_info(id):
     return file_info
 
 
-@bp.route("/download/<int:id>")
+@bp.route("/download/<string:id>")
 @permission_required("read: files")
 def download(id):
     """ View for downloading a file. """
@@ -97,10 +98,10 @@ def download(id):
     return {"download_url": download_url}
 
 
-@bp.route("/delete/<int:id>", methods=["POST"])
+@bp.route("/delete/<string:id>", methods=["POST"])
 @permission_required("write: files")
 def delete(id):
-    repo = get_files_repo()
+    repo = get_db()
     db_file = repo.get_by_id(id)
 
     if not db_file:

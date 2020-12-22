@@ -8,6 +8,7 @@
 """
 
 from abc import ABC, abstractmethod
+
 from auth.models import AuthTicket
 
 

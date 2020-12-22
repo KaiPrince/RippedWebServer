@@ -5,8 +5,9 @@ Flask
 wfastcgi
 gunicorn
 python-dotenv
-flask-mongoengine
 pytest-mock
 requests
 eve
 authlib
+pymongo
+dnspython

@@ -7,6 +7,7 @@
 """
 
 import pytest
+
 from auth.models import AuthTicket, Permission
 
 

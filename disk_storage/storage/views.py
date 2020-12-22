@@ -1,19 +1,11 @@
 import os
 
-from flask import (
-    Blueprint,
-    abort,
-    current_app,
-    request,
-    send_from_directory,
-    url_for,
-    Response,
-)
+from flask import (Blueprint, Response, abort, current_app, request,
+                   send_from_directory, url_for)
 from flask.helpers import BadRequest, NotFound
 from flask_cors import cross_origin
 
 import common
-
 # from werkzeug.exceptions import abort
 import storage.service as service
 from auth.middleware import permission_required

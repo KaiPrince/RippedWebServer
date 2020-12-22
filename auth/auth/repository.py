@@ -6,9 +6,9 @@
  * Description: This file contains repository-level functions for the auth app.
 """
 
-from db.service import get_db
-
 from sqlite3 import Row
+
+from db.service import get_db
 
 
 def find_user(username: str) -> Row:

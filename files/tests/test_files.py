@@ -7,7 +7,7 @@ from flask import Flask
 from werkzeug.datastructures import FileStorage
 
 # import pytest
-from db.service import get_db
+from db.repositories.factories import get_sql_db as get_db
 
 
 class TestFiles:
@@ -122,9 +122,9 @@ class TestFiles:
                 " ORDER BY uploaded DESC",
                 str(file_id),
             ).fetchone()
-            assert db_file["name"] == filename
-            assert db_file["user_id"] == user_id
-            assert db_file["file_path"] == file_path
+            assert db_file[1] == filename
+            assert db_file[3] == user_id
+            assert db_file[4] == file_path
 
     def test_read_file(
         self,

@@ -6,10 +6,11 @@
  * Description: This file contains functions that call the disk_storage service API.
 """
 
+from abc import ABC, abstractmethod
+
 import requests
 
 from auth.middleware import get_auth_middleware
-from abc import ABC, abstractmethod
 
 
 class IDiskStorageRepository(ABC):

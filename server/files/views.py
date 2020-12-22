@@ -1,16 +1,8 @@
 import sys
 
 from flask import (
-    Blueprint,
-    current_app,
-    flash,
-    g,
-    redirect,
-    render_template,
-    request,
-    session,
-    url_for,
-)
+    Blueprint, current_app, flash, g, redirect, render_template, request,
+    session, url_for)
 from flask.helpers import NotFound
 from requests import HTTPError
 from requests.exceptions import ConnectionError as r_ConnectionError
@@ -19,8 +11,8 @@ from werkzeug.utils import secure_filename
 
 import common
 import files.service as service
-from auth.route_decorators import login_required
 from auth.permissions import make_jwt_permissions_reader
+from auth.route_decorators import login_required
 
 # from .utils import allowed_file
 
@@ -128,7 +120,7 @@ def create():
     return render_template("files/create.html")
 
 
-@bp.route("/detail/<int:id>")
+@bp.route("/detail/<string:id>")
 @login_required
 def detail(id):
 
@@ -140,7 +132,7 @@ def detail(id):
             f"The files service was unable to serve this request. {message}",
             category="error",
         )
-        return redirect("files.index")
+        return redirect(url_for("files.index"))
 
     # file_path = file["file_path"]
     # if file_path.endswith("txt"):
@@ -166,7 +158,7 @@ def detail(id):
     )
 
 
-@bp.route("/download/<int:id>")
+@bp.route("/download/<string:id>")
 @login_required
 def download(id):
     """ View for downloading a file. """
@@ -186,7 +178,7 @@ def download(id):
     return redirect(full_url)
 
 
-@bp.route("/delete/<int:id>", methods=["GET", "POST"])
+@bp.route("/delete/<string:id>", methods=["GET", "POST"])
 @login_required
 def delete(id):
     file = service.get_file(id)

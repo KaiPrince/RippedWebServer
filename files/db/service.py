@@ -1,18 +1,19 @@
 import os
-import sqlite3
 
 from flask import current_app, g
 
+from db.repositories import IFilesRepository
+from db.repositories.factories import (get_sql_db, make_files_mongo_repo,
+                                       make_files_sql_repo)
 
-def get_db():
+
+def get_db() -> IFilesRepository:
     if "db" not in g:
-        # client = pymongo.MongoClient("mongodb+srv://dbAdmin:<password>@cluster0.o29to.mongodb.net/<dbname>?retryWrites=true&w=majority")
-        # db = client.test
-
-        g.db = sqlite3.connect(
-            current_app.config["DATABASE"], detect_types=sqlite3.PARSE_DECLTYPES
+        g.db = (
+            make_files_mongo_repo()
+            if not current_app.testing
+            else make_files_sql_repo()
         )
-        g.db.row_factory = sqlite3.Row
 
     return g.db
 
@@ -21,11 +22,12 @@ def close_db(e=None):
     db = g.pop("db", None)
 
     if db is not None:
-        db.close()
+        # Call destructor to run cleanup
+        del db
 
 
 def init_db():
-    db = get_db()
+    db = get_sql_db()
 
     schema_file = os.path.join(os.path.dirname(__file__), "schema.sql")
 

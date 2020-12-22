@@ -7,7 +7,7 @@
 """
 
 from datetime import datetime
-from typing import Literal, List
+from typing import List, Literal
 
 
 class Permission:

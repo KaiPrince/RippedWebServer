@@ -8,9 +8,11 @@
  *   This will be used in the creation of sharing links.
 """
 from uuid import uuid4
+
 from authlib.jose import jwt
-from auth.service import validate_share_token_request
 from pytest_mock import MockerFixture
+
+from auth.service import validate_share_token_request
 
 
 def test_generate_public_token(client, app, auth_token, mocker: MockerFixture):

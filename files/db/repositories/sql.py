@@ -1,54 +1,22 @@
 """
  * Project Name: RippedWebServer
- * File Name: db.py
+ * File Name: sql.py
  * Programmer: Kai Prince
- * Date: Mon, Nov 30, 2020
- * Description: This file contains DB service functions for the files app.
+ * Date: Sun, Dec 13, 2020
+ * Description: This file contains an SQL implementation of the Files Repository.
 """
-from abc import ABC, abstractmethod
 
-from db.service import get_db
+from sqlite3 import Connection
 
-
-class IFilesRepository(ABC):
-    """
-    * Class Name: IRepository
-    * Purpose: This purpose of this class is to provide an interface for all
-    *   repositories.
-    """
-
-    @abstractmethod
-    def __init__(self, db):
-        pass
-
-    @abstractmethod
-    def index(self):
-        pass
-
-    @abstractmethod
-    def get_by_id(self, id: int):
-        pass
-
-    @abstractmethod
-    def search(self, predicate: callable([..., bool])):
-        pass
-
-    @abstractmethod
-    def create(self, file_name, user_id, file_path) -> int:
-        pass
-
-    @abstractmethod
-    def edit(self, file_id, file_name, user_id, file_path) -> None:
-        pass
-
-    @abstractmethod
-    def delete(self, file_id) -> None:
-        pass
+from . import IFilesRepository
 
 
 class FilesSqlRepository(IFilesRepository):
-    def __init__(self, db):
+    def __init__(self, db: Connection):
         self.db = db
+
+    def __del__(self):
+        self.db.close()
 
     def index(self):
         db = self.db
@@ -59,7 +27,7 @@ class FilesSqlRepository(IFilesRepository):
             " ORDER BY uploaded DESC"
         ).fetchall()
 
-        files_array = list(dict(x) for x in files)
+        files_array = list(self._db_file_to_dict(x) for x in files)
         return files_array
 
     def get_by_id(self, id):
@@ -67,7 +35,7 @@ class FilesSqlRepository(IFilesRepository):
         db = self.db
 
         db_file = db.execute(
-            "SELECT f.id, file_name as name, uploaded, user_id, file_path"
+            "SELECT f.id, file_name, uploaded, user_id, file_path"
             " FROM user_file f"
             " WHERE f.id = ?"
             " ORDER BY uploaded DESC",
@@ -77,7 +45,15 @@ class FilesSqlRepository(IFilesRepository):
         if not db_file:
             return None
 
-        return dict(db_file)
+        file_details = {
+            "id": db_file[0],
+            "name": db_file[1],
+            "uploaded": db_file[2],
+            "user_id": db_file[3],
+            "file_path": db_file[4],
+        }
+
+        return file_details
 
     def search(self, predicate):
         raise NotImplementedError
@@ -101,7 +77,17 @@ class FilesSqlRepository(IFilesRepository):
         db.execute("DELETE from user_file" " WHERE id = ?", [str(file_id)])
         db.commit()
 
+    def _db_file_to_dict(self, db_file):
+        file_details = {
+            "id": db_file[0],
+            "file_name": db_file[1],
+            "uploaded": db_file[2],
+            "user_id": db_file[3],
+            "file_path": db_file[4],
+        }
 
-def make_files_sql_repo():
-    db = get_db()
+        return file_details
+
+
+def make_files_sql_repo(db):
     return FilesSqlRepository(db)

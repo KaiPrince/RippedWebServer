@@ -13,7 +13,6 @@ class Config(object):
     # Import config from environment
     SECRET_KEY = os.getenv("SECRET_KEY")
     DATABASE = os.getenv("DATABASE")
-    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
     FILES_SERVICE_URL = os.getenv("FILES_SERVICE_URL")
     PUBLIC_FILES_SERVICE_URL = os.getenv("PUBLIC_FILES_SERVICE_URL")
     AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL")
@@ -24,14 +23,6 @@ class Config(object):
 
         if self.SECRET_KEY is None:
             logging.warning("SECRET_KEY environment variable not set.")
-
-        if self.DATABASE is None:
-            logging.warning("DATABASE environment variable not set.")
-            self.DATABASE = os.path.join(app.instance_path, "web_server.sqlite")
-
-        if self.UPLOAD_FOLDER is None:
-            logging.warning("UPLOAD_FOLDER environment variable not set.")
-            self.UPLOAD_FOLDER = os.path.join(app.instance_path, "uploads")
 
         if self.FILES_SERVICE_URL is None:
             logging.warning("FILES_SERVICE_URL environment variable not set.")

@@ -1,7 +1,7 @@
 import pytest
-from db.service import get_db
-
 from authlib.jose import jwt
+
+from db.service import get_db
 
 
 @pytest.mark.skip
