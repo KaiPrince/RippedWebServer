@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 from authlib.jose import jwt
 from flask import session
+
 from auth.permissions import make_jwt_permissions_reader
 
 

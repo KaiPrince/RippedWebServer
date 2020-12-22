@@ -8,8 +8,10 @@
 """
 
 import sqlite3
+
 from flask import current_app
 from pymongo import MongoClient
+
 from db.repositories.mongo import FilesMongoRepository
 from db.repositories.sql import FilesSqlRepository
 
@@ -24,8 +26,12 @@ def get_mongo_db():
     username = current_app.config["MONGO_USERNAME"]
     password = current_app.config["MONGO_PASSWORD"]
     dbname = current_app.config["MONGO_DBNAME"]
-    mongo_uri = f"mongodb+srv://{username}:{password}@cluster0.o29to.mongodb.net"
-    f"/{dbname}?retryWrites=true&w=majority"
+    mongo_uri = (
+        str(current_app.config["DATABASE"])
+        .replace("{username}", username)
+        .replace("{password}", password)
+        .replace("{dbname}", dbname)
+    )
 
     db = MongoClient(mongo_uri)
     return db

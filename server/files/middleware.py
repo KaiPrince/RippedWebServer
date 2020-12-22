@@ -1,8 +1,11 @@
+from flask import current_app, g
+
 from files.service_api.disk_storage import IDiskStorageRepository
-from files.service_api.disk_storage import make_repository as make_disk_repository
+from files.service_api.disk_storage import \
+    make_repository as make_disk_repository
 from files.service_api.files import IFilesRepository
 from files.service_api.files import make_repository as make_files_repository
-from flask import current_app, g
+
 from .views import bp
 
 

@@ -1,12 +1,10 @@
 import os
 
 from flask import current_app, g
-from db.repositories.factories import (
-    make_files_sql_repo,
-    make_files_mongo_repo,
-    get_sql_db,
-)
+
 from db.repositories import IFilesRepository
+from db.repositories.factories import (get_sql_db, make_files_mongo_repo,
+                                       make_files_sql_repo)
 
 
 def get_db() -> IFilesRepository:
@@ -21,15 +19,11 @@ def get_db() -> IFilesRepository:
 
 
 def close_db(e=None):
-    g.pop("db", None)
-
-    # TODO This is useless because it's a new instance
-    # This is only needed in testing, so it should be
-    # moved to the conftest.py file.
-    db = get_sql_db()
+    db = g.pop("db", None)
 
     if db is not None:
-        db.close()
+        # Call destructor to run cleanup
+        del db
 
 
 def init_db():

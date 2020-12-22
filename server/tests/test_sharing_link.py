@@ -6,11 +6,12 @@
  * Description: This file contains tests for creating links to share files.
 """
 
-from bs4 import BeautifulSoup
 import re
-import pytest
-from time import time
 from datetime import timedelta
+from time import time
+
+import pytest
+from bs4 import BeautifulSoup
 
 
 def test_sharing_link(

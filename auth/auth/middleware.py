@@ -1,7 +1,8 @@
 import functools
 
-from db.service import get_db
 from flask import g, redirect, session, url_for
+
+from db.service import get_db
 
 from .views import bp
 

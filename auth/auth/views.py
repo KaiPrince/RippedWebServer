@@ -1,19 +1,12 @@
-from flask import (
-    Blueprint,
-    flash,
-    redirect,
-    render_template,
-    request,
-    session,
-    url_for,
-    make_response,
-    current_app,
-)
-import auth.service as service
-from authlib.jose import jwt
 from datetime import timedelta
-from time import time
 from operator import itemgetter
+from time import time
+
+from authlib.jose import jwt
+from flask import (Blueprint, current_app, flash, make_response, redirect,
+                   render_template, request, session, url_for)
+
+import auth.service as service
 
 bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder="templates")
 

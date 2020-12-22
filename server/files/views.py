@@ -1,16 +1,8 @@
 import sys
 
 from flask import (
-    Blueprint,
-    current_app,
-    flash,
-    g,
-    redirect,
-    render_template,
-    request,
-    session,
-    url_for,
-)
+    Blueprint, current_app, flash, g, redirect, render_template, request,
+    session, url_for)
 from flask.helpers import NotFound
 from requests import HTTPError
 from requests.exceptions import ConnectionError as r_ConnectionError
@@ -19,8 +11,8 @@ from werkzeug.utils import secure_filename
 
 import common
 import files.service as service
-from auth.route_decorators import login_required
 from auth.permissions import make_jwt_permissions_reader
+from auth.route_decorators import login_required
 
 # from .utils import allowed_file
 

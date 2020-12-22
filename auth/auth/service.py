@@ -6,14 +6,16 @@
  * Description: This file contains service functions for the authentication app.
 """
 
-from db.service import create_user, get_db
-from werkzeug.security import check_password_hash
-import auth.repository as repository
-from authlib.jose import jwt
-from flask import current_app
 from datetime import timedelta
 from time import time
 from uuid import uuid4
+
+from authlib.jose import jwt
+from flask import current_app
+from werkzeug.security import check_password_hash
+
+import auth.repository as repository
+from db.service import create_user, get_db
 
 
 def find_user(username: str) -> dict:

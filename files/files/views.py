@@ -1,13 +1,14 @@
+from operator import itemgetter
+
 from flask import Blueprint, current_app, make_response, request
 from flask.helpers import NotFound
 from requests import HTTPError
-from werkzeug.utils import secure_filename
 from werkzeug.exceptions import abort
+from werkzeug.utils import secure_filename
 
 import files.service as service
 from auth.middleware import permission_required
 from db.service import get_db
-from operator import itemgetter
 
 # from .utils import allowed_file
 

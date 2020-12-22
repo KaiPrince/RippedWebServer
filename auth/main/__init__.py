@@ -8,11 +8,11 @@
 
 import os
 
-import auth.views
-import db
 from flask import Flask
 
 import auth
+import auth.views
+import db
 
 from .config import getConfig
 

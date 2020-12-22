@@ -3,15 +3,14 @@ import tempfile
 from unittest.mock import MagicMock
 
 import pytest
+import requests
+from authlib.jose import jwt
 from flask import Flask
 from pytest_mock import MockerFixture
 
-from db.service import init_db
 from db.repositories.factories import get_sql_db
+from db.service import init_db
 from files import create_app
-from authlib.jose import jwt
-import requests
-
 
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
     _data_sql = f.read().decode("utf8")

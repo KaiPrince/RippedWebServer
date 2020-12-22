@@ -2,12 +2,12 @@ import os
 import tempfile
 
 import pytest
-from db.service import get_db, init_db
-from main import create_app
-
+from authlib.jose import jwt
 from flask import Flask
 from flask.testing import FlaskClient
-from authlib.jose import jwt
+
+from db.service import get_db, init_db
+from main import create_app
 
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
     _data_sql = f.read().decode("utf8")

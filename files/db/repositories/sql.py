@@ -6,13 +6,17 @@
  * Description: This file contains an SQL implementation of the Files Repository.
 """
 
+from sqlite3 import Connection
+
 from . import IFilesRepository
-from operator import itemgetter
 
 
 class FilesSqlRepository(IFilesRepository):
-    def __init__(self, db):
+    def __init__(self, db: Connection):
         self.db = db
+
+    def __del__(self):
+        self.db.close()
 
     def index(self):
         db = self.db

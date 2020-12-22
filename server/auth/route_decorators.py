@@ -1,8 +1,9 @@
 import functools
+from datetime import datetime, timedelta
 
-from flask import current_app, flash, g, redirect, session, url_for, request
+from flask import current_app, flash, g, redirect, request, session, url_for
+
 import auth.service as service
-from datetime import timedelta, datetime
 
 
 def login_required(view):
