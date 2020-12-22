@@ -39,7 +39,6 @@ class UsersMongoRepository(IUsersRepository):
 
     def search(self, predicate):
         all_items = self.index()
-        all_items = [self._conform(x) for x in all_items]
         search_results = [x for x in all_items if predicate(x)]
 
         return search_results
