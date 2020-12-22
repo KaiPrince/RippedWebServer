@@ -82,7 +82,7 @@ class UsersMongoRepository(IUsersRepository):
         if record is None:
             return record
 
-        result = {**record, "user_id": str(record["_id"])}
+        result = {**record, "id": str(record["_id"])}
         result.pop("_id", None)
 
         return result
