@@ -8,6 +8,7 @@
 
 from db.repositories import IFilesRepository
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 
 class FilesMongoRepository(IFilesRepository):
@@ -27,7 +28,7 @@ class FilesMongoRepository(IFilesRepository):
 
     def get_by_id(self, obj_id):
         """ Consumes an ID and produces file details. """
-        record = self.collection.find_one({"_id": obj_id})
+        record = self.collection.find_one({"_id": ObjectId(obj_id)})
         record = self._add_file_id_field(record)
 
         return record
