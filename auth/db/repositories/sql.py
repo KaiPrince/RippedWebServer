@@ -27,7 +27,10 @@ class UsersSqlRepository(IUsersRepository):
         users_with_permissions = [
             {
                 **x,
-                "permissions": self._get_user_permissions(x["id"]),
+                "permissions": [
+                    self._conform_permission(y)
+                    for y in self._get_user_permissions(x["id"])
+                ],
             }
             for x in users
         ]
@@ -43,7 +46,9 @@ class UsersSqlRepository(IUsersRepository):
 
         user_with_permissions = {
             **user,
-            "permissions": self._get_user_permissions(user["id"]),
+            "permissions": [
+                self._conform_permission(y) for y in self._get_user_permissions(user["id"])
+            ],
         }
         return user_with_permissions
 
@@ -123,6 +128,15 @@ class UsersSqlRepository(IUsersRepository):
         }
 
         return details
+
+    def _conform_permission(self, record: dict) -> dict:
+        if record is None:
+            return record
+
+        result = {**record}
+        result.pop("id", None)
+
+        return result
 
     def _get_user_permissions(self, user_id) -> dict:
         raw_permissions = self.db.execute(

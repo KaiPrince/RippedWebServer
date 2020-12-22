@@ -31,15 +31,19 @@ def test_init_db_command(runner, monkeypatch):
 
 def test_create_super_user_command(runner, app):
     with app.app_context():
-
         result = runner.invoke(args=["create-superuser", "admin"], input="test\ntest\n")
         assert "Created" in result.output
 
         db = get_db()
 
-        user_exists = len(db.search(lambda x: x["username"] == "admin")) == 1
+        assert len(db.search(lambda x: x["username"] == "admin")) == 1
 
-        # For some reason this line is required or teardown will fail.
-        del db
+        user = db.search(lambda x: x["username"] == "admin")[0]
+        assert user["permissions"] == [
+            {"access_level": "read", "scope": "files"},
+            {"access_level": "write", "scope": "files"},
+            {"access_level": "read", "scope": "disk_storage"},
+            {"access_level": "write", "scope": "disk_storage"},
+        ]
 
-    assert user_exists
+    del db

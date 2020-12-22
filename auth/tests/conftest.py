@@ -7,6 +7,7 @@ from flask import Flask
 from flask.testing import FlaskClient
 
 from db.repositories.factories import get_sql_db
+from db.service import get_db
 from db.service import init_db
 from main import create_app
 
@@ -43,6 +44,7 @@ def client(app: Flask) -> FlaskClient:
 @pytest.fixture
 def runner(app: Flask):
     return app.test_cli_runner()
+
 
 
 class AuthActions(object):
