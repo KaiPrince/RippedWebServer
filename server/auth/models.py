@@ -7,7 +7,7 @@
 """
 
 from datetime import datetime
-from typing import List, Literal
+from typing import List  # , Literal
 
 
 class Permission:
@@ -18,8 +18,8 @@ class Permission:
     *  A permission is used authorize certain actions.
     """
 
-    operation: Literal["read", "write"]
-    scope: Literal["files", "disk_storage"]
+    # operation: Literal["read", "write"]
+    # scope: Literal["files", "disk_storage"]
 
     def __init__(self, operation, scope):
         self.operation = operation
