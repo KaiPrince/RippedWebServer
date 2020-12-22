@@ -1,7 +1,6 @@
 from flask import Response, current_app
 
 from auth.service import create_auth_token
-from db.repositories.factories import make_files_sql_repo as get_files_repo
 from db.service import get_db
 from service_api.disk_storage import make_repository
 
@@ -15,7 +14,7 @@ def get_disk_repo():
 
 def get_download_url(id) -> str:
     """ Consumes a file id and produces a url. """
-    repo = get_files_repo()
+    repo = get_db()
     db_file = repo.get_by_id(id)
 
     if db_file is None or "file_path" not in db_file.keys():
@@ -50,7 +49,7 @@ def build_upload_url(file_path: str) -> str:
 
 def delete_file(id):
     """ Deletes a file from storage. """
-    files_repo = get_files_repo()
+    files_repo = get_db()
 
     file_path = files_repo.get_by_id(id)["file_path"]
 
