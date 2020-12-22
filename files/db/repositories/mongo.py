@@ -54,7 +54,7 @@ class FilesMongoRepository(IFilesRepository):
 
     def edit(self, file_id, file_name, user_id, file_path):
         result = self.collection.update_one(
-            {"_id": file_id},
+            {"_id": ObjectId(file_id)},
             {
                 "file_name": file_name,
                 "user_id": user_id,
@@ -65,7 +65,7 @@ class FilesMongoRepository(IFilesRepository):
         return result
 
     def delete(self, file_id):
-        result = self.collection.delete_one({"_id": file_id})
+        result = self.collection.delete_one({"_id": ObjectId(file_id)})
 
         return result
 
