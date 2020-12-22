@@ -33,7 +33,7 @@ class IFilesRepository(ABC):
         pass
 
     @abstractmethod
-    def create(self, file_name, user_id, file_path) -> int:
+    def create(self, file_name, user_id, file_path) -> str:
         pass
 
     @abstractmethod
@@ -43,4 +43,3 @@ class IFilesRepository(ABC):
     @abstractmethod
     def delete(self, file_id) -> None:
         pass
-

@@ -46,7 +46,7 @@ class FilesMongoRepository(IFilesRepository):
 
         return search_results
 
-    def create(self, file_name, user_id, file_path):
+    def create(self, file_name, user_id, file_path) -> str:
         result = self.collection.insert_one(
             {
                 "file_name": file_name,
@@ -56,10 +56,10 @@ class FilesMongoRepository(IFilesRepository):
             }
         )
 
-        return result
+        return result.inserted_id
 
-    def edit(self, file_id, file_name, user_id, file_path):
-        result = self.collection.update_one(
+    def edit(self, file_id, file_name, user_id, file_path) -> None:
+        self.collection.update_one(
             {"_id": ObjectId(file_id)},
             {
                 "file_name": file_name,
@@ -68,12 +68,8 @@ class FilesMongoRepository(IFilesRepository):
             },
         )
 
-        return result
-
-    def delete(self, file_id):
-        result = self.collection.delete_one({"_id": ObjectId(file_id)})
-
-        return result
+    def delete(self, file_id) -> None:
+        self.collection.delete_one({"_id": ObjectId(file_id)})
 
     def _conform(self, record):
         """
