@@ -35,9 +35,11 @@ def test_create_super_user_command(runner, app):
         result = runner.invoke(args=["create-superuser", "admin"], input="test\ntest\n")
         assert "Created" in result.output
 
-        # For some reason this line causes teardown to fail.
-        # db = get_db()
+        db = get_db()
 
-        # user_exists = len(db.search(lambda x: x["username"] == "admin")) == 1
+        user_exists = len(db.search(lambda x: x["username"] == "admin")) == 1
 
-    # assert user_exists
+        # For some reason this line is required or teardown will fail.
+        del db
+
+    assert user_exists
