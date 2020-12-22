@@ -72,6 +72,6 @@ class FilesMongoRepository(IFilesRepository):
             return record
 
         result = {**record, "file_id": str(record["_id"])}
-        result.update({"_id": None})
+        result.pop("_id", None)
 
         return result
