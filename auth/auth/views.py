@@ -3,42 +3,50 @@ from operator import itemgetter
 from time import time
 
 from authlib.jose import jwt
-from flask import (Blueprint, current_app, flash, make_response, redirect,
-                   render_template, request, session, url_for)
+from flask import (
+    Blueprint,
+    current_app,
+    make_response,
+    redirect,
+    request,
+    session,
+    url_for,
+)
 
 import auth.service as service
 
 bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder="templates")
 
 
-@bp.route("/register", methods=("GET", "POST"))
-def register():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        db = get_db()
-        error = None
+# @bp.route("/register", methods=("GET", "POST"))
+# def register():
+#     if request.method == "POST":
+#         username = request.form["username"]
+#         password = request.form["password"]
+#         db = get_db()
+#         error = None
 
-        # TEMP disable adding new users TODO: Remove.
-        # error = "User registration is disabled."
+#         # TEMP disable adding new users TODO: Remove.
+#         # error = "User registration is disabled."
 
-        if not username:
-            error = "Username is required."
-        elif not password:
-            error = "Password is required."
-        elif (
-            db.execute("SELECT id FROM user WHERE username = ?", (username,)).fetchone()
-            is not None
-        ):
-            error = "User {} is already registered.".format(username)
+#         if not username:
+#             error = "Username is required."
+#         elif not password:
+#             error = "Password is required."
+#         elif (
+#             db.execute("SELECT id FROM user WHERE username = ?",
+#               (username,)).fetchone()
+#             is not None
+#         ):
+#             error = "User {} is already registered.".format(username)
 
-        if error is None:
-            create_user(username, password)
-            return redirect(url_for("auth.login"))
+#         if error is None:
+#             create_user(username, password)
+#             return redirect(url_for("auth.login"))
 
-        make_response(error, 400)
+#         make_response(error, 400)
 
-    return render_template("auth/register.html")
+#     return render_template("auth/register.html")
 
 
 @bp.route("/login", methods=["POST"])

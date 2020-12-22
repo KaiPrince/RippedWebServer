@@ -14,12 +14,15 @@ from authlib.jose import jwt
 from flask import current_app
 from werkzeug.security import check_password_hash
 
-import auth.repository as repository
-from db.service import create_user, get_db
+from db.service import get_db
 
 
 def find_user(username: str) -> dict:
-    return repository.find_user(username)
+    db = get_db()
+
+    user = db.search(lambda x: x["username"] == username)[0]
+
+    return user
 
 
 def does_password_match(guessed: str, stored: str) -> bool:
@@ -27,9 +30,12 @@ def does_password_match(guessed: str, stored: str) -> bool:
 
 
 def get_user_permissions(user_id: int) -> list:
-    rows = repository.get_permissions_by_user_id(user_id)
 
-    permissions = [x["access_level"] + ": " + x["scope"] for x in rows]
+    db = get_db()
+
+    user = db.get_by_id(user_id)
+    permissions = user["permissions"]
+    permissions = [x["access_level"] + ": " + x["scope"] for x in permissions]
 
     return permissions
 

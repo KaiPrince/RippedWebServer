@@ -6,7 +6,8 @@ from authlib.jose import jwt
 from flask import Flask
 from flask.testing import FlaskClient
 
-from db.service import get_db, init_db
+from db.repositories.factories import get_sql_db
+from db.service import init_db
 from main import create_app
 
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
@@ -26,7 +27,7 @@ def app(tmp_path) -> Flask:
 
     with app.app_context():
         init_db()
-        get_db().executescript(_data_sql)
+        get_sql_db().executescript(_data_sql)
 
     yield app
 
