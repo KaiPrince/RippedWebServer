@@ -9,6 +9,7 @@
 from db.repositories import IFilesRepository
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from datetime import datetime
 
 
 class FilesMongoRepository(IFilesRepository):
@@ -45,6 +46,7 @@ class FilesMongoRepository(IFilesRepository):
                 "file_name": file_name,
                 "user_id": user_id,
                 "file_path": file_path,
+                "uploaded": datetime.now(),
             }
         )
 
