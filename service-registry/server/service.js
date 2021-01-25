@@ -1,9 +1,11 @@
-import express from 'express';
-import ServiceRegistry from './lib/ServiceRegistry';
+const express = require('express');
+
+console.log('dirname', __dirname, process.cwd());
+const ServiceRegistry = require('./lib/ServiceRegistry');
 
 const service = express();
 
-export default (config) => {
+module.exports = (config) => {
   const log = config.log();
   const serviceRegistry = new ServiceRegistry(log);
   // Add a request logging middleware in development mode
@@ -14,43 +16,25 @@ export default (config) => {
     });
   }
 
-  service.put(
-    '/register/:servicename/:serviceversion/:serviceport',
-    (req, res) => {
-      const { servicename, serviceversion, serviceport } = req.params;
+  service.put('/register/:servicename/:serviceversion/:serviceport', (req, res) => {
+    const { servicename, serviceversion, serviceport } = req.params;
 
-      const serviceip = req.connection.remoteAddress.includes('::')
-        ? `[${req.connection.remoteAddress}]`
-        : req.connection.remoteAddress;
+    const serviceip = req.connection.remoteAddress.includes('::') ? `[${req.connection.remoteAddress}]` : req.connection.remoteAddress;
 
-      const serviceKey = serviceRegistry.register(
-        servicename,
-        serviceversion,
-        serviceip,
-        serviceport,
-      );
-      return res.json({ result: serviceKey });
-    },
-  );
+    const serviceKey = serviceRegistry
+      .register(servicename, serviceversion, serviceip, serviceport);
+    return res.json({ result: serviceKey });
+  });
 
-  service.delete(
-    '/register/:servicename/:serviceversion/:serviceport',
-    (req, res) => {
-      const { servicename, serviceversion, serviceport } = req.params;
+  service.delete('/register/:servicename/:serviceversion/:serviceport', (req, res) => {
+    const { servicename, serviceversion, serviceport } = req.params;
 
-      const serviceip = req.connection.remoteAddress.includes('::')
-        ? `[${req.connection.remoteAddress}]`
-        : req.connection.remoteAddress;
+    const serviceip = req.connection.remoteAddress.includes('::') ? `[${req.connection.remoteAddress}]` : req.connection.remoteAddress;
 
-      const serviceKey = serviceRegistry.unregister(
-        servicename,
-        serviceversion,
-        serviceip,
-        serviceport,
-      );
-      return res.json({ result: serviceKey });
-    },
-  );
+    const serviceKey = serviceRegistry
+      .unregister(servicename, serviceversion, serviceip, serviceport);
+    return res.json({ result: serviceKey });
+  });
 
   service.get('/find/:servicename/:serviceversion', (req, res) => {
     const { servicename, serviceversion } = req.params;
