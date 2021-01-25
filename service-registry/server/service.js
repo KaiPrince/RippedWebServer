@@ -1,6 +1,8 @@
 const express = require('express');
 
 console.log('dirname', __dirname, process.cwd());
+const fs = require('fs');
+console.log('ls', fs.readdirSync('.'));
 const ServiceRegistry = require('./lib/ServiceRegistry');
 
 const service = express();
