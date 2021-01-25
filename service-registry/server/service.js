@@ -2,6 +2,7 @@ const express = require('express');
 // NOTE: For some reason, heroku throws a "module not found" error
 // const ServiceRegistry = require('./lib/ServiceRegistry');
 
+// (Copied over from the lib file)
 
 const semver = require('semver');
 
