@@ -3,7 +3,8 @@ const express = require('express');
 console.log('dirname', __dirname, process.cwd());
 const fs = require('fs');
 console.log('ls', fs.readdirSync('.'));
-const ServiceRegistry = require('./lib/ServiceRegistry');
+const path = require('path');
+const ServiceRegistry = require(path.join(__dirname, './lib/ServiceRegistry'));
 
 const service = express();
 
