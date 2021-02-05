@@ -1,7 +1,7 @@
 version: "3.8"
 services:
-  server:
-    build: ./server
+  web-ui:
+    build: ./web-ui
     environment:
       FILES_SERVICE_URL: http://rippedwebserver_files_1:5000
       DISK_STORAGE_SERVICE_URL: http://rippedwebserver_disk_storage_1:5000
