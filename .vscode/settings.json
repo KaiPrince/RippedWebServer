@@ -4,7 +4,6 @@
   "python.linting.enabled": true,
   "python.testing.pytestEnabled": true,
   "python.testing.unittestEnabled": true,
-  "python.linting.flake8Args": ["--config=server/setup.cfg"],
   "python.terminal.activateEnvInCurrentTerminal": true,
   "python.linting.pylintEnabled": false
 }
