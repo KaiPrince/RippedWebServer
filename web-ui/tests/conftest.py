@@ -8,7 +8,7 @@ from flask import Flask
 from pytest_mock import MockerFixture
 
 from files.utils import copyfile
-from web_server import create_app
+from main import create_app
 
 UPLOAD_FOLDER = os.path.join(".", "tests", "uploads")
 

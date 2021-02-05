@@ -1,4 +1,4 @@
-from web_server import create_app
+from main import create_app
 
 
 def test_config():
