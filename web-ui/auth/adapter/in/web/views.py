@@ -1,6 +1,14 @@
 from flask import (
-    Blueprint, current_app, flash, g, redirect, render_template, request,
-    session, url_for)
+    Blueprint,
+    current_app,
+    flash,
+    g,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from requests.exceptions import HTTPError
 
 import auth.service as service

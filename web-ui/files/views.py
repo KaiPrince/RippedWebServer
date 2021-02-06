@@ -1,8 +1,16 @@
 import sys
 
 from flask import (
-    Blueprint, current_app, flash, g, redirect, render_template, request,
-    session, url_for)
+    Blueprint,
+    current_app,
+    flash,
+    g,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from flask.helpers import NotFound
 from requests import HTTPError
 from requests.exceptions import ConnectionError as r_ConnectionError

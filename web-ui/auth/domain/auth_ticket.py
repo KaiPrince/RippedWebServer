@@ -1,44 +1,15 @@
 """
  * Project Name: RippedWebServer
- * File Name: models.py
+ * File Name: auth_ticket.py
  * Programmer: Kai Prince
- * Date: Mon, Dec 07, 2020
- * Description: This file contains model definitions for the auth app.
+ * Date: Fri, Feb 05, 2021
+ * Description: This file contains the AuthTicket model.
 """
 
 from datetime import datetime
 from typing import List  # , Literal
 
-
-class Permission:
-    """
-    * Class Name: Permission
-    * Purpose: This purpose of this class is to define the properties
-    *  of the Permission entity.
-    *  A permission is used authorize certain actions.
-    """
-
-    # operation: Literal["read", "write"]
-    # scope: Literal["files", "disk_storage"]
-
-    def __init__(self, operation, scope):
-        self.operation = operation
-        self.scope = scope
-
-    @staticmethod
-    def from_string(string: str):
-        operation, scope = [x.strip() for x in string.split(":")]
-
-        instance = Permission(operation, scope)
-
-        # TODO add validation
-
-        return instance
-
-    def __eq__(self, other):
-        is_equal = self.operation == other.operation and self.scope == other.scope
-
-        return is_equal
+from .permission import Permission
 
 
 class AuthTicket:
