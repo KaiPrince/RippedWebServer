@@ -51,7 +51,7 @@ class AuthTicket:
         self.unique_id = unique_id
         self.permissions = permissions
 
-    def is_token_expired(self) -> bool:
+    def is_expired(self) -> bool:
         if self.expires_at:
             now = int(time())
             return now > self.expires_at

@@ -10,11 +10,12 @@ from flask import (
     url_for,
 )
 
-import auth.service as service
+import auth.adapter.outbound.service_api.auth as service
 import files.service as files_service
 from auth.adapter.inbound.web.route_decorators import login_required
 
 from auth.application.login_controller import LoginController
+from auth.adapter.inbound.session.get import get_auth_ticket
 
 bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder="templates")
 
@@ -34,14 +35,14 @@ def load_auth_token():
 
 @bp.before_app_request
 def refresh_auth_token():
-    token_data = session.get("auth_token_data")
+    auth_ticket = get_auth_ticket()
 
-    if token_data is not None and is_token_expired(token_data):
-        session.clear()
-        flash("Session expired. Please log in again.")
+    if auth_ticket is not None:
+        # TODO move to factory or context global
+        login_controller = LoginController()
+        login_controller.refresh_auth_ticket()
 
-        current_app.logger.debug("Auth token expired " + str(token_data))
-        return redirect(url_for("auth.login"))
+        return login_controller.get_response()
 
 
 @bp.route("/register", methods=("GET", "POST"))
@@ -71,11 +72,10 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        response = object()
-        login_controller = LoginController(response)
+        login_controller = LoginController()
         login_controller.login(username, password)
 
-        return response.data
+        return login_controller.get_response()
 
     return render_template("auth/login.html")
 

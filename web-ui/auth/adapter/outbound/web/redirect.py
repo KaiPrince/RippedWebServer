@@ -11,3 +11,7 @@ from flask import redirect, url_for
 
 def redirect_to_index():
     return redirect(url_for("index"))
+
+
+def redirect_to_login():
+    return redirect(url_for("auth.login"))

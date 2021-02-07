@@ -16,10 +16,17 @@ class LogoutUseCase(ABC):
 
     * Given: The user is currently logged it,
     * When: the user logs out,
-    * Then: the user's session and Auth Token are cleared from memory.
+    * Then: the user's session and Auth Ticket are cleared from memory.
     """
 
-    @abstractmethod
     def logout(self):
         if self.user_is_logged_in():
-            self.clear_user_session_and_auth_token()
+            self.clear_user_session_and_auth_ticket()
+
+    @abstractmethod
+    def user_is_logged_in(self):
+        pass
+
+    @abstractmethod
+    def clear_user_session_and_auth_ticket(self):
+        pass

@@ -26,7 +26,6 @@ class LoginUseCase(ABC):
     *   otherwise an error message is shown.
     """
 
-    @abstractmethod
     def login(self, username: str, password: str):
         auth_ticket = self.send_credentials_to_auth_service(username, password)
 
