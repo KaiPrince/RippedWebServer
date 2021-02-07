@@ -10,7 +10,7 @@ from flask import session
 
 
 def get_auth_ticket():
-    return session.get("auth_ticket")
+    return session.get("auth_token_data")  # auth_ticket
 
 
 def get_auth_token():

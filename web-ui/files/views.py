@@ -19,8 +19,8 @@ from werkzeug.utils import secure_filename
 
 import common
 import files.service as service
-from auth.permissions import make_jwt_permissions_reader
-from auth.route_decorators import login_required
+from auth.application.permissions import make_jwt_permissions_reader
+from auth.adapter.inbound.web.route_decorators import login_required
 
 # from .utils import allowed_file
 

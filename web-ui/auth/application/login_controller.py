@@ -8,10 +8,15 @@
 
 from auth.adapter.inbound.jwt.decode import get_payload_from_auth_token
 from auth.adapter.outbound.service_api.auth import get_auth_token
-from auth.adapter.outbound.session.save import clear
-from auth.adapter.outbound.session.save import save_auth_ticket as persist
+from auth.adapter.outbound.session.save import clear, save_user_profile
+from auth.adapter.outbound.session.save import (
+    save_auth_ticket as _save_auth_ticket,
+    save_user_profile,
+    save_auth_token,
+)
 from auth.adapter.outbound.web.flash import flash
 from auth.adapter.outbound.web.redirect import redirect_to_index
+from auth.application.models.auth_ticket_jwt import AuthTicketJwt
 from auth.application.port.inbound.login_use_case import LoginUseCase
 from auth.application.port.inbound.logout_use_case import LogoutUseCase
 from auth.application.port.inbound.refresh_auth_ticket_use_case import (
@@ -19,6 +24,7 @@ from auth.application.port.inbound.refresh_auth_ticket_use_case import (
 )
 from auth.domain.auth_ticket import AuthTicket
 from auth.application.interfaces.base_controller import BaseController
+from auth.domain.user_profile import UserProfile
 
 
 class LoginController(
@@ -35,17 +41,18 @@ class LoginController(
     def __init__(self):
         pass
 
-    @BaseController.new_response
-    def login(self, username: str, password: str):
-        return super().login(username, password)
+    # @BaseController.new_response
+    # def login(self, username: str, password: str):
+    #     return super().login(username, password)
+    # TODO: Handle exception
 
-    @BaseController.new_response
-    def logout(self):
-        return super().logout()
+    # @BaseController.new_response
+    # def logout(self):
+    #     return super().logout()
 
-    @BaseController.new_response
-    def refresh_auth_ticket(self, auth_ticket: AuthTicket):
-        return super().refresh_auth_ticket(auth_ticket)
+    # @BaseController.new_response
+    # def refresh_auth_ticket(self, auth_ticket: AuthTicket):
+    #     return super().refresh_auth_ticket(auth_ticket)
 
     # TODO: hide non-usecase entry methods
 
@@ -53,15 +60,22 @@ class LoginController(
         self, username: str, password: str
     ) -> AuthTicket:
         auth_token = get_auth_token(username, password)
-        jwt_payload = get_payload_from_auth_token(auth_token)
-
-        return AuthTicket.from_jwt(jwt_payload)
+        # jwt_payload = get_payload_from_auth_token(auth_token)
+        # return AuthTicket.from_jwt(jwt_payload)
+        return AuthTicketJwt(auth_token)
 
     def clear_session(self):
         clear()
 
-    def save_auth_ticket(self, auth_ticket: AuthTicket):
-        persist(auth_ticket)
+    def save_auth_ticket(self, auth_ticket: AuthTicketJwt):
+        jwt_ticket = auth_ticket.to_jwt()
+        _save_auth_ticket(jwt_ticket)
+
+        auth_token = auth_ticket.get_encoded_jwt()
+        save_auth_token(auth_token)
+
+        user_profile = UserProfile.from_jwt(jwt_ticket)
+        save_user_profile(user_profile.to_dict())
 
     def show_index_page(self):
         self.set_response(redirect_to_index())
@@ -76,3 +90,9 @@ class LoginController(
 
     def redirect_to_login_page(self):
         self.set_response()
+
+    def clear_user_session_and_auth_ticket(self):
+        raise NotImplementedError
+
+    def user_is_logged_in(self):
+        raise NotImplementedError

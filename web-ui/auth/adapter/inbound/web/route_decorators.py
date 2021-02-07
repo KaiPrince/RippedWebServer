@@ -1,9 +1,10 @@
 import functools
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from flask import current_app, flash, g, redirect, request, session, url_for
+from flask import flash, g, redirect, request, url_for
 
-import auth.service as service
+import auth.adapter.inbound.jwt.decode as decode
+from auth.domain.auth_ticket import AuthTicket
 
 
 def login_required(view):
@@ -11,9 +12,12 @@ def login_required(view):
     def wrapped_view(**kwargs):
         if request.args.get("token"):
             auth_token = request.args.get("token")
-            payload = service.get_payload_from_auth_token(auth_token)
 
-            if service.is_token_expired(payload):
+            # TODO move this to use case
+            payload = decode.get_payload_from_auth_token(auth_token)
+            auth_ticket = AuthTicket.from_jwt(payload)
+
+            if auth_ticket.is_expired():
                 flash("This token has expired. Please request another.", "error")
                 return redirect(url_for("index"))
 

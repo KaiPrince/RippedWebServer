@@ -24,6 +24,8 @@ class Permission:
 
     @staticmethod
     def from_string(string: str):
+        # Example: "write: disk_storage"
+
         operation, scope = [x.strip() for x in string.split(":")]
 
         instance = Permission(operation, scope)
@@ -36,3 +38,6 @@ class Permission:
         is_equal = self.operation == other.operation and self.scope == other.scope
 
         return is_equal
+
+    def __str__(self) -> str:
+        return f"{self.operation}: {self.scope}"

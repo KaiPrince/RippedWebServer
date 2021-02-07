@@ -98,7 +98,7 @@ def files_service_url(app: Flask) -> str:
 
 @pytest.fixture
 def mock_auth_repo(mocker: MockerFixture) -> MagicMock:
-    mock_func = mocker.patch("auth.service.requests")
+    mock_func = mocker.patch("auth.adapter.outbound.service_api.auth.requests")
 
     return mock_func
 

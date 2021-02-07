@@ -4,7 +4,7 @@ import pytest
 from authlib.jose import jwt
 from flask import session
 
-from auth.permissions import make_jwt_permissions_reader
+from auth.application.permissions import make_jwt_permissions_reader
 
 
 @pytest.mark.skip
@@ -53,7 +53,7 @@ def test_login(
 
     mock_token = jwt.encode(
         {"alg": "HS256"},
-        {"sub": 2, "name": username, "permissions": ""},
+        {"sub": 2, "name": username, "permissions": []},
         app.secret_key,
     ).decode("utf-8")
 

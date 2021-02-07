@@ -8,7 +8,8 @@
 
 import pytest
 
-from auth.models import AuthTicket, Permission
+from auth.domain.auth_ticket import AuthTicket
+from auth.domain.permission import Permission
 
 
 @pytest.mark.parametrize(

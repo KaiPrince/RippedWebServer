@@ -19,9 +19,9 @@ class LoginUseCase(ABC):
     * Given: A username and password,
     * When: a log in request is submitted,
     * Then: the credentials are sent to the Auth service,
-    *   and if an Auth Ticket is returned,
+    *   and if an Auth Token is returned,
     *   then the session is cleared,
-    *   and the Auth Ticket is retained,
+    *   and the Auth Token is retained,
     *   and the user is redirected to the index page,
     *   otherwise an error message is shown.
     """

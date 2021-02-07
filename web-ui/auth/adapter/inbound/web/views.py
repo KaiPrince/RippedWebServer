@@ -10,12 +10,13 @@ from flask import (
     url_for,
 )
 
-import auth.adapter.outbound.service_api.auth as service
+import auth.application.port.outbound.auth as service
 import files.service as files_service
 from auth.adapter.inbound.web.route_decorators import login_required
 
 from auth.application.login_controller import LoginController
 from auth.adapter.inbound.session.get import get_auth_ticket
+from auth.domain.auth_ticket import AuthTicket
 
 bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder="templates")
 
@@ -38,9 +39,11 @@ def refresh_auth_token():
     auth_ticket = get_auth_ticket()
 
     if auth_ticket is not None:
+        auth_ticket = AuthTicket.from_jwt(auth_ticket)
+
         # TODO move to factory or context global
         login_controller = LoginController()
-        login_controller.refresh_auth_ticket()
+        login_controller.refresh_auth_ticket(auth_ticket)
 
         return login_controller.get_response()
 

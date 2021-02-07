@@ -90,3 +90,21 @@ class AuthTicket:
         )
 
         return instance
+
+    def to_jwt(self):
+        json: dict = dict()
+
+        permissions = [str(x) for x in self.permissions]
+
+        for x, y in [
+            ("sub", self.subject),
+            ("iss", self.issuer),
+            ("aud", self.audience),
+            ("iat", self.issued_at),
+            ("exp", self.expires_at),
+            ("jti", self.unique_id),
+            ("permissions", permissions),
+        ]:
+            json[x] = y
+
+        return json

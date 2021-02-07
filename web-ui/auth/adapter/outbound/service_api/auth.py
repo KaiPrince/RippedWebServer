@@ -12,7 +12,7 @@ import requests
 from . import _base_url
 
 
-def get_auth_token(username, password) -> dict:
+def get_auth_token(username, password) -> str:
     response = requests.post(
         f"{_base_url()}/auth/login",
         json={

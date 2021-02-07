@@ -10,7 +10,7 @@ import os
 
 from flask import Flask
 
-import auth.views
+import auth.adapter.inbound.web.views as auth_views
 import files.views
 
 from .config import getConfig
@@ -41,7 +41,7 @@ def create_app(test_config=None):
         pass
 
     files.init_app(app)
-    app.register_blueprint(auth.views.bp)
+    app.register_blueprint(auth_views.bp)
     app.register_blueprint(files.views.bp)
 
     app.add_url_rule("/", endpoint="index", view_func=files.views.index)

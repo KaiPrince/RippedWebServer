@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 
 import requests
 
-from auth.middleware import get_auth_middleware
+from auth.adapter.inbound.web.middleware import get_auth_middleware
 
 
 class IDiskStorageRepository(ABC):
