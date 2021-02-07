@@ -9,13 +9,12 @@ from flask import (
     session,
     url_for,
 )
-from requests.exceptions import HTTPError
 
 import auth.service as service
 import files.service as files_service
-from auth.route_decorators import login_required
+from auth.adapter.inbound.web.route_decorators import login_required
 
-from .service import is_token_expired
+from auth.application.login_controller import LoginController
 
 bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder="templates")
 
@@ -72,33 +71,11 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        try:
-            auth_token = service.get_auth_token(username, password)
-            payload = service.get_payload_from_auth_token(auth_token)
+        response = object()
+        login_controller = LoginController(response)
+        login_controller.login(username, password)
 
-            session.clear()
-
-            session["user"] = {"username": payload["name"], "id": payload["sub"]}
-            session["auth_token"] = auth_token
-            session["auth_token_data"] = payload
-
-            current_app.logger.debug(
-                "Log in successful. "
-                + str(
-                    {
-                        "username": payload["name"],
-                        "id": payload["sub"],
-                        "auth_token": auth_token,
-                    }
-                )
-            )
-            return redirect(url_for("index"))
-
-        except HTTPError as e:
-            current_app.logger.debug(
-                "Log in failed. " + str({"status_code": e.response.status_code})
-            )
-            flash("Log in failed.")
+        return response.data
 
     return render_template("auth/login.html")
 

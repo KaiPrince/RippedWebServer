@@ -7,31 +7,8 @@
  *  user currently has.
 """
 
-from abc import ABC, abstractmethod
-
-from auth.models import AuthTicket
-
-
-class IPermissionsReader(ABC):
-    """
-    * Class Name: IPermissionsReader
-    * Purpose: This purpose of this class is to define an interface for the
-    *  PermissionsReader classes.
-    """
-
-    @abstractmethod
-    def __init__(self, auth_ticket: AuthTicket):
-        pass
-
-    @abstractmethod
-    def may_delete(self, resource):
-        """ Consumes a resource, such as a file id, and produces a boolean. """
-        pass
-
-    @abstractmethod
-    def may_share(resource):
-        """ Consumes a resource, such as a file id, and produces a boolean. """
-        pass
+from auth.application.interfaces.permissions_reader import IPermissionsReader
+from auth.domain.auth_ticket import AuthTicket
 
 
 class JWTPermissionsReader(IPermissionsReader):

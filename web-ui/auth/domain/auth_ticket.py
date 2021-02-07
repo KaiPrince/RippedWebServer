@@ -6,6 +6,7 @@
  * Description: This file contains the AuthTicket model.
 """
 
+from time import time
 from datetime import datetime
 from typing import List  # , Literal
 
@@ -49,6 +50,13 @@ class AuthTicket:
         self.expires_at = expires_at
         self.unique_id = unique_id
         self.permissions = permissions
+
+    def is_token_expired(self) -> bool:
+        if self.expires_at:
+            now = int(time())
+            return now > self.expires_at
+        else:
+            return False
 
     @staticmethod
     def from_jwt(json: dict):

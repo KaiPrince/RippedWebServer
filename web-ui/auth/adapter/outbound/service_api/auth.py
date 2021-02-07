@@ -1,20 +1,15 @@
 """
  * Project Name: RippedWebServer
- * File Name: service.py
+ * File Name: auth.py
  * Programmer: Kai Prince
- * Date: Sat, Nov 28, 2020
- * Description: This file contains service functions for the auth app.
+ * Date: Sat, Feb 06, 2021
+ * Description: This file contains the outbound auth service adapter.
 """
 
-from time import time
 
 import requests
-from authlib.jose import jwt
-from flask import current_app
 
-
-def _base_url():
-    return current_app.config["AUTH_SERVICE_URL"]
+from . import _base_url
 
 
 def get_auth_token(username, password) -> dict:
@@ -35,24 +30,10 @@ def get_auth_token(username, password) -> dict:
     return token
 
 
-def get_payload_from_auth_token(token) -> dict:
-    body = jwt.decode(token, current_app.config["JWT_KEY"])
-
-    return body
-
-
-def is_token_expired(token) -> bool:
-    if "exp" in token:
-        expiry = token["exp"]
-        now = int(time())
-        return now > expiry
-    else:
-        return False
-
-
 def request_share_token(
     own_token: str,
-    shared_resource: str,
+    requester: str,
+    file_path: str,
     duration: int,
     requested_permissions: list,
 ):
@@ -61,15 +42,12 @@ def request_share_token(
     permissions.
     """
 
-    # TODO inject this instead
-    base_url = current_app.config["AUTH_SERVICE_URL"]
-
     response = requests.post(
-        base_url + "/auth/request_share_token",
+        _base_url() + "/auth/request_share_token",
         headers={"Authorization": own_token},
         json={
-            "requester": "1",
-            "file_path": "test.txt",
+            "requester": requester,
+            "file_path": file_path,
             "duration": duration,
             "permissions": requested_permissions,
         },
