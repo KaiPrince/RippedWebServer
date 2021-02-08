@@ -9,7 +9,7 @@
 from typing import Union
 from authlib.jose import JsonWebToken
 from auth.domain.auth_ticket import AuthTicket
-from auth.adapter.inbound.jwt.decode import get_payload_from_auth_token
+from auth.application.models.jwt import get_payload_from_auth_token
 
 
 class AuthTicketJwt(AuthTicket):

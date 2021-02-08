@@ -3,7 +3,7 @@ from datetime import datetime
 
 from flask import flash, g, redirect, request, url_for
 
-import auth.adapter.inbound.jwt.decode as decode
+import auth.application.models.jwt as decode
 from auth.domain.auth_ticket import AuthTicket
 
 

@@ -6,16 +6,17 @@
  * Description: This file contains the login service.
 """
 
-from auth.adapter.inbound.jwt.decode import get_payload_from_auth_token
-from auth.adapter.outbound.service_api.auth import get_auth_token
-from auth.adapter.outbound.session.save import clear, save_user_profile
+from auth.adapter.outbound.service_api.auth import fetch_auth_token
 from auth.adapter.outbound.session.save import (
+    clear,
     save_auth_ticket as _save_auth_ticket,
     save_user_profile,
     save_auth_token,
 )
+from auth.adapter.outbound.session.get import get_auth_token
 from auth.adapter.outbound.web.flash import flash
-from auth.adapter.outbound.web.redirect import redirect_to_index
+from auth.adapter.outbound.web.redirect import redirect_to_index, redirect_to_login
+from auth.application.exceptions.bad_credentials import BadCredentialsError
 from auth.application.models.auth_ticket_jwt import AuthTicketJwt
 from auth.application.port.inbound.login_use_case import LoginUseCase
 from auth.application.port.inbound.logout_use_case import LogoutUseCase
@@ -41,25 +42,31 @@ class LoginController(
     def __init__(self):
         pass
 
-    # @BaseController.new_response
-    # def login(self, username: str, password: str):
-    #     return super().login(username, password)
-    # TODO: Handle exception
+    def login(self, username: str, password: str):
+        self.clear_response()
 
-    # @BaseController.new_response
-    # def logout(self):
-    #     return super().logout()
+        try:
+            super().login(username, password)
+        except BadCredentialsError:
+            response = flash("Invalid username or password")
+            self.set_response(response)
+        except RuntimeError:
+            response = flash("Log in failed.")
+            self.set_response(response)
 
-    # @BaseController.new_response
-    # def refresh_auth_ticket(self, auth_ticket: AuthTicket):
-    #     return super().refresh_auth_ticket(auth_ticket)
+    def logout(self):
+        # TODO: Handle exception
+        return super().logout()
+
+    def refresh_auth_ticket(self, auth_ticket: AuthTicket):
+        return super().refresh_auth_ticket(auth_ticket)
 
     # TODO: hide non-usecase entry methods
 
     def send_credentials_to_auth_service(
         self, username: str, password: str
     ) -> AuthTicket:
-        auth_token = get_auth_token(username, password)
+        auth_token = fetch_auth_token(username, password)
         # jwt_payload = get_payload_from_auth_token(auth_token)
         # return AuthTicket.from_jwt(jwt_payload)
         return AuthTicketJwt(auth_token)
@@ -89,10 +96,13 @@ class LoginController(
         self.set_response(flash("Session expired. Please log in again."))
 
     def redirect_to_login_page(self):
-        self.set_response()
+        self.set_response(redirect_to_login())
 
     def clear_user_session_and_auth_ticket(self):
-        raise NotImplementedError
+        # TODO adjust type hinting, add documentation?
+        save_user_profile(None)
+        save_auth_token(None)
+        _save_auth_ticket(None)
 
     def user_is_logged_in(self):
-        raise NotImplementedError
+        return get_auth_token() is not None

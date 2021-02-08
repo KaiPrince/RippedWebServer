@@ -15,7 +15,7 @@ import files.service as files_service
 from auth.adapter.inbound.web.route_decorators import login_required
 
 from auth.application.login_controller import LoginController
-from auth.adapter.inbound.session.get import get_auth_ticket
+from auth.adapter.outbound.session.get import get_auth_ticket
 from auth.domain.auth_ticket import AuthTicket
 
 bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder="templates")
@@ -45,7 +45,7 @@ def refresh_auth_token():
         login_controller = LoginController()
         login_controller.refresh_auth_ticket(auth_ticket)
 
-        return login_controller.get_response()
+        return login_controller.get_response_or_none()
 
 
 @bp.route("/register", methods=("GET", "POST"))
@@ -85,8 +85,10 @@ def login():
 
 @bp.route("/logout")
 def logout():
-    session.clear()
-    return redirect(url_for("index"))
+    login_controller = LoginController()
+    login_controller.logout()
+
+    return login_controller.get_response()
 
 
 @bp.route("/generate_sharing_link")

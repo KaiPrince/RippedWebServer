@@ -1,6 +1,6 @@
 """
  * Project Name: RippedWebServer
- * File Name: decode.py
+ * File Name: jwt.py
  * Programmer: Kai Prince
  * Date: Sat, Feb 06, 2021
  * Description: This file contains JWT decoding functions.

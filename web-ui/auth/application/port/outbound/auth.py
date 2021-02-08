@@ -10,14 +10,14 @@
 from requests.exceptions import HTTPError
 from flask import current_app
 from auth.adapter.outbound.service_api import auth
-from auth.adapter.inbound.jwt.decode import get_payload_from_auth_token
+from auth.application.models.jwt import get_payload_from_auth_token
 
 
 def get_auth_token(username, password) -> dict:
     auth_token = None
 
     try:
-        auth_token = auth.get_auth_token(username, password)
+        auth_token = auth.fetch_auth_token(username, password)
 
         payload = get_payload_from_auth_token(auth_token)
         current_app.logger.debug(

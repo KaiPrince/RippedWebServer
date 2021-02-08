@@ -9,6 +9,8 @@
 
 import functools
 from abc import ABC
+from typing import Optional
+
 from auth.application.models.response import Response
 
 
@@ -25,7 +27,18 @@ class BaseController(ABC):
     def set_response(self, response: Response):
         self._response = response
 
+    def clear_response(self):
+        self._response = None
+
+    def has_response(self) -> bool:
+        return self._response is not None
+
     def get_response(self) -> Response:
+        if self._response is None:
+            raise ValueError("Response has not been set.")
+        return self._response
+
+    def get_response_or_none(self) -> Optional[Response]:
         return self._response
 
     def new_response(self, func):

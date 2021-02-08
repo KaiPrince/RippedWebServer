@@ -16,12 +16,14 @@ class LogoutUseCase(ABC):
 
     * Given: The user is currently logged it,
     * When: the user logs out,
-    * Then: the user's session and Auth Ticket are cleared from memory.
+    * Then: the user's session and Auth Ticket are cleared from memory,
+    *   and the user is redirected to the home page.
     """
 
     def logout(self):
         if self.user_is_logged_in():
             self.clear_user_session_and_auth_ticket()
+            self.show_index_page()
 
     @abstractmethod
     def user_is_logged_in(self):
@@ -29,4 +31,8 @@ class LogoutUseCase(ABC):
 
     @abstractmethod
     def clear_user_session_and_auth_ticket(self):
+        pass
+
+    @abstractmethod
+    def show_index_page(self):
         pass
