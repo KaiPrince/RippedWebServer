@@ -15,37 +15,8 @@ import files.service as files_service
 from auth.adapter.inbound.web.route_decorators import login_required
 
 from auth.application.login_controller import LoginController
-from auth.adapter.outbound.session.get import get_auth_ticket
-from auth.domain.auth_ticket import AuthTicket
 
 bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder="templates")
-
-
-@bp.before_app_request
-def load_logged_in_user():
-    user = session.get("user")
-
-    g.user = user
-
-
-@bp.before_app_request
-def load_auth_token():
-    g.auth_token = session.get("auth_token")
-    g.auth_token_data = session.get("auth_token_data")
-
-
-@bp.before_app_request
-def refresh_auth_token():
-    auth_ticket = get_auth_ticket()
-
-    if auth_ticket is not None:
-        auth_ticket = AuthTicket.from_jwt(auth_ticket)
-
-        # TODO move to factory or context global
-        login_controller = LoginController()
-        login_controller.refresh_auth_ticket(auth_ticket)
-
-        return login_controller.get_response_or_none()
 
 
 @bp.route("/register", methods=("GET", "POST"))
@@ -75,7 +46,7 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        login_controller = LoginController()
+        login_controller: LoginController = g.login_controller
         login_controller.login(username, password)
 
         return login_controller.get_response()
@@ -85,7 +56,7 @@ def login():
 
 @bp.route("/logout")
 def logout():
-    login_controller = LoginController()
+    login_controller: LoginController = g.login_controller
     login_controller.logout()
 
     return login_controller.get_response()
