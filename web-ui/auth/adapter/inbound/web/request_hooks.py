@@ -1,11 +1,8 @@
-from flask import current_app, flash, g, redirect, session, url_for
+from flask import g
 
 from auth.application.login_controller import LoginController
-from auth.application.models.auth_ticket_jwt import AuthTicketJwt
 from auth.application.session_controller import SessionController
 from .views import bp
-
-from auth.domain.auth_ticket import AuthTicket
 from ...outbound.session import FlaskSession
 
 
@@ -36,5 +33,3 @@ def refresh_auth_token():
     login_controller.refresh_auth_ticket()
 
     return login_controller.get_response_or_none()
-
-
