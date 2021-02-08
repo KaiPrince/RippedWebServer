@@ -25,20 +25,26 @@ class RefreshAuthTicketUseCase(ABC):
     *   and redirected to the log in page.
     """
 
-    def refresh_auth_ticket(self, auth_ticket: AuthTicket):
-        if auth_ticket.is_expired():
-            self.show_ticket_expired_message()
-            self.clear_session()
-            self.redirect_to_login_page()
+    def refresh_auth_ticket(self):
+        auth_ticket: AuthTicket = self._get_auth_ticket()
+
+        if auth_ticket is not None and auth_ticket.is_expired():
+            self._show_ticket_expired_message()
+            self._clear_session()
+            self._redirect_to_login_page()
 
     @abstractmethod
-    def show_ticket_expired_message(self):
+    def _show_ticket_expired_message(self):
         pass
 
     @abstractmethod
-    def clear_session(self):
+    def _clear_session(self):
         pass
 
     @abstractmethod
-    def redirect_to_login_page(self):
+    def _redirect_to_login_page(self):
+        pass
+
+    @abstractmethod
+    def _get_auth_ticket(self) -> AuthTicket:
         pass

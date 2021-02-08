@@ -107,7 +107,7 @@ def test_auth_ticket_from_dict(
     # Arrange
 
     # Act
-    instance = AuthTicket.from_jwt(json)
+    instance = AuthTicket.from_claims(json)
 
     # Assert
 
@@ -145,7 +145,7 @@ def test_auth_ticket_from_bad_jwt(json):
 
     # Act
     with pytest.raises(ValueError):
-        AuthTicket.from_jwt(json)
+        AuthTicket.from_claims(json)
 
     # Assert
 

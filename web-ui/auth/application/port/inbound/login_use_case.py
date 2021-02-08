@@ -27,33 +27,33 @@ class LoginUseCase(ABC):
     """
 
     def login(self, username: str, password: str):
-        auth_ticket = self.send_credentials_to_auth_service(username, password)
+        auth_ticket = self._send_credentials_to_auth_service(username, password)
 
         if auth_ticket:
-            self.clear_session()
-            self.save_auth_ticket(auth_ticket)
-            self.show_index_page()
+            self._clear_session()
+            self._save_auth_ticket(auth_ticket)
+            self._show_index_page()
         else:
-            self.show_login_failed_message()
+            self._show_login_failed_message()
 
     @abstractmethod
-    def send_credentials_to_auth_service(
+    def _send_credentials_to_auth_service(
         self, username: str, password: str
     ) -> AuthTicket:
         pass
 
     @abstractmethod
-    def clear_session(self):
+    def _clear_session(self):
         pass
 
     @abstractmethod
-    def save_auth_ticket(self, auth_ticket: AuthTicket):
+    def _save_auth_ticket(self, auth_ticket: AuthTicket):
         pass
 
     @abstractmethod
-    def show_index_page(self):
+    def _show_index_page(self):
         pass
 
     @abstractmethod
-    def show_login_failed_message(self):
+    def _show_login_failed_message(self):
         pass

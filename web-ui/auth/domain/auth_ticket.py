@@ -58,8 +58,9 @@ class AuthTicket:
         else:
             return False
 
+    # TODO Sort out terminology: jwt, ticket, token, claims
     @staticmethod
-    def from_jwt(json: dict):
+    def from_claims(json: dict):
 
         (subject, issuer, audience, issued_at, expires_at, unique_id, permissions,) = [
             json.get(x)

@@ -21,7 +21,7 @@ class AuthTicketJwt(AuthTicket):
         self.encoded_jwt = encoded_jwt
 
         decoded_jwt = get_payload_from_auth_token(encoded_jwt)
-        self.ticket = AuthTicket.from_jwt(decoded_jwt)
+        self.ticket = AuthTicket.from_claims(decoded_jwt)
 
     def to_jwt(self):
         return self.ticket.to_jwt()

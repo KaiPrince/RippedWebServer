@@ -7,13 +7,7 @@
 """
 
 from auth.adapter.outbound.service_api.auth import fetch_auth_token
-from auth.adapter.outbound.session.save import (
-    clear,
-    save_auth_ticket as _save_auth_ticket,
-    save_user_profile,
-    save_auth_token,
-)
-from auth.adapter.outbound.session.get import get_auth_token
+from auth.application.session_controller import SessionController
 from auth.adapter.outbound.web.flash import flash
 from auth.adapter.outbound.web.redirect import redirect_to_index, redirect_to_login
 from auth.application.exceptions.bad_credentials import BadCredentialsError
@@ -29,24 +23,26 @@ from auth.domain.user_profile import UserProfile
 
 
 class LoginController(
-    BaseController,
     LoginUseCase,
     LogoutUseCase,
     RefreshAuthTicketUseCase,
+    BaseController,
 ):
     """
     * Class Name: LoginService
     * Purpose: This purpose of this class is to perform login operations.
     """
 
-    def __init__(self):
-        pass
+    _session_controller: SessionController
 
+    def __init__(self, session_controller: SessionController):
+        self._session_controller = session_controller
+
+    @BaseController.new_response
     def login(self, username: str, password: str):
-        self.clear_response()
-
         try:
             super().login(username, password)
+
         except BadCredentialsError:
             response = flash("Invalid username or password")
             self.set_response(response)
@@ -54,55 +50,59 @@ class LoginController(
             response = flash("Log in failed.")
             self.set_response(response)
 
+    @BaseController.new_response
     def logout(self):
         # TODO: Handle exception
         return super().logout()
 
-    def refresh_auth_ticket(self, auth_ticket: AuthTicket):
-        return super().refresh_auth_ticket(auth_ticket)
+    @BaseController.new_response
+    def refresh_auth_ticket(self):
+        # TODO: Handle exception
+        return super().refresh_auth_ticket()
 
-    # TODO: hide non-usecase entry methods
-
-    def send_credentials_to_auth_service(
+    def _send_credentials_to_auth_service(
         self, username: str, password: str
     ) -> AuthTicket:
         auth_token = fetch_auth_token(username, password)
-        # jwt_payload = get_payload_from_auth_token(auth_token)
-        # return AuthTicket.from_jwt(jwt_payload)
         return AuthTicketJwt(auth_token)
 
-    def clear_session(self):
-        clear()
+    def _clear_session(self):
+        self._session_controller.clear()
 
-    def save_auth_ticket(self, auth_ticket: AuthTicketJwt):
+    def _save_auth_ticket(self, auth_ticket: AuthTicketJwt):
+        self._session_controller.save_auth_ticket(auth_ticket)
+
+        self._session_controller.save_auth_token(auth_ticket)
+
         jwt_ticket = auth_ticket.to_jwt()
-        _save_auth_ticket(jwt_ticket)
-
-        auth_token = auth_ticket.get_encoded_jwt()
-        save_auth_token(auth_token)
-
         user_profile = UserProfile.from_jwt(jwt_ticket)
-        save_user_profile(user_profile.to_dict())
+        self._session_controller.save_user_profile(user_profile)
 
-    def show_index_page(self):
-        self.set_response(redirect_to_index())
+    @BaseController.response
+    def _show_index_page(self):
+        return redirect_to_index()
 
-    def show_login_failed_message(self):
-        self.set_response(flash("Log in failed."))
+    @BaseController.response
+    def _show_login_failed_message(self):
+        return flash("Log in failed.")
 
-    def show_ticket_expired_message(self):
+    @BaseController.response
+    def _show_ticket_expired_message(self):
         # current_app.logger.debug("Auth token expired " + str(token_data))
 
-        self.set_response(flash("Session expired. Please log in again."))
+        return flash("Session expired. Please log in again.")
 
-    def redirect_to_login_page(self):
-        self.set_response(redirect_to_login())
+    @BaseController.response
+    def _redirect_to_login_page(self):
+        return redirect_to_login()
 
-    def clear_user_session_and_auth_ticket(self):
-        # TODO adjust type hinting, add documentation?
-        save_user_profile(None)
-        save_auth_token(None)
-        _save_auth_ticket(None)
+    def _clear_user_session_and_auth_ticket(self):
+        self._session_controller.save_user_profile(None)
+        self._session_controller.save_auth_token(None)
+        self._session_controller.save_auth_ticket(None)
 
-    def user_is_logged_in(self):
-        return get_auth_token() is not None
+    def _user_is_logged_in(self):
+        return self._session_controller.get_auth_ticket() is not None
+
+    def _get_auth_ticket(self) -> AuthTicket:
+        return self._session_controller.get_auth_ticket()

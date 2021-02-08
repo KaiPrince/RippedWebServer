@@ -21,18 +21,18 @@ class LogoutUseCase(ABC):
     """
 
     def logout(self):
-        if self.user_is_logged_in():
-            self.clear_user_session_and_auth_ticket()
-            self.show_index_page()
+        if self._user_is_logged_in():
+            self._clear_user_session_and_auth_ticket()
+            self._show_index_page()
 
     @abstractmethod
-    def user_is_logged_in(self):
+    def _user_is_logged_in(self):
         pass
 
     @abstractmethod
-    def clear_user_session_and_auth_ticket(self):
+    def _clear_user_session_and_auth_ticket(self):
         pass
 
     @abstractmethod
-    def show_index_page(self):
+    def _show_index_page(self):
         pass

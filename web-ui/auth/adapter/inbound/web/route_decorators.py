@@ -15,7 +15,7 @@ def login_required(view):
 
             # TODO move this to use case
             payload = decode.get_payload_from_auth_token(auth_token)
-            auth_ticket = AuthTicket.from_jwt(payload)
+            auth_ticket = AuthTicket.from_claims(payload)
 
             if auth_ticket.is_expired():
                 flash("This token has expired. Please request another.", "error")

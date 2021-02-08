@@ -22,7 +22,7 @@ class BaseController(ABC):
     * NOTE: This is NOT the same as an MVC controller.
     """
 
-    _response: Response = None
+    _response: Optional[Response] = None
 
     def set_response(self, response: Response):
         self._response = response
@@ -41,13 +41,28 @@ class BaseController(ABC):
     def get_response_or_none(self) -> Optional[Response]:
         return self._response
 
-    def new_response(self, func):
+    @classmethod
+    def new_response(cls, func):
         """ Reset the controller for a new response. """
 
         @functools.wraps(func)
-        def wrapped_func(**kwargs):
-            self.set_response(None)
+        def wrapped_func(self: BaseController, *args, **kwargs):
+            self.clear_response()
 
-            return func(**kwargs)
+            return func(self, *args, **kwargs)
+
+        return wrapped_func
+
+    @classmethod
+    def response(cls, func):
+        """ Reset the controller for a new response. """
+
+        @functools.wraps(func)
+        def wrapped_func(self: BaseController, *args, **kwargs):
+            result = func(self, *args, **kwargs)
+
+            self.set_response(result)
+
+            return result
 
         return wrapped_func

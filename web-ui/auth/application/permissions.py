@@ -52,7 +52,7 @@ class JWTPermissionsReader(IPermissionsReader):
         return auth_ticket.permissions
 
 
-def make_jwt_permissions_reader(auth_token):
-    auth_ticket = AuthTicket.from_jwt(auth_token)
+def make_jwt_permissions_reader(claims: dict):
+    auth_ticket = AuthTicket.from_claims(claims)
 
     return JWTPermissionsReader(auth_ticket)

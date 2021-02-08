@@ -10,7 +10,7 @@ from flask import (
     url_for,
 )
 
-import auth.application.port.outbound.auth as service
+import auth.application.port.outbound.auth_service as service
 import files.service as files_service
 from auth.adapter.inbound.web.route_decorators import login_required
 
