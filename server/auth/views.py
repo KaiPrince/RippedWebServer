@@ -111,6 +111,7 @@ def generate_sharing_link():
 
     permissions_needed = ["read: files", "read: disk_storage"]
     share_token = service.request_share_token(
+        g.user.get("id"),
         g.auth_token,
         file_path,
         duration,
