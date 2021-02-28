@@ -78,7 +78,7 @@ def test_sharing_link(
 
     assert auth_repo_request.headers["Authorization"] == auth_token
     assert call.kwargs["json"] == {
-        "requester": "1",
+        "requester": "2",
         "file_path": "test.txt",
         "duration": str(60 * 60 * 60),
         "permissions": ["read: files", "read: disk_storage"],

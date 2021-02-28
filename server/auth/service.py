@@ -51,6 +51,7 @@ def is_token_expired(token) -> bool:
 
 
 def request_share_token(
+    requester_id: str,
     own_token: str,
     shared_resource: str,
     duration: int,
@@ -68,8 +69,8 @@ def request_share_token(
         base_url + "/auth/request_share_token",
         headers={"Authorization": own_token},
         json={
-            "requester": "1",
-            "file_path": "test.txt",
+            "requester": requester_id,
+            "file_path": shared_resource,
             "duration": duration,
             "permissions": requested_permissions,
         },
