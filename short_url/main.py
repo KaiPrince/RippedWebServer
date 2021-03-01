@@ -6,8 +6,6 @@
 * Description: This file contains the entry point for the ShortUrl service.
 """
 
-import entrypoint
+import entrypoint.app
 
-
-if __name__ == "__main__":
-    entrypoint.create_app()
+app = entrypoint.app.create_app()

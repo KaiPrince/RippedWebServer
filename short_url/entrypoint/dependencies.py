@@ -8,13 +8,16 @@
 """
 
 from fastapi import Depends
+from pymongo import MongoClient
 
-from repository import InMemRepository, BaseUrlRepository
+import config
+from repository import BaseUrlRepository, MongoRepository
 from service import ShortUrlService
 
 
 def make_repo():
-    return InMemRepository()
+    db = MongoClient(config.mongo_url)
+    return MongoRepository(db)
 
 
 def make_service(repo: BaseUrlRepository = Depends(make_repo)):

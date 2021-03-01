@@ -9,6 +9,7 @@
 from fastapi import FastAPI
 from .views import router
 
+
 def create_app():
     app = FastAPI()
 

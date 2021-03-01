@@ -24,3 +24,13 @@ def make_short_url(url: UrlDTO, url_service: ShortUrlService = Depends(make_serv
     raw_short_url = url_service.make_short_url(url.url)
 
     return ShortUrlDTO(short_url=raw_short_url)
+
+
+@router.post(
+    "/get-full-url/",
+    response_model=UrlDTO,
+)
+def get_full_url(short_url: ShortUrlDTO, url_service: ShortUrlService = Depends(make_service)):
+    raw_url = url_service.get_full_url(short_url.short_url)
+
+    return UrlDTO(url=raw_url)

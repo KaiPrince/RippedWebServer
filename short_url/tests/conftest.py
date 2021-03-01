@@ -10,13 +10,21 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from entrypoint.app import create_app
+from entrypoint.dependencies import make_repo
 from repository import InMemRepository
 from service import ShortUrlService
 
 
+def make_test_repo():
+    return InMemRepository()
+
+
 @pytest.fixture
 def app() -> FastAPI:
-    return create_app()
+    app = create_app()
+    app.dependency_overrides[make_repo] = make_test_repo
+
+    return app
 
 
 @pytest.fixture
