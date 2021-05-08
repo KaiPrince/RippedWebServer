@@ -7,11 +7,9 @@
 """
 
 import requests
-from flask import current_app
 
 
-def ping_service_registry():
-    base_url = current_app.config["SERVICE_REGISTRY_URL"]
+def ping_service_registry(base_url):
     # TODO move to config.
     service_name = "files"
     service_version = "1.0.0"
