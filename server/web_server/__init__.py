@@ -12,6 +12,8 @@ from flask import Flask
 
 import auth.views
 import files.views
+from common import periodically_do
+from service_api.service_registry import ServicesRepository
 
 from .config import getConfig
 
@@ -45,5 +47,9 @@ def create_app(test_config=None):
     app.register_blueprint(files.views.bp)
 
     app.add_url_rule("/", endpoint="index", view_func=files.views.index)
+
+    # Register self to service registry (every 20 seconds)
+    service_repo = ServicesRepository(app.config["SERVICE_REGISTRY_URL"])
+    periodically_do(service_repo.ping_service_registry, 20.0)
 
     return app
