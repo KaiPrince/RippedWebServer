@@ -1,11 +1,14 @@
 import os
+import pathlib
 
 import pytest
 
 from storage.utils import copyfile
 from web_server import create_app
 
-UPLOAD_FOLDER = os.path.join(".", "tests", "uploads")
+UPLOAD_FOLDER = os.path.join(
+    pathlib.Path(__file__).parent.absolute(), "uploads"
+)
 
 
 @pytest.fixture

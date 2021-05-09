@@ -42,6 +42,6 @@ def create_app(test_config=None):
 
     # Register self to service registry (every 20 seconds)
     service_repo = ServicesRepository(app.config["SERVICE_REGISTRY_URL"])
-    periodically_do(service_repo.ping_service_registry, 20.0)
+    periodically_do(service_repo.make_ping_func("files", "1.0.0"), 20.0)
 
     return app

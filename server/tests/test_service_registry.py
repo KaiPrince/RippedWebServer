@@ -7,6 +7,7 @@
 """
 
 from flask import Flask
+
 # from pytest_mock import MockerFixture
 import responses
 
@@ -15,7 +16,7 @@ from service_api.service_registry import ServicesRepository
 
 @responses.activate
 def test_get_service_url(app: Flask):
-    """ Call the get_service_url function. """
+    """ Call the _get_service_url function. """
     # Arrange
     service_registry_url = app.config["SERVICE_REGISTRY_URL"]
     service_name = "auth"
