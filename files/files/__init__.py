@@ -40,8 +40,9 @@ def create_app(test_config=None):
 
     app.add_url_rule("/", endpoint="index", view_func=files.views.index)
 
-    # Register self to service registry (every 20 seconds)
-    service_repo = ServicesRepository(app.config["SERVICE_REGISTRY_URL"])
-    periodically_do(service_repo.make_ping_func("files", "1.0.0"), 20.0)
+    if not app.testing:
+        # Register self to service registry (every 20 seconds)
+        service_repo = ServicesRepository(app.config["SERVICE_REGISTRY_URL"])
+        periodically_do(service_repo.make_ping_func("files", "1.0.0"), 20.0)
 
     return app
