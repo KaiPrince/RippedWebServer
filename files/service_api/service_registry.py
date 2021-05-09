@@ -30,17 +30,20 @@ class ServicesRepository:
 
     def ping_service_registry(self):
         url = f"{self.base_url}/register/{self.service_name}/{self.service_version}/{self.service_port}"
+        # TODO handle service registry offline
 
         requests.put(url)
 
-    def get_disk_storage_url(self):
+    def get_disk_storage_url(self) -> str:
         service_name = "disk_storage"
         version = "1.0.0"
         url = f"{self.base_url}/find/{service_name}/{version}"
 
         response = requests.get(url)
         if response.status_code == 404:
-            raise Exception("Service not found.")
+            raise Exception("Disk storage service not found in service registry.")
+
+        # TODO handle service registry offline
 
         data = response.json()
 
