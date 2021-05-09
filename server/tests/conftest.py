@@ -32,7 +32,7 @@ def app(tmp_path, mock_files_repo, mock_disk_storage_repo) -> Flask:
         {
             "TESTING": True,
             "UPLOAD_FOLDER": temp_uploads_folder,
-            "SERVICE_REGISTRY_URL": "test_url"
+            "SERVICE_REGISTRY_URL": "https://test_url"
         }
     )
 

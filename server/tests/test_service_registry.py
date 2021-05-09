@@ -5,28 +5,35 @@
  * Date: Sun, Jan 24, 2021
  * Description: This file contains tests for the service registry functions.
 """
+
 from flask import Flask
-from pytest_mock import MockerFixture
+# from pytest_mock import MockerFixture
+import responses
 
-from common import get_service_url
+from service_api.service_registry import ServicesRepository
 
 
-def test_get_service_url(mocker: MockerFixture, app: Flask):
+@responses.activate
+def test_get_service_url(app: Flask):
     """ Call the get_service_url function. """
     # Arrange
+    service_registry_url = app.config["SERVICE_REGISTRY_URL"]
+    service_name = "auth"
+    service_url = "10.10.10.10"
+
+    expected_url = service_registry_url + f"/find/{service_name}/1.0.0"
+
     # ..Mock network call
-    mock_func = mocker.patch("common.requests").get
+    responses.add(responses.GET, expected_url, json={"ip": service_url})
 
-    service_name = "AUTH_SERVICE"
-    service_url = "abc"
-
-    mock_func.return_value = service_url
+    service_repo = ServicesRepository(service_registry_url)
 
     # Act
     with app.app_context():
-        return_value = get_service_url(service_name)
+        return_value = service_repo.get_auth_url()
 
     # Assert
     assert return_value == service_url
-    mock_func.assert_called_once_with(
-        app.config["SERVICE_REGISTRY_URL"] + f"/find/{service_name}/1.0")
+
+    assert len(responses.calls) == 1
+    assert responses.calls[0].request.url == expected_url
