@@ -1,4 +1,5 @@
 import os
+import pathlib
 from unittest.mock import MagicMock
 
 import pytest
@@ -10,7 +11,10 @@ from pytest_mock import MockerFixture
 from files.utils import copyfile
 from web_server import create_app
 
-UPLOAD_FOLDER = os.path.join(".", "tests", "uploads")
+
+UPLOAD_FOLDER = os.path.join(
+    pathlib.Path(__file__).parent.absolute(), "uploads"
+)
 
 
 @pytest.fixture
@@ -28,6 +32,7 @@ def app(tmp_path, mock_files_repo, mock_disk_storage_repo) -> Flask:
         {
             "TESTING": True,
             "UPLOAD_FOLDER": temp_uploads_folder,
+            "SERVICE_REGISTRY_URL": "https://test_url"
         }
     )
 

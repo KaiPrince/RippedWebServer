@@ -12,9 +12,13 @@ import requests
 from authlib.jose import jwt
 from flask import current_app
 
+from service_api.service_registry import ServicesRepository
+
 
 def _base_url():
-    return current_app.config["AUTH_SERVICE_URL"]
+    service_repo = ServicesRepository(current_app.config["SERVICE_REGISTRY_URL"])
+    base_url = service_repo.get_auth_url()
+    return base_url
 
 
 def get_auth_token(username, password) -> dict:

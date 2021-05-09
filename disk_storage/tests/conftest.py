@@ -1,11 +1,12 @@
 import os
+import pathlib
 
 import pytest
 
 from storage.utils import copyfile
 from web_server import create_app
 
-UPLOAD_FOLDER = os.path.join(".", "tests", "uploads")
+UPLOAD_FOLDER = os.path.join(pathlib.Path(__file__).parent.absolute(), "uploads")
 
 
 @pytest.fixture
@@ -19,7 +20,11 @@ def app(tmp_path):
             dest_file = temp_uploads_folder / f
             copyfile(src, dest_file)
 
-    app_config = {"UPLOAD_FOLDER": temp_uploads_folder}
+    app_config = {
+        "TESTING": True,
+        "SELF_REGISTER": False,
+        "UPLOAD_FOLDER": temp_uploads_folder,
+    }
     app = create_app(app_config)
 
     # Setup

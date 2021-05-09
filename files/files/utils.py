@@ -1,4 +1,7 @@
+from typing import Callable
 from .const import ALLOWED_EXTENSIONS
+
+from threading import Timer
 
 
 def allowed_file(filename):
@@ -16,3 +19,11 @@ def copyfile(source, dest, buffer_size=1024 * 1024):
         if not copy_buffer:
             break
         dest.write_bytes(copy_buffer)
+
+
+def periodically_do(func: Callable, interval_in_seconds: float):
+    def _do():
+        func()
+        Timer(interval_in_seconds, _do).start()
+
+    Timer(interval_in_seconds, _do).start()
