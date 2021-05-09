@@ -6,6 +6,12 @@
  * Description: This file contains shared functions.
 """
 import re
+from threading import Timer
+from typing import Callable
+
+import requests
+
+from flask import current_app
 
 
 def get_content_metadata(header_string):
@@ -20,3 +26,11 @@ def get_content_metadata(header_string):
     content_total = m.group("total")
 
     return (content_range, content_total)
+
+
+def periodically_do(func: Callable, interval_in_seconds: float):
+    def _do():
+        func()
+        Timer(interval_in_seconds, _do).start()
+
+    Timer(interval_in_seconds, _do).start()

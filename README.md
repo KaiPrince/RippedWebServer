@@ -68,15 +68,15 @@ flask run
 - [x] Styling with <s>Tailwind</s> Bootstrap
 - [ ] Theming
 - [ ] File previews, videos, pictures
-- [ ] Authentication & link tokens (expirable)
+- [x] Authentication & link tokens (expirable)
 - [x] Full Elm integration
 - [x] Upload progress bar
 - [x] Large file uploads
 - [ ] Public links
 - [x] File Storage microservice
 - [ ] Service registry
-- [ ] Users microservice
-- [ ] File Storage auto-deploy?
+- [x] Users microservice
+- [x] File Storage auto-deploy?
 - [x] Split docker-compose across microservices
 - [ ] Convert files app to Eve
 - [ ] Add exception handling and remove file from db if creation fails
@@ -87,7 +87,7 @@ flask run
 - [ ] Add file size
 - [ ] only refresh auth token on protected routes
 - [ ] only display refresh message on recently stale token
-- [ ] create clipboard microservice
+- [x] create clipboard microservice
 - [ ] one-time password for protected files "HKDTA"
 - [ ] hash file path in sharing token and compare to request url
 - [ ] Fix confusion of file_name and filename in server create view

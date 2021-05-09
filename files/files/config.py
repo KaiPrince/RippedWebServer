@@ -19,6 +19,7 @@ class Config(object):
     MONGO_USERNAME = os.getenv("MONGO_USERNAME")
     MONGO_PASSWORD = os.getenv("MONGO_PASSWORD")
     MONGO_DBNAME = os.getenv("MONGO_DBNAME")
+    SERVICE_REGISTRY_URL = os.getenv("SERVICE_REGISTRY_URL")
 
     def __init__(self, app: Flask):
 
@@ -53,6 +54,10 @@ class Config(object):
         if self.MONGO_DBNAME is None:
             logging.warning("MONGO_DBNAME environment variable not set.")
             self.MONGO_DBNAME = "files"
+
+        if self.SERVICE_REGISTRY_URL is None:
+            logging.warning("SERVICE_REGISTRY_URL environment variable not set.")
+            self.SERVICE_REGISTRY_URL = ""
 
 
 # class Config(object):

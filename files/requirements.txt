@@ -7,7 +7,6 @@ gunicorn
 python-dotenv
 pytest-mock
 requests
-eve
 authlib
 pymongo
 dnspython

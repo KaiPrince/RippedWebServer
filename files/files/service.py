@@ -3,10 +3,12 @@ from flask import Response, current_app
 from auth.service import create_auth_token
 from db.service import get_db
 from service_api.disk_storage import make_repository
+from service_api.service_registry import ServicesRepository
 
 
 def get_disk_repo():
-    base_url = current_app.config["DISK_STORAGE_SERVICE_URL"]
+    service_repo = ServicesRepository(current_app.config["SERVICE_REGISTRY_URL"])
+    base_url = service_repo.get_disk_storage_url()
     auth_token = create_auth_token()
 
     return make_repository(base_url, auth_token)
