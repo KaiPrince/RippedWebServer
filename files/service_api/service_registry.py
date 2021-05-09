@@ -5,6 +5,7 @@
 * Date: Sat, May 08, 2021
 * Description: This file contains api calls to the service registry.
 """
+from ipaddress import ip_address
 
 import requests
 
@@ -47,7 +48,7 @@ class ServicesRepository:
 
         data = response.json()
 
-        # e.g. "[::ffff:10.31.64.150]"
-        ip = data["ip"]
+        # e.g. "10.31.64.150"
+        ip = ip_address(data["ip"])
 
-        return ip
+        return str(ip)
