@@ -15,6 +15,7 @@ class Config(object):
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
     JWT_KEY = os.getenv("JWT_KEY")
     SERVICE_REGISTRY_URL = os.getenv("SERVICE_REGISTRY_URL")
+    SELF_REGISTER = os.getenv("SELF_REGISTER")
 
     def __init__(self, app: Flask):
 
@@ -32,6 +33,10 @@ class Config(object):
         if self.SERVICE_REGISTRY_URL is None:
             logging.warning("SERVICE_REGISTRY_URL environment variable not set.")
             self.SERVICE_REGISTRY_URL = ""
+
+        if self.SELF_REGISTER is None:
+            logging.debug("SELF_REGISTER environment variale not set. Default to True")
+            self.SELF_REGISTER = True
 
 
 # class Config(object):

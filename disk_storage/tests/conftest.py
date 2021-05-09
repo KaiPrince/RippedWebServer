@@ -20,7 +20,11 @@ def app(tmp_path):
             dest_file = temp_uploads_folder / f
             copyfile(src, dest_file)
 
-    app_config = {"TESTING": True, "UPLOAD_FOLDER": temp_uploads_folder}
+    app_config = {
+        "TESTING": True,
+        "SELF_REGISTER": False,
+        "UPLOAD_FOLDER": temp_uploads_folder,
+    }
     app = create_app(app_config)
 
     # Setup
