@@ -7,6 +7,7 @@ license = "MIT"
 
 [tool.poetry.scripts]
 start = "gunicorn app:create_app() --bind 0.0.0.0:5000"
+start-win = "waitress-serve --listen=*:5000 app:create_app()"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -15,6 +16,7 @@ gunicorn = "^20.1.0"
 python-dotenv = "^0.20.0"
 Authlib = "^1.0.1"
 Flask-Cors = "^3.0.10"
+waitress = "^2.1.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
