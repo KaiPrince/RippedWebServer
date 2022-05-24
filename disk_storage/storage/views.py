@@ -1,11 +1,19 @@
 import os
 
-from flask import (Blueprint, Response, abort, current_app, request,
-                   send_from_directory, url_for)
-from flask.helpers import BadRequest, NotFound
+from flask import (
+    Blueprint,
+    Response,
+    abort,
+    current_app,
+    request,
+    send_from_directory,
+    url_for,
+)
+from werkzeug.exceptions import BadRequest, NotFound
 from flask_cors import cross_origin
 
 import common
+
 # from werkzeug.exceptions import abort
 import storage.service as service
 from auth.middleware import permission_required
@@ -79,7 +87,7 @@ def write(file_path):
 @bp.route("/download/<path:file_name>")
 @permission_required("read: disk_storage")
 def download(file_name):
-    """ View for downloading a file. """
+    """View for downloading a file."""
 
     # if db_file is None or "file_path" not in db_file.keys():
     #     abort(404)
@@ -104,7 +112,7 @@ def delete(file_name):
 @bp.route("/speedtest")
 @cross_origin()
 def speedtest():
-    """ This view handler streams random data to the requester. """
+    """This view handler streams random data to the requester."""
 
     # TODO rate limit
 
