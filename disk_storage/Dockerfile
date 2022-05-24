@@ -4,9 +4,10 @@ ENV FLASK_ENV=production
 
 WORKDIR /usr/src
 
-COPY requirements.txt ./
+COPY poetry.lock ./
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install poetry
+RUN poetry install --no-dev
 
 COPY . .
 
