@@ -5,6 +5,9 @@ description = ""
 authors = ["Kai Prince <34746763+KaiPrince@users.noreply.github.com>"]
 license = "MIT"
 
+[tool.poetry.scripts]
+start = "gunicorn app:create_app() --bind 0.0.0.0:5000"
+
 [tool.poetry.dependencies]
 python = "^3.10"
 Flask = "^2.1.2"
