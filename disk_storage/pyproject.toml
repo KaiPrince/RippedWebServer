@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.scripts]
 start = "gunicorn app:create_app() --bind 0.0.0.0:5000"
-start-win = "waitress-serve --listen=*:5000 app:create_app()"
+start-win = "waitress:serve(listen=*:5000 app:create_app())"
 
 [tool.poetry.dependencies]
 python = "^3.10"
